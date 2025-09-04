@@ -203,7 +203,7 @@ export default {
 
             const x_title_size = parameters.x_title_size ? Number(parameters.x_title_size) : 15;
             const x_label_size = parameters.x_label_size ? Number(parameters.x_label_size) : 10;
-            const x_label_limit = parameters.x_label_limit ? parameters.x_label_limit : null;
+            const x_label_limit = parameters.x_label_limit ? parameters.x_label_limit : 'none';
             const x_label_length = parameters.x_label_length ? Number(parameters.x_label_length) : Math.max(...barDomain.map(d => choices_one[d].length));
                 
             // Get the x tick format            
@@ -224,7 +224,7 @@ export default {
             
             const y_title_size = parameters.y_title_size ? Number(parameters.y_title_size) : 15;
             const y_label_size = parameters.y_label_size ? Number(parameters.y_label_size) : 10;
-            const y_label_limit = parameters.y_label_limit ? parameters.y_label_limit : null;
+            const y_label_limit = parameters.y_label_limit ? parameters.y_label_limit : 'none';
             const y_label_length = parameters.y_label_length ? Number(parameters.y_label_length) : Math.max(...countsFlattened.map(d => d.category.toString().length));
             
             // Get the y tick format
