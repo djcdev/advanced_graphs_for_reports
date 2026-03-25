@@ -49,14 +49,27 @@
         ConfirmationModal,
     },
     props: ['module', 'dashboard', 'report', 'data_dictionary', 'report_fields_by_repeat_instrument'],
-    provide() {
-        return {
-            module: this.module,
-            dashboard: this.dashboard,
-            data_dictionary: this.data_dictionary,
-            report: this.report,
-            report_fields_by_repeat_instrument: this.report_fields_by_repeat_instrument,
-        };
+    provide()  {
+      return {
+        module: this.module,
+        dashboard: this.dashboard,
+        report: this.report,
+
+        // Provide sanitized computed values
+        data_dictionary: this.sanitized_data_dictionary,
+        report_fields_by_repeat_instrument: this.sanitized_report_fields_by_repeat_instrument
+      };
+    },
+    computed: {
+      sanitized_data_dictionary() {
+        const stripFields = ['label', 'note', 'description'];
+        return this.sanitizeDeep(this.data_dictionary, stripFields);
+      },
+
+      sanitized_report_fields_by_repeat_instrument() {
+        const stripFields = ['label', 'note', 'description'];
+        return this.sanitizeDeep(this.report_fields_by_repeat_instrument, stripFields);
+      }
     },
     data() {
         return {
@@ -119,23 +132,23 @@
         addDashboardRow() {
             this.body.push([]);
         },
-      async saveDashboard() {
-        this.localDashboard = this.localDashboard && this.localDashboard.body ? this.localDashboard : await this.newDashboard();
-        this.localDashboard.body = this.body;
-        this.localDashboard.title = this.title;
-        this.localDashboard.is_public = this.isPublic;
-        this.module.ajax('saveDashboard', this.localDashboard).then(function (result) {
-          console.log('saveDashboard', result);
-          var new_dash = JSON.parse(result)[0];
-          this.savedModal = {
-            name: new_dash.title,
-            list_link: this.module.getUrl('advanced_graphs.php'),
-            dash_link: this.module.getUrl('view_dash.php') + '&report_id=' + new_dash.report_id 
-        + '&dash_id=' + new_dash.dash_id,
-          };
-        }.bind(this)).catch(function (error) {
-          console.log(error);
-        });
+        async saveDashboard() {
+          this.localDashboard = this.localDashboard && this.localDashboard.body ? this.localDashboard : await this.newDashboard();
+          this.localDashboard.body = this.body;
+          this.localDashboard.title = this.title;
+          this.localDashboard.is_public = this.isPublic;
+          this.module.ajax('saveDashboard', this.localDashboard).then(function (result) {
+            console.log('saveDashboard', result);
+            var new_dash = JSON.parse(result)[0];
+            this.savedModal = {
+              name: new_dash.title,
+              list_link: this.module.getUrl('advanced_graphs.php'),
+              dash_link: this.module.getUrl('view_dash.php') + '&report_id=' + new_dash.report_id 
+          + '&dash_id=' + new_dash.dash_id,
+            };
+          }.bind(this)).catch(function (error) {
+            console.log(error);
+          });
       },
       async newDashboard() {
         try {
@@ -145,7 +158,54 @@
         } catch (error) {
             console.log(error);
         }
-    }
+     },
+        // Decode HTML entities such as &lt;, &amp;, etc.
+      decodeHTML(s) {
+        if (typeof s !== 'string') return s;
+        const t = document.createElement('textarea');
+        t.innerHTML = s;
+        return t.value;
+      },
+
+      // Strip HTML tags using browser parser
+      stripHTML(s) {
+        if (typeof s !== 'string') return s;
+        const div = document.createElement('div');
+        div.innerHTML = s;
+        return div.textContent || div.innerText || '';
+      },
+
+      // Recursively walk object/array
+      sanitizeDeep(value, stripFields, path = []) {
+        if (typeof value === 'string') {
+          const key = path[path.length - 1];
+
+          let decoded = this.decodeHTML(value);
+
+          // Only strip for allowed fields
+          if (stripFields.includes(key)) {
+            decoded = this.stripHTML(decoded);
+          }
+
+          return decoded;
+        }
+
+        if (Array.isArray(value)) {
+          return value.map((item, i) =>
+            this.sanitizeDeep(item, stripFields, path.concat(i))
+          );
+        }
+
+        if (value && typeof value === 'object') {
+          const out = {};
+          for (const [k, v] of Object.entries(value)) {
+            out[k] = this.sanitizeDeep(v, stripFields, path.concat(k));
+          }
+          return out;
+        }
+
+        return value; // numbers, null, booleans
+      }
     },
     watch: {
       body: {
@@ -154,6 +214,6 @@
         },
         deep: true,
       },
-    },
-  };
+    }
+ };
   </script>

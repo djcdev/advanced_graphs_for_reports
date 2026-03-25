@@ -259,6 +259,7 @@ export default {
                 tickFormat: x_tick_format,
                 tickRotate:  x_rotate,
                 fontSize: x_label_size,
+                facet: false
             });
 
             // Create x axis title
@@ -269,7 +270,8 @@ export default {
                 labelOffset: x_title_offset,
                 tick: null,
                 tickFormat: null,
-                fontSize: x_title_size
+                fontSize: x_title_size,
+                facet: false
             });
 
             // Create y axis labels
@@ -277,7 +279,8 @@ export default {
                 label: null,
                 tickFormat: y_tick_format,
                 tickRotate: y_rotate,
-                fontSize: y_label_size
+                fontSize: y_label_size,
+                facet: false
             });
 
             // Create y axis title
@@ -361,7 +364,8 @@ export default {
                     x: d => d.type,
                     y: 'value',
                     fill: d => colorScale(d.type),
-                    width: 0.8
+                    width: 0.8,
+                    facet: false
                 });
 
                 const color_label_length = parameters.color_label_length ? Number(parameters.color_label_length) : Math.max(...colorDomain.map(d => choices_two[d].toString().length));
@@ -384,6 +388,7 @@ export default {
                     tickFormat: color_tick_format,
                     tickRotate:  x_rotate,
                     fontSize: x_label_size,
+                    facet: false,
                 });
 
                 barLabels = Plot.text(

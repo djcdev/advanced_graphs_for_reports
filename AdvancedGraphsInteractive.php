@@ -94,34 +94,8 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 	
 	function redcap_module_save_configuration($project_id) {
 
-				$error = "";
-				$r_path = $this->getSystemSetting("r-path");
-				if(is_array($r_path)){
-					$r_path = $r_path[0];
-				}
-				if ($r_path=="" || !file_exists($r_path)) {
-					$error .= "\nInvalid RScript path: $r_path";
-				}
-				
-				$pandocPath = $this->getSystemSetting("pandoc-path");
-				if(is_array($pandocPath)){
-					$pandocPath = $pandocPath[0];
-				}
-				if ($pandocPath=="" || !is_dir($pandocPath)) {
-					$error .= "\nInvalid Pandoc path: $pandocPath";
-				}
+		$error = "";
 
-				$arr_libPaths = $this->getSystemSetting("r-libraries-path");
-				if(is_array($arr_libPaths)){
-					$arr_libPaths = $arr_libPaths[0];
-				}
-				if (count($arr_libPaths)>0) {
-					foreach($arr_libPaths as $libPath) {
-						if ($libPath=="" || !is_dir($libPath)) {
-							$error .= "\nInvalid ath to R libraries: $libPath";
-						}
-					}
-				}	
 		if($error!="") {
 			$this->log("Error configuring settings: $error");
 			$this->disable($this->PREFIX, false);

@@ -30185,13 +30185,13 @@ const initDirectivesForSSR = () => {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardEditor.vue?vue&type=template&id=37265f16
+;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardEditor.vue?vue&type=template&id=129f0b6a
 
 const _hoisted_1 = /*#__PURE__*/createBaseVNode("h1", null, "Dashboard Editor", -1);
 const _hoisted_2 = {
   class: "AG-editor-final-buttons"
 };
-function DashboardEditorvue_type_template_id_37265f16_render(_ctx, _cache, $props, $setup, $data, $options) {
+function DashboardEditorvue_type_template_id_129f0b6a_render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_DashboardOptions = resolveComponent("DashboardOptions");
   const _component_editor_table = resolveComponent("editor-table");
   const _component_saved_modal = resolveComponent("saved-modal");
@@ -30224,7 +30224,7 @@ function DashboardEditorvue_type_template_id_37265f16_render(_ctx, _cache, $prop
     ref: "confirmationModal"
   }, null, 512)], 64);
 }
-;// CONCATENATED MODULE: ./src/DashboardEditor.vue?vue&type=template&id=37265f16
+;// CONCATENATED MODULE: ./src/DashboardEditor.vue?vue&type=template&id=129f0b6a
 
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.push.js
 var es_array_push = __webpack_require__(7658);
@@ -64474,30 +64474,30 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
 const GroupedBarGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(GroupedBarGraphFormvue_type_script_lang_js, [['render',GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render],['__scopeId',"data-v-3584a69a"]])
 
 /* harmony default export */ var GroupedBarGraphForm = (GroupedBarGraphForm_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=template&id=510670cb&scoped=true
+;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=template&id=02553c9f&scoped=true
 
-const GroupedBarGraphvue_type_template_id_510670cb_scoped_true_withScopeId = n => (_pushScopeId("data-v-510670cb"), n = n(), _popScopeId(), n);
-const GroupedBarGraphvue_type_template_id_510670cb_scoped_true_hoisted_1 = {
+const GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_withScopeId = n => (_pushScopeId("data-v-02553c9f"), n = n(), _popScopeId(), n);
+const GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_hoisted_1 = {
   class: "AG-graph-container"
 };
-const GroupedBarGraphvue_type_template_id_510670cb_scoped_true_hoisted_2 = {
+const GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_hoisted_2 = {
   class: "AG-graph-title"
 };
-const GroupedBarGraphvue_type_template_id_510670cb_scoped_true_hoisted_3 = {
+const GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_hoisted_3 = {
   ref: "graphContainer",
   class: "AG-graphContainer"
 };
-const GroupedBarGraphvue_type_template_id_510670cb_scoped_true_hoisted_4 = {
+const GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_hoisted_4 = {
   class: "AG-graph-description"
 };
-function GroupedBarGraphvue_type_template_id_510670cb_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock("div", GroupedBarGraphvue_type_template_id_510670cb_scoped_true_hoisted_1, [createBaseVNode("div", GroupedBarGraphvue_type_template_id_510670cb_scoped_true_hoisted_2, [createBaseVNode("h3", null, toDisplayString($props.parameters.title || ""), 1)]), createBaseVNode("div", GroupedBarGraphvue_type_template_id_510670cb_scoped_true_hoisted_3, null, 512), createBaseVNode("div", GroupedBarGraphvue_type_template_id_510670cb_scoped_true_hoisted_4, [createBaseVNode("p", null, toDisplayString($props.parameters.description || ""), 1)]), $props.editorMode ? (openBlock(), createBlock(resolveDynamicComponent($data.moreOptionsComponent), {
+function GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return openBlock(), createElementBlock("div", GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_hoisted_1, [createBaseVNode("div", GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_hoisted_2, [createBaseVNode("h3", null, toDisplayString($props.parameters.title || ""), 1)]), createBaseVNode("div", GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_hoisted_3, null, 512), createBaseVNode("div", GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_hoisted_4, [createBaseVNode("p", null, toDisplayString($props.parameters.description || ""), 1)]), $props.editorMode ? (openBlock(), createBlock(resolveDynamicComponent($data.moreOptionsComponent), {
     key: 0,
     parameters: $props.parameters,
     onUpdateParameters: _cache[0] || (_cache[0] = $event => $options.updateParameters($event))
   }, null, 40, ["parameters"])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=template&id=510670cb&scoped=true
+;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=template&id=02553c9f&scoped=true
 
 ;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=template&id=354765b0&scoped=true
 
@@ -65626,7 +65626,8 @@ const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default *
         type: 'band',
         tickFormat: x_tick_format,
         tickRotate: x_rotate,
-        fontSize: x_label_size
+        fontSize: x_label_size,
+        facet: false
       });
 
       // Create x axis title
@@ -65637,7 +65638,8 @@ const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default *
         labelOffset: x_title_offset,
         tick: null,
         tickFormat: null,
-        fontSize: x_title_size
+        fontSize: x_title_size,
+        facet: false
       });
 
       // Create y axis labels
@@ -65645,7 +65647,8 @@ const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default *
         label: null,
         tickFormat: y_tick_format,
         tickRotate: y_rotate,
-        fontSize: y_label_size
+        fontSize: y_label_size,
+        facet: false
       });
 
       // Create y axis title
@@ -65724,7 +65727,8 @@ const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default *
           x: d => d.type,
           y: 'value',
           fill: d => colorScale(d.type),
-          width: 0.8
+          width: 0.8,
+          facet: false
         });
         const color_label_length = parameters.color_label_length ? Number(parameters.color_label_length) : Math.max(...colorDomain.map(d => choices_two[d].toString().length));
         var color_tick_format = d => choices_two[d];
@@ -65741,7 +65745,8 @@ const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default *
           type: 'band',
           tickFormat: color_tick_format,
           tickRotate: x_rotate,
-          fontSize: x_label_size
+          fontSize: x_label_size,
+          facet: false
         });
         barLabels = text_text(countsFlattened, {
           x: d => d.type,
@@ -65796,10 +65801,10 @@ const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default *
 });
 ;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=style&index=0&id=510670cb&scoped=true&lang=css
+;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=style&index=0&id=02553c9f&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=style&index=0&id=510670cb&scoped=true&lang=css
+;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=style&index=0&id=02553c9f&scoped=true&lang=css
 
 ;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraph.vue
 
@@ -65809,25 +65814,25 @@ const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default *
 ;
 
 
-const GroupedBarGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(GroupedBarGraphvue_type_script_lang_js, [['render',GroupedBarGraphvue_type_template_id_510670cb_scoped_true_render],['__scopeId',"data-v-510670cb"]])
+const GroupedBarGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(GroupedBarGraphvue_type_script_lang_js, [['render',GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_render],['__scopeId',"data-v-02553c9f"]])
 
 /* harmony default export */ var GroupedBarGraph = (GroupedBarGraph_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphForm.vue?vue&type=template&id=1ce9b7da&scoped=true
+;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphForm.vue?vue&type=template&id=aa231426&scoped=true
 
-const LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_withScopeId = n => (_pushScopeId("data-v-1ce9b7da"), n = n(), _popScopeId(), n);
-const LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_hoisted_1 = {
+const LikertGraphFormvue_type_template_id_aa231426_scoped_true_withScopeId = n => (_pushScopeId("data-v-aa231426"), n = n(), _popScopeId(), n);
+const LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_1 = {
   key: 0
 };
-const LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_hoisted_2 = {
+const LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_2 = {
   class: "AG-two-panes"
 };
-const LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_hoisted_3 = {
+const LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_3 = {
   class: "AG-pane-left"
 };
-const LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_hoisted_4 = {
+const LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_4 = {
   class: "AG-pane-right"
 };
-function LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
+function LikertGraphFormvue_type_template_id_aa231426_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_instrument_selector = resolveComponent("instrument-selector");
   const _component_helpful_parameter = resolveComponent("helpful-parameter");
   const _component_likert_choices_selector = resolveComponent("likert-choices-selector");
@@ -65838,7 +65843,7 @@ function LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_render(_ctx, _
     modelValue: $data.formData.instrument,
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.formData.instrument = $event),
     availableInstruments: $options.availableInstruments
-  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_hoisted_1, [createBaseVNode("div", LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_hoisted_2, [createBaseVNode("div", LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_hoisted_3, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_1, [createBaseVNode("div", LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_2, [createBaseVNode("div", LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_3, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('title'),
     "help-text": $options.module.tt('title_help')
   }, {
@@ -65879,7 +65884,7 @@ function LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_render(_ctx, _
       labels: [$options.module.tt('likert_keep'), $options.module.tt('likert_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_hoisted_4, [$data.formData.likert_choices ? (openBlock(), createBlock(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_4, [$data.formData.likert_choices ? (openBlock(), createBlock(_component_helpful_parameter, {
     key: 0,
     "label-text": $options.module.tt('likert_category_checkbox'),
     "help-text": $options.module.tt('likert_category_checkbox_help')
@@ -65901,7 +65906,7 @@ function LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_render(_ctx, _
     _: 1
   }, 8, ["label-text", "help-text"])])])])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphForm.vue?vue&type=template&id=1ce9b7da&scoped=true
+;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphForm.vue?vue&type=template&id=aa231426&scoped=true
 
 ;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=template&id=f03bfc2a
 
@@ -66160,9 +66165,14 @@ const LikertCategoryCheckbox_exports_ = /*#__PURE__*/(0,exportHelper/* default *
       if (!fields) {
         return [];
       }
+      // Sanitize field_label for each field BEFORE filtering
+      const cleanedFields = fields.map(field => ({
+        ...field,
+        field_label: this.sanitizeFieldLabel(field.field_label)
+      }));
 
-      // Return the fields that are categorical
-      return fields.filter(field => isCategoricalField(field));
+      // Only return categorical fields
+      return cleanedFields.filter(field => isCategoricalField(field));
     }
   },
   watch: {
@@ -66214,15 +66224,31 @@ const LikertCategoryCheckbox_exports_ = /*#__PURE__*/(0,exportHelper/* default *
 
       // If no likert key words were found, return false
       return false;
+    },
+    decodeHTML(s) {
+      if (typeof s !== 'string') return s;
+      const t = document.createElement('textarea');
+      t.innerHTML = s;
+      return t.value;
+    },
+    stripHTML(s) {
+      if (typeof s !== 'string') return s;
+      const div = document.createElement('div');
+      div.innerHTML = s;
+      return div.textContent || div.innerText || '';
+    },
+    sanitizeFieldLabel(label) {
+      if (typeof label !== 'string') return label;
+      return this.stripHTML(this.decodeHTML(label)).trim();
     }
   }
 });
 ;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphForm.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphForm.vue?vue&type=style&index=0&id=1ce9b7da&scoped=true&lang=css
+;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphForm.vue?vue&type=style&index=0&id=aa231426&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphForm.vue?vue&type=style&index=0&id=1ce9b7da&scoped=true&lang=css
+;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphForm.vue?vue&type=style&index=0&id=aa231426&scoped=true&lang=css
 
 ;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphForm.vue
 
@@ -66232,7 +66258,7 @@ const LikertCategoryCheckbox_exports_ = /*#__PURE__*/(0,exportHelper/* default *
 ;
 
 
-const LikertGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(LikertGraphFormvue_type_script_lang_js, [['render',LikertGraphFormvue_type_template_id_1ce9b7da_scoped_true_render],['__scopeId',"data-v-1ce9b7da"]])
+const LikertGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(LikertGraphFormvue_type_script_lang_js, [['render',LikertGraphFormvue_type_template_id_aa231426_scoped_true_render],['__scopeId',"data-v-aa231426"]])
 
 /* harmony default export */ var LikertGraphForm = (LikertGraphForm_exports_);
 ;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraph.vue?vue&type=template&id=261fa47e&scoped=true
@@ -71925,10 +71951,21 @@ const SavedModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(SavedMo
     return {
       module: this.module,
       dashboard: this.dashboard,
-      data_dictionary: this.data_dictionary,
       report: this.report,
-      report_fields_by_repeat_instrument: this.report_fields_by_repeat_instrument
+      // Provide sanitized computed values
+      data_dictionary: this.sanitized_data_dictionary,
+      report_fields_by_repeat_instrument: this.sanitized_report_fields_by_repeat_instrument
     };
+  },
+  computed: {
+    sanitized_data_dictionary() {
+      const stripFields = ['label', 'note', 'description'];
+      return this.sanitizeDeep(this.data_dictionary, stripFields);
+    },
+    sanitized_report_fields_by_repeat_instrument() {
+      const stripFields = ['label', 'note', 'description'];
+      return this.sanitizeDeep(this.report_fields_by_repeat_instrument, stripFields);
+    }
   },
   data() {
     return {
@@ -72011,8 +72048,47 @@ const SavedModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(SavedMo
       } catch (error) {
         console.log(error);
       }
+    },
+    // Decode HTML entities such as &lt;, &amp;, etc.
+    decodeHTML(s) {
+      if (typeof s !== 'string') return s;
+      const t = document.createElement('textarea');
+      t.innerHTML = s;
+      return t.value;
+    },
+    // Strip HTML tags using browser parser
+    stripHTML(s) {
+      if (typeof s !== 'string') return s;
+      const div = document.createElement('div');
+      div.innerHTML = s;
+      return div.textContent || div.innerText || '';
+    },
+    // Recursively walk object/array
+    sanitizeDeep(value, stripFields, path = []) {
+      if (typeof value === 'string') {
+        const key = path[path.length - 1];
+        let decoded = this.decodeHTML(value);
+
+        // Only strip for allowed fields
+        if (stripFields.includes(key)) {
+          decoded = this.stripHTML(decoded);
+        }
+        return decoded;
+      }
+      if (Array.isArray(value)) {
+        return value.map((item, i) => this.sanitizeDeep(item, stripFields, path.concat(i)));
+      }
+      if (value && typeof value === 'object') {
+        const out = {};
+        for (const [k, v] of Object.entries(value)) {
+          out[k] = this.sanitizeDeep(v, stripFields, path.concat(k));
+        }
+        return out;
+      }
+      return value; // numbers, null, booleans
     }
   },
+
   watch: {
     body: {
       handler: function (newBody) {
@@ -72030,7 +72106,7 @@ const SavedModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(SavedMo
 
 
 ;
-const DashboardEditor_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(DashboardEditorvue_type_script_lang_js, [['render',DashboardEditorvue_type_template_id_37265f16_render]])
+const DashboardEditor_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(DashboardEditorvue_type_script_lang_js, [['render',DashboardEditorvue_type_template_id_129f0b6a_render]])
 
 /* harmony default export */ var DashboardEditor = (DashboardEditor_exports_);
 ;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardList.vue?vue&type=template&id=3ccf7c8e
@@ -72163,34 +72239,34 @@ function DashboardListvue_type_template_id_3ccf7c8e_render(_ctx, _cache, $props,
 const DashboardList_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(DashboardListvue_type_script_lang_js, [['render',DashboardListvue_type_template_id_3ccf7c8e_render]])
 
 /* harmony default export */ var DashboardList = (DashboardList_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=template&id=4eacb3a8&scoped=true
+;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=template&id=0dd2a7f6&scoped=true
 
-const DashboardViewervue_type_template_id_4eacb3a8_scoped_true_withScopeId = n => (_pushScopeId("data-v-4eacb3a8"), n = n(), _popScopeId(), n);
-const DashboardViewervue_type_template_id_4eacb3a8_scoped_true_hoisted_1 = {
+const DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_withScopeId = n => (_pushScopeId("data-v-0dd2a7f6"), n = n(), _popScopeId(), n);
+const DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_1 = {
   class: "AG-viewer-title"
 };
-const DashboardViewervue_type_template_id_4eacb3a8_scoped_true_hoisted_2 = {
+const DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_2 = {
   class: "AG-viewer-dashboard"
 };
-const DashboardViewervue_type_template_id_4eacb3a8_scoped_true_hoisted_3 = {
+const DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_3 = {
   class: "AG-viewer-col"
 };
-function DashboardViewervue_type_template_id_4eacb3a8_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock(runtime_core_esm_bundler_Fragment, null, [createBaseVNode("div", DashboardViewervue_type_template_id_4eacb3a8_scoped_true_hoisted_1, [createBaseVNode("h1", null, toDisplayString($props.dashboard.title), 1)]), createBaseVNode("div", DashboardViewervue_type_template_id_4eacb3a8_scoped_true_hoisted_2, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.rows, (row, index) => {
+function DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return openBlock(), createElementBlock(runtime_core_esm_bundler_Fragment, null, [createBaseVNode("div", DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_1, [createBaseVNode("h1", null, toDisplayString($props.dashboard.title), 1)]), createBaseVNode("div", DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_2, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.rows, (row, index) => {
     return openBlock(), createElementBlock("div", {
       key: index,
       class: "AG-viewer-row"
     }, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList(row, (graph, index) => {
       return openBlock(), createElementBlock("div", {
         key: index
-      }, [createBaseVNode("div", DashboardViewervue_type_template_id_4eacb3a8_scoped_true_hoisted_3, [(openBlock(), createBlock(resolveDynamicComponent($data.GraphTypes[graph.type].graph), {
+      }, [createBaseVNode("div", DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_3, [(openBlock(), createBlock(resolveDynamicComponent($data.GraphTypes[graph.type].graph), {
         parameters: graph.parameters,
         editorMode: false
       }, null, 8, ["parameters"]))])]);
     }), 128))]);
   }), 128))])], 64);
 }
-;// CONCATENATED MODULE: ./src/DashboardViewer.vue?vue&type=template&id=4eacb3a8&scoped=true
+;// CONCATENATED MODULE: ./src/DashboardViewer.vue?vue&type=template&id=0dd2a7f6&scoped=true
 
 ;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=script&lang=js
 
@@ -72201,15 +72277,65 @@ function DashboardViewervue_type_template_id_4eacb3a8_scoped_true_render(_ctx, _
     return {
       module: this.module,
       dashboard: this.dashboard,
-      data_dictionary: this.data_dictionary,
       report: this.report,
-      report_fields_by_repeat_instrument: this.report_fields_by_repeat_instrument
+      // Provide sanitized computed values
+      data_dictionary: this.sanitized_data_dictionary,
+      report_fields_by_repeat_instrument: this.sanitized_report_fields_by_repeat_instrument
     };
   },
   mounted() {
     console.log(this.rows);
   },
+  methods: {
+    // Decode HTML entities such as &lt;, &amp;, etc.
+    decodeHTML(s) {
+      if (typeof s !== 'string') return s;
+      const t = document.createElement('textarea');
+      t.innerHTML = s;
+      return t.value;
+    },
+    // Strip HTML tags using browser parser
+    stripHTML(s) {
+      if (typeof s !== 'string') return s;
+      const div = document.createElement('div');
+      div.innerHTML = s;
+      return div.textContent || div.innerText || '';
+    },
+    // Recursively walk object/array
+    sanitizeDeep(value, stripFields, path = []) {
+      if (typeof value === 'string') {
+        const key = path[path.length - 1];
+        let decoded = this.decodeHTML(value);
+
+        // Only strip for allowed fields
+        if (stripFields.includes(key)) {
+          decoded = this.stripHTML(decoded);
+        }
+        return decoded;
+      }
+      if (Array.isArray(value)) {
+        return value.map((item, i) => this.sanitizeDeep(item, stripFields, path.concat(i)));
+      }
+      if (value && typeof value === 'object') {
+        const out = {};
+        for (const [k, v] of Object.entries(value)) {
+          out[k] = this.sanitizeDeep(v, stripFields, path.concat(k));
+        }
+        return out;
+      }
+      return value; // numbers, null, booleans
+    }
+  },
+
   computed: {
+    sanitized_data_dictionary() {
+      const stripFields = ['label', 'note', 'description'];
+      return this.sanitizeDeep(this.data_dictionary, stripFields);
+    },
+    sanitized_report_fields_by_repeat_instrument() {
+      const stripFields = ['label', 'note', 'description'];
+      return this.sanitizeDeep(this.report_fields_by_repeat_instrument, stripFields);
+    },
     rows() {
       return this.dashboard && this.dashboard.body ? JSON.parse(JSON.stringify(this.dashboard.body)) : [];
     }
@@ -72222,10 +72348,10 @@ function DashboardViewervue_type_template_id_4eacb3a8_scoped_true_render(_ctx, _
 });
 ;// CONCATENATED MODULE: ./src/DashboardViewer.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=style&index=0&id=4eacb3a8&scoped=true&lang=css
+;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=style&index=0&id=0dd2a7f6&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/DashboardViewer.vue?vue&type=style&index=0&id=4eacb3a8&scoped=true&lang=css
+;// CONCATENATED MODULE: ./src/DashboardViewer.vue?vue&type=style&index=0&id=0dd2a7f6&scoped=true&lang=css
 
 ;// CONCATENATED MODULE: ./src/DashboardViewer.vue
 
@@ -72235,7 +72361,7 @@ function DashboardViewervue_type_template_id_4eacb3a8_scoped_true_render(_ctx, _
 ;
 
 
-const DashboardViewer_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(DashboardViewervue_type_script_lang_js, [['render',DashboardViewervue_type_template_id_4eacb3a8_scoped_true_render],['__scopeId',"data-v-4eacb3a8"]])
+const DashboardViewer_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(DashboardViewervue_type_script_lang_js, [['render',DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_render],['__scopeId',"data-v-0dd2a7f6"]])
 
 /* harmony default export */ var DashboardViewer = (DashboardViewer_exports_);
 ;// CONCATENATED MODULE: ./node_modules/@fortawesome/fontawesome-svg-core/index.mjs

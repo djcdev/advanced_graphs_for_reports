@@ -187,10 +187,16 @@
         // If there are no fields, return an empty array
         if (!fields) {
           return [];
-        }
+        } 
+        // Sanitize field_label for each field BEFORE filtering
+        const cleanedFields = fields.map(field => ({
+          ...field,
+          field_label: this.sanitizeFieldLabel(field.field_label)
+        }));
 
-        // Return the fields that are categorical
-        return fields.filter((field) => isCategoricalField(field));
+        // Only return categorical fields
+        return cleanedFields.filter(field => isCategoricalField(field));
+
       },
     },
     watch: {
@@ -241,6 +247,22 @@
 
         // If no likert key words were found, return false
         return false;
+      },
+      decodeHTML(s) {
+          if (typeof s !== 'string') return s;
+          const t = document.createElement('textarea');
+          t.innerHTML = s;
+          return t.value;
+      },
+      stripHTML(s) {
+        if (typeof s !== 'string') return s;
+        const div = document.createElement('div');
+        div.innerHTML = s;
+        return div.textContent || div.innerText || '';
+      },
+      sanitizeFieldLabel(label) {
+        if (typeof label !== 'string') return label;
+        return this.stripHTML(this.decodeHTML(label)).trim();
       }
     }
   };
