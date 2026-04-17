@@ -1,7 +1,7 @@
 <?php
 namespace VIHA\AdvancedGraphsInteractive;
 
-use \REDCap as REDCap;
+use REDCap as REDCap;
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
 
@@ -19,6 +19,9 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 	public $repeats_dictionary;
 
 	public $query_result;
+
+	public $module_js_path;
+	public $module_css_path;
 
 	private function getEnabledProjects()
 	{
@@ -345,7 +348,7 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 
 		// Get the active dashboard if there dash id is not null or 0
 		if (isset($_GET['dash_id']) && $_GET['dash_id'] != '0') {
-			$dashboard = $module->getDashboards($pid, $dash_id);
+			$dashboard = $this->getDashboards($pid, $dash_id)[0];
 			$report_id = $dashboard['report_id'];
 			$live_filters = $dashboard['live_filters'];
 		}
@@ -676,7 +679,7 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 	public function checkDashHash($dash_id=null)
 	{
 		$params = [PROJECT_ID];
-		$sql = "select dash_id from $dashboard_table_name
+		$sql = "select dash_id from $this->dashboard_table_name
 				where project_id = ? and hash is null";
 		if (isinteger($dash_id) && $dash_id > 0) {
 			$sql .= " and dash_id = ?";
@@ -695,7 +698,7 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 				// Generate new unique name (start with 3 digit number followed by 7 alphanumeric chars) - do not allow zeros
 				$unique_name = generateRandomHash(11, false, true);
 				// Update the table
-				$sql = "update $dashboard_table_name set hash = ? where dash_id = ?";
+				$sql = "update $this->dashboard_table_name set hash = ? where dash_id = ?";
 				$success = $this->query($sql, [$unique_name, $dash_id]);
 			}
 		}
@@ -731,7 +734,7 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		// First, add row to redcap_project_dashboards and get new report id
 		$table = $this->getTableColumns($dashboard_table_name);
 		// Get report attributes
-		$dash = $this->getDashboards($pid, $dash_id);
+		$dash = $this->getDashboards($pid, $dash_id)[0];
 		// Remove dash_id from arrays to prevent query issues
 		unset($dash['dash_id'], $table['dash_id'], $dash['hash'], $table['hash'], $dash['short_url'], $table['short_url']);
 		// Append "(copy)" to title to differeniate it from original
@@ -774,7 +777,7 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		
 		if ($errors == 0) {
 			// Just in case, make sure that all report orders are correct
-			$this->checkDashOrder();
+			$this->checkDashOrder($pid);
 		}
 		// Return dash_id of new report, else FALSE if errors occurred
 		return ($errors == 0) ? array('new_dash_id'=>$new_dash_id, 'html'=>$this->renderDashboardList()) : false;

@@ -11,11 +11,11 @@
 return /******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 9662:
+/***/ 4601:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var isCallable = __webpack_require__(614);
-var tryToString = __webpack_require__(6330);
+var isCallable = __webpack_require__(8420);
+var tryToString = __webpack_require__(3838);
 
 var $TypeError = TypeError;
 
@@ -28,10 +28,66 @@ module.exports = function (argument) {
 
 /***/ }),
 
-/***/ 9670:
+/***/ 1009:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var isObject = __webpack_require__(111);
+var has = (__webpack_require__(1171).has);
+
+// Perform ? RequireInternalSlot(M, [[SetData]])
+module.exports = function (it) {
+  has(it);
+  return it;
+};
+
+
+/***/ }),
+
+/***/ 298:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__(1602);
+var create = __webpack_require__(3105);
+var defineProperty = (__webpack_require__(3610).f);
+
+var UNSCOPABLES = wellKnownSymbol('unscopables');
+var ArrayPrototype = Array.prototype;
+
+// Array.prototype[@@unscopables]
+// https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
+if (ArrayPrototype[UNSCOPABLES] == undefined) {
+  defineProperty(ArrayPrototype, UNSCOPABLES, {
+    configurable: true,
+    value: create(null)
+  });
+}
+
+// add a key to Array.prototype[@@unscopables]
+module.exports = function (key) {
+  ArrayPrototype[UNSCOPABLES][key] = true;
+};
+
+
+/***/ }),
+
+/***/ 5190:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var isPrototypeOf = __webpack_require__(7658);
+
+var $TypeError = TypeError;
+
+module.exports = function (it, Prototype) {
+  if (isPrototypeOf(Prototype, it)) return it;
+  throw $TypeError('Incorrect invocation');
+};
+
+
+/***/ }),
+
+/***/ 3938:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var isObject = __webpack_require__(5335);
 
 var $String = String;
 var $TypeError = TypeError;
@@ -45,12 +101,12 @@ module.exports = function (argument) {
 
 /***/ }),
 
-/***/ 1318:
+/***/ 8186:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var toIndexedObject = __webpack_require__(5656);
-var toAbsoluteIndex = __webpack_require__(1400);
-var lengthOfArrayLike = __webpack_require__(6244);
+var toIndexedObject = __webpack_require__(5476);
+var toAbsoluteIndex = __webpack_require__(6539);
+var lengthOfArrayLike = __webpack_require__(3493);
 
 // `Array.prototype.{ indexOf, includes }` methods implementation
 var createMethod = function (IS_INCLUDES) {
@@ -84,13 +140,13 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3658:
+/***/ 6648:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 "use strict";
 
-var DESCRIPTORS = __webpack_require__(9781);
-var isArray = __webpack_require__(3157);
+var DESCRIPTORS = __webpack_require__(5077);
+var isArray = __webpack_require__(8679);
 
 var $TypeError = TypeError;
 // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
@@ -119,10 +175,28 @@ module.exports = SILENT_ON_NON_WRITABLE_LENGTH_SET ? function (O, length) {
 
 /***/ }),
 
-/***/ 4326:
+/***/ 1332:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var uncurryThis = __webpack_require__(1702);
+var anObject = __webpack_require__(3938);
+var iteratorClose = __webpack_require__(9868);
+
+// call something on iterator step with safe closing on error
+module.exports = function (iterator, fn, value, ENTRIES) {
+  try {
+    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
+  } catch (error) {
+    iteratorClose(iterator, 'throw', error);
+  }
+};
+
+
+/***/ }),
+
+/***/ 8569:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var uncurryThis = __webpack_require__(281);
 
 var toString = uncurryThis({}.toString);
 var stringSlice = uncurryThis(''.slice);
@@ -134,13 +208,49 @@ module.exports = function (it) {
 
 /***/ }),
 
-/***/ 9920:
+/***/ 3062:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var hasOwn = __webpack_require__(2597);
-var ownKeys = __webpack_require__(3887);
-var getOwnPropertyDescriptorModule = __webpack_require__(1236);
-var definePropertyModule = __webpack_require__(3070);
+var TO_STRING_TAG_SUPPORT = __webpack_require__(3129);
+var isCallable = __webpack_require__(8420);
+var classofRaw = __webpack_require__(8569);
+var wellKnownSymbol = __webpack_require__(1602);
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+var $Object = Object;
+
+// ES3 wrong here
+var CORRECT_ARGUMENTS = classofRaw(function () { return arguments; }()) == 'Arguments';
+
+// fallback for IE11 Script Access Denied error
+var tryGet = function (it, key) {
+  try {
+    return it[key];
+  } catch (error) { /* empty */ }
+};
+
+// getting tag from ES6+ `Object.prototype.toString`
+module.exports = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
+  var O, tag, result;
+  return it === undefined ? 'Undefined' : it === null ? 'Null'
+    // @@toStringTag case
+    : typeof (tag = tryGet(O = $Object(it), TO_STRING_TAG)) == 'string' ? tag
+    // builtinTag case
+    : CORRECT_ARGUMENTS ? classofRaw(O)
+    // ES3 arguments fallback
+    : (result = classofRaw(O)) == 'Object' && isCallable(O.callee) ? 'Arguments' : result;
+};
+
+
+/***/ }),
+
+/***/ 4361:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var hasOwn = __webpack_require__(6490);
+var ownKeys = __webpack_require__(5816);
+var getOwnPropertyDescriptorModule = __webpack_require__(7632);
+var definePropertyModule = __webpack_require__(3610);
 
 module.exports = function (target, source, exceptions) {
   var keys = ownKeys(source);
@@ -157,12 +267,39 @@ module.exports = function (target, source, exceptions) {
 
 /***/ }),
 
-/***/ 8880:
+/***/ 7168:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var DESCRIPTORS = __webpack_require__(9781);
-var definePropertyModule = __webpack_require__(3070);
-var createPropertyDescriptor = __webpack_require__(9114);
+var fails = __webpack_require__(2074);
+
+module.exports = !fails(function () {
+  function F() { /* empty */ }
+  F.prototype.constructor = null;
+  // eslint-disable-next-line es/no-object-getprototypeof -- required for testing
+  return Object.getPrototypeOf(new F()) !== F.prototype;
+});
+
+
+/***/ }),
+
+/***/ 8296:
+/***/ (function(module) {
+
+// `CreateIterResultObject` abstract operation
+// https://tc39.es/ecma262/#sec-createiterresultobject
+module.exports = function (value, done) {
+  return { value: value, done: done };
+};
+
+
+/***/ }),
+
+/***/ 7712:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var DESCRIPTORS = __webpack_require__(5077);
+var definePropertyModule = __webpack_require__(3610);
+var createPropertyDescriptor = __webpack_require__(6843);
 
 module.exports = DESCRIPTORS ? function (object, key, value) {
   return definePropertyModule.f(object, key, createPropertyDescriptor(1, value));
@@ -174,7 +311,7 @@ module.exports = DESCRIPTORS ? function (object, key, value) {
 
 /***/ }),
 
-/***/ 9114:
+/***/ 6843:
 /***/ (function(module) {
 
 module.exports = function (bitmap, value) {
@@ -189,13 +326,13 @@ module.exports = function (bitmap, value) {
 
 /***/ }),
 
-/***/ 8052:
+/***/ 7485:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var isCallable = __webpack_require__(614);
-var definePropertyModule = __webpack_require__(3070);
-var makeBuiltIn = __webpack_require__(6339);
-var defineGlobalProperty = __webpack_require__(3072);
+var isCallable = __webpack_require__(8420);
+var definePropertyModule = __webpack_require__(3610);
+var makeBuiltIn = __webpack_require__(8218);
+var defineGlobalProperty = __webpack_require__(9430);
 
 module.exports = function (O, key, value, options) {
   if (!options) options = {};
@@ -223,10 +360,23 @@ module.exports = function (O, key, value, options) {
 
 /***/ }),
 
-/***/ 3072:
+/***/ 2760:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var global = __webpack_require__(7854);
+var defineBuiltIn = __webpack_require__(7485);
+
+module.exports = function (target, src, options) {
+  for (var key in src) defineBuiltIn(target, key, src[key], options);
+  return target;
+};
+
+
+/***/ }),
+
+/***/ 9430:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var global = __webpack_require__(200);
 
 // eslint-disable-next-line es/no-object-defineproperty -- safe
 var defineProperty = Object.defineProperty;
@@ -242,10 +392,10 @@ module.exports = function (key, value) {
 
 /***/ }),
 
-/***/ 9781:
+/***/ 5077:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var fails = __webpack_require__(7293);
+var fails = __webpack_require__(2074);
 
 // Detect IE8's incomplete defineProperty implementation
 module.exports = !fails(function () {
@@ -256,7 +406,7 @@ module.exports = !fails(function () {
 
 /***/ }),
 
-/***/ 4154:
+/***/ 6568:
 /***/ (function(module) {
 
 var documentAll = typeof document == 'object' && document.all;
@@ -273,11 +423,11 @@ module.exports = {
 
 /***/ }),
 
-/***/ 317:
+/***/ 3262:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var global = __webpack_require__(7854);
-var isObject = __webpack_require__(111);
+var global = __webpack_require__(200);
+var isObject = __webpack_require__(5335);
 
 var document = global.document;
 // typeof document.createElement is 'object' in old IE
@@ -290,7 +440,7 @@ module.exports = function (it) {
 
 /***/ }),
 
-/***/ 7207:
+/***/ 7242:
 /***/ (function(module) {
 
 var $TypeError = TypeError;
@@ -304,7 +454,7 @@ module.exports = function (it) {
 
 /***/ }),
 
-/***/ 8113:
+/***/ 7061:
 /***/ (function(module) {
 
 module.exports = typeof navigator != 'undefined' && String(navigator.userAgent) || '';
@@ -312,11 +462,11 @@ module.exports = typeof navigator != 'undefined' && String(navigator.userAgent) 
 
 /***/ }),
 
-/***/ 7392:
+/***/ 6845:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var global = __webpack_require__(7854);
-var userAgent = __webpack_require__(8113);
+var global = __webpack_require__(200);
+var userAgent = __webpack_require__(7061);
 
 var process = global.process;
 var Deno = global.Deno;
@@ -346,7 +496,7 @@ module.exports = version;
 
 /***/ }),
 
-/***/ 748:
+/***/ 290:
 /***/ (function(module) {
 
 // IE8- don't enum bug keys
@@ -363,16 +513,16 @@ module.exports = [
 
 /***/ }),
 
-/***/ 2109:
+/***/ 1605:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var global = __webpack_require__(7854);
-var getOwnPropertyDescriptor = (__webpack_require__(1236).f);
-var createNonEnumerableProperty = __webpack_require__(8880);
-var defineBuiltIn = __webpack_require__(8052);
-var defineGlobalProperty = __webpack_require__(3072);
-var copyConstructorProperties = __webpack_require__(9920);
-var isForced = __webpack_require__(4705);
+var global = __webpack_require__(200);
+var getOwnPropertyDescriptor = (__webpack_require__(7632).f);
+var createNonEnumerableProperty = __webpack_require__(7712);
+var defineBuiltIn = __webpack_require__(7485);
+var defineGlobalProperty = __webpack_require__(9430);
+var copyConstructorProperties = __webpack_require__(4361);
+var isForced = __webpack_require__(4977);
 
 /*
   options.target         - name of the target object
@@ -424,7 +574,7 @@ module.exports = function (options, source) {
 
 /***/ }),
 
-/***/ 7293:
+/***/ 2074:
 /***/ (function(module) {
 
 module.exports = function (exec) {
@@ -438,10 +588,30 @@ module.exports = function (exec) {
 
 /***/ }),
 
-/***/ 4374:
+/***/ 6885:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var fails = __webpack_require__(7293);
+var uncurryThis = __webpack_require__(3091);
+var aCallable = __webpack_require__(4601);
+var NATIVE_BIND = __webpack_require__(8823);
+
+var bind = uncurryThis(uncurryThis.bind);
+
+// optional / simple context binding
+module.exports = function (fn, that) {
+  aCallable(fn);
+  return that === undefined ? fn : NATIVE_BIND ? bind(fn, that) : function (/* ...args */) {
+    return fn.apply(that, arguments);
+  };
+};
+
+
+/***/ }),
+
+/***/ 8823:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var fails = __webpack_require__(2074);
 
 module.exports = !fails(function () {
   // eslint-disable-next-line es/no-function-prototype-bind -- safe
@@ -453,10 +623,10 @@ module.exports = !fails(function () {
 
 /***/ }),
 
-/***/ 6916:
+/***/ 2368:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var NATIVE_BIND = __webpack_require__(4374);
+var NATIVE_BIND = __webpack_require__(8823);
 
 var call = Function.prototype.call;
 
@@ -467,11 +637,11 @@ module.exports = NATIVE_BIND ? call.bind(call) : function () {
 
 /***/ }),
 
-/***/ 6530:
+/***/ 2071:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var DESCRIPTORS = __webpack_require__(9781);
-var hasOwn = __webpack_require__(2597);
+var DESCRIPTORS = __webpack_require__(5077);
+var hasOwn = __webpack_require__(6490);
 
 var FunctionPrototype = Function.prototype;
 // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
@@ -491,10 +661,42 @@ module.exports = {
 
 /***/ }),
 
-/***/ 1702:
+/***/ 1385:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var NATIVE_BIND = __webpack_require__(4374);
+var uncurryThis = __webpack_require__(281);
+var aCallable = __webpack_require__(4601);
+
+module.exports = function (object, key, method) {
+  try {
+    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+    return uncurryThis(aCallable(Object.getOwnPropertyDescriptor(object, key)[method]));
+  } catch (error) { /* empty */ }
+};
+
+
+/***/ }),
+
+/***/ 3091:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var classofRaw = __webpack_require__(8569);
+var uncurryThis = __webpack_require__(281);
+
+module.exports = function (fn) {
+  // Nashorn bug:
+  //   https://github.com/zloirock/core-js/issues/1128
+  //   https://github.com/zloirock/core-js/issues/1130
+  if (classofRaw(fn) === 'Function') return uncurryThis(fn);
+};
+
+
+/***/ }),
+
+/***/ 281:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var NATIVE_BIND = __webpack_require__(8823);
 
 var FunctionPrototype = Function.prototype;
 var call = FunctionPrototype.call;
@@ -509,11 +711,11 @@ module.exports = NATIVE_BIND ? uncurryThisWithBind : function (fn) {
 
 /***/ }),
 
-/***/ 5005:
+/***/ 6492:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var global = __webpack_require__(7854);
-var isCallable = __webpack_require__(614);
+var global = __webpack_require__(200);
+var isCallable = __webpack_require__(8420);
 
 var aFunction = function (argument) {
   return isCallable(argument) ? argument : undefined;
@@ -526,11 +728,83 @@ module.exports = function (namespace, method) {
 
 /***/ }),
 
-/***/ 8173:
+/***/ 938:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var aCallable = __webpack_require__(9662);
-var isNullOrUndefined = __webpack_require__(8554);
+var aCallable = __webpack_require__(4601);
+
+module.exports = function (obj) {
+  return {
+    iterator: obj,
+    next: aCallable(obj.next)
+  };
+};
+
+
+/***/ }),
+
+/***/ 781:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var call = __webpack_require__(2368);
+var anObject = __webpack_require__(3938);
+var getIteratorDirect = __webpack_require__(938);
+var getIteratorMethod = __webpack_require__(1898);
+
+module.exports = function (obj) {
+  var object = anObject(obj);
+  var method = getIteratorMethod(object);
+  return getIteratorDirect(anObject(method !== undefined ? call(method, object) : object));
+};
+
+
+/***/ }),
+
+/***/ 1898:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var classof = __webpack_require__(3062);
+var getMethod = __webpack_require__(6457);
+var isNullOrUndefined = __webpack_require__(8406);
+var Iterators = __webpack_require__(2228);
+var wellKnownSymbol = __webpack_require__(1602);
+
+var ITERATOR = wellKnownSymbol('iterator');
+
+module.exports = function (it) {
+  if (!isNullOrUndefined(it)) return getMethod(it, ITERATOR)
+    || getMethod(it, '@@iterator')
+    || Iterators[classof(it)];
+};
+
+
+/***/ }),
+
+/***/ 9526:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var call = __webpack_require__(2368);
+var aCallable = __webpack_require__(4601);
+var anObject = __webpack_require__(3938);
+var tryToString = __webpack_require__(3838);
+var getIteratorMethod = __webpack_require__(1898);
+
+var $TypeError = TypeError;
+
+module.exports = function (argument, usingIterator) {
+  var iteratorMethod = arguments.length < 2 ? getIteratorMethod(argument) : usingIterator;
+  if (aCallable(iteratorMethod)) return anObject(call(iteratorMethod, argument));
+  throw $TypeError(tryToString(argument) + ' is not iterable');
+};
+
+
+/***/ }),
+
+/***/ 6457:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var aCallable = __webpack_require__(4601);
+var isNullOrUndefined = __webpack_require__(8406);
 
 // `GetMethod` abstract operation
 // https://tc39.es/ecma262/#sec-getmethod
@@ -542,7 +816,53 @@ module.exports = function (V, P) {
 
 /***/ }),
 
-/***/ 7854:
+/***/ 2926:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var aCallable = __webpack_require__(4601);
+var anObject = __webpack_require__(3938);
+var call = __webpack_require__(2368);
+var toIntegerOrInfinity = __webpack_require__(9328);
+
+var $TypeError = TypeError;
+var max = Math.max;
+
+var SetRecord = function (set, size, has, keys) {
+  this.set = set;
+  this.size = size;
+  this.has = has;
+  this.keys = keys;
+};
+
+SetRecord.prototype = {
+  getIterator: function () {
+    return anObject(call(this.keys, this.set));
+  },
+  includes: function (it) {
+    return call(this.has, this.set, it);
+  }
+};
+
+// `GetSetRecord` abstract operation
+// https://tc39.es/proposal-set-methods/#sec-getsetrecord
+module.exports = function (obj) {
+  anObject(obj);
+  var numSize = +obj.size;
+  // NOTE: If size is undefined, then numSize will be NaN
+  // eslint-disable-next-line no-self-compare -- NaN check
+  if (numSize != numSize) throw $TypeError('Invalid size');
+  return new SetRecord(
+    obj,
+    max(toIntegerOrInfinity(numSize), 0),
+    aCallable(obj.has),
+    aCallable(obj.keys)
+  );
+};
+
+
+/***/ }),
+
+/***/ 200:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 var check = function (it) {
@@ -563,11 +883,11 @@ module.exports =
 
 /***/ }),
 
-/***/ 2597:
+/***/ 6490:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var uncurryThis = __webpack_require__(1702);
-var toObject = __webpack_require__(7908);
+var uncurryThis = __webpack_require__(281);
+var toObject = __webpack_require__(2612);
 
 var hasOwnProperty = uncurryThis({}.hasOwnProperty);
 
@@ -581,7 +901,7 @@ module.exports = Object.hasOwn || function hasOwn(it, key) {
 
 /***/ }),
 
-/***/ 3501:
+/***/ 7708:
 /***/ (function(module) {
 
 module.exports = {};
@@ -589,12 +909,22 @@ module.exports = {};
 
 /***/ }),
 
-/***/ 4664:
+/***/ 8890:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var DESCRIPTORS = __webpack_require__(9781);
-var fails = __webpack_require__(7293);
-var createElement = __webpack_require__(317);
+var getBuiltIn = __webpack_require__(6492);
+
+module.exports = getBuiltIn('document', 'documentElement');
+
+
+/***/ }),
+
+/***/ 7694:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var DESCRIPTORS = __webpack_require__(5077);
+var fails = __webpack_require__(2074);
+var createElement = __webpack_require__(3262);
 
 // Thanks to IE8 for its funny defineProperty
 module.exports = !DESCRIPTORS && !fails(function () {
@@ -607,12 +937,12 @@ module.exports = !DESCRIPTORS && !fails(function () {
 
 /***/ }),
 
-/***/ 8361:
+/***/ 8664:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var uncurryThis = __webpack_require__(1702);
-var fails = __webpack_require__(7293);
-var classof = __webpack_require__(4326);
+var uncurryThis = __webpack_require__(281);
+var fails = __webpack_require__(2074);
+var classof = __webpack_require__(8569);
 
 var $Object = Object;
 var split = uncurryThis(''.split);
@@ -629,12 +959,12 @@ module.exports = fails(function () {
 
 /***/ }),
 
-/***/ 2788:
+/***/ 9965:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var uncurryThis = __webpack_require__(1702);
-var isCallable = __webpack_require__(614);
-var store = __webpack_require__(5465);
+var uncurryThis = __webpack_require__(281);
+var isCallable = __webpack_require__(8420);
+var store = __webpack_require__(9310);
 
 var functionToString = uncurryThis(Function.toString);
 
@@ -650,17 +980,17 @@ module.exports = store.inspectSource;
 
 /***/ }),
 
-/***/ 9909:
+/***/ 9206:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var NATIVE_WEAK_MAP = __webpack_require__(4811);
-var global = __webpack_require__(7854);
-var isObject = __webpack_require__(111);
-var createNonEnumerableProperty = __webpack_require__(8880);
-var hasOwn = __webpack_require__(2597);
-var shared = __webpack_require__(5465);
-var sharedKey = __webpack_require__(6200);
-var hiddenKeys = __webpack_require__(3501);
+var NATIVE_WEAK_MAP = __webpack_require__(8369);
+var global = __webpack_require__(200);
+var isObject = __webpack_require__(5335);
+var createNonEnumerableProperty = __webpack_require__(7712);
+var hasOwn = __webpack_require__(6490);
+var shared = __webpack_require__(9310);
+var sharedKey = __webpack_require__(5904);
+var hiddenKeys = __webpack_require__(7708);
 
 var OBJECT_ALREADY_INITIALIZED = 'Object already initialized';
 var TypeError = global.TypeError;
@@ -727,10 +1057,27 @@ module.exports = {
 
 /***/ }),
 
-/***/ 3157:
+/***/ 9034:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var classof = __webpack_require__(4326);
+var wellKnownSymbol = __webpack_require__(1602);
+var Iterators = __webpack_require__(2228);
+
+var ITERATOR = wellKnownSymbol('iterator');
+var ArrayPrototype = Array.prototype;
+
+// check on default Array iterator
+module.exports = function (it) {
+  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
+};
+
+
+/***/ }),
+
+/***/ 8679:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var classof = __webpack_require__(8569);
 
 // `IsArray` abstract operation
 // https://tc39.es/ecma262/#sec-isarray
@@ -742,10 +1089,10 @@ module.exports = Array.isArray || function isArray(argument) {
 
 /***/ }),
 
-/***/ 614:
+/***/ 8420:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var $documentAll = __webpack_require__(4154);
+var $documentAll = __webpack_require__(6568);
 
 var documentAll = $documentAll.all;
 
@@ -760,11 +1107,11 @@ module.exports = $documentAll.IS_HTMLDDA ? function (argument) {
 
 /***/ }),
 
-/***/ 4705:
+/***/ 4977:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var fails = __webpack_require__(7293);
-var isCallable = __webpack_require__(614);
+var fails = __webpack_require__(2074);
+var isCallable = __webpack_require__(8420);
 
 var replacement = /#|\.prototype\./;
 
@@ -789,7 +1136,7 @@ module.exports = isForced;
 
 /***/ }),
 
-/***/ 8554:
+/***/ 8406:
 /***/ (function(module) {
 
 // we can't use just `it == null` since of `document.all` special case
@@ -801,11 +1148,11 @@ module.exports = function (it) {
 
 /***/ }),
 
-/***/ 111:
+/***/ 5335:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var isCallable = __webpack_require__(614);
-var $documentAll = __webpack_require__(4154);
+var isCallable = __webpack_require__(8420);
+var $documentAll = __webpack_require__(6568);
 
 var documentAll = $documentAll.all;
 
@@ -818,7 +1165,7 @@ module.exports = $documentAll.IS_HTMLDDA ? function (it) {
 
 /***/ }),
 
-/***/ 1913:
+/***/ 6926:
 /***/ (function(module) {
 
 module.exports = false;
@@ -826,13 +1173,13 @@ module.exports = false;
 
 /***/ }),
 
-/***/ 2190:
+/***/ 2328:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var getBuiltIn = __webpack_require__(5005);
-var isCallable = __webpack_require__(614);
-var isPrototypeOf = __webpack_require__(7976);
-var USE_SYMBOL_AS_UID = __webpack_require__(3307);
+var getBuiltIn = __webpack_require__(6492);
+var isCallable = __webpack_require__(8420);
+var isPrototypeOf = __webpack_require__(7658);
+var USE_SYMBOL_AS_UID = __webpack_require__(5225);
 
 var $Object = Object;
 
@@ -846,10 +1193,313 @@ module.exports = USE_SYMBOL_AS_UID ? function (it) {
 
 /***/ }),
 
-/***/ 6244:
+/***/ 64:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var toLength = __webpack_require__(7466);
+var call = __webpack_require__(2368);
+
+module.exports = function (iterator, fn, $next) {
+  var next = $next || iterator.next;
+  var step, result;
+  while (!(step = call(next, iterator)).done) {
+    result = fn(step.value);
+    if (result !== undefined) return result;
+  }
+};
+
+
+/***/ }),
+
+/***/ 2929:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var bind = __webpack_require__(6885);
+var call = __webpack_require__(2368);
+var anObject = __webpack_require__(3938);
+var tryToString = __webpack_require__(3838);
+var isArrayIteratorMethod = __webpack_require__(9034);
+var lengthOfArrayLike = __webpack_require__(3493);
+var isPrototypeOf = __webpack_require__(7658);
+var getIterator = __webpack_require__(9526);
+var getIteratorMethod = __webpack_require__(1898);
+var iteratorClose = __webpack_require__(9868);
+
+var $TypeError = TypeError;
+
+var Result = function (stopped, result) {
+  this.stopped = stopped;
+  this.result = result;
+};
+
+var ResultPrototype = Result.prototype;
+
+module.exports = function (iterable, unboundFunction, options) {
+  var that = options && options.that;
+  var AS_ENTRIES = !!(options && options.AS_ENTRIES);
+  var IS_RECORD = !!(options && options.IS_RECORD);
+  var IS_ITERATOR = !!(options && options.IS_ITERATOR);
+  var INTERRUPTED = !!(options && options.INTERRUPTED);
+  var fn = bind(unboundFunction, that);
+  var iterator, iterFn, index, length, result, next, step;
+
+  var stop = function (condition) {
+    if (iterator) iteratorClose(iterator, 'normal', condition);
+    return new Result(true, condition);
+  };
+
+  var callFn = function (value) {
+    if (AS_ENTRIES) {
+      anObject(value);
+      return INTERRUPTED ? fn(value[0], value[1], stop) : fn(value[0], value[1]);
+    } return INTERRUPTED ? fn(value, stop) : fn(value);
+  };
+
+  if (IS_RECORD) {
+    iterator = iterable.iterator;
+  } else if (IS_ITERATOR) {
+    iterator = iterable;
+  } else {
+    iterFn = getIteratorMethod(iterable);
+    if (!iterFn) throw $TypeError(tryToString(iterable) + ' is not iterable');
+    // optimisation for array iterators
+    if (isArrayIteratorMethod(iterFn)) {
+      for (index = 0, length = lengthOfArrayLike(iterable); length > index; index++) {
+        result = callFn(iterable[index]);
+        if (result && isPrototypeOf(ResultPrototype, result)) return result;
+      } return new Result(false);
+    }
+    iterator = getIterator(iterable, iterFn);
+  }
+
+  next = IS_RECORD ? iterable.next : iterator.next;
+  while (!(step = call(next, iterator)).done) {
+    try {
+      result = callFn(step.value);
+    } catch (error) {
+      iteratorClose(iterator, 'throw', error);
+    }
+    if (typeof result == 'object' && result && isPrototypeOf(ResultPrototype, result)) return result;
+  } return new Result(false);
+};
+
+
+/***/ }),
+
+/***/ 9868:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var call = __webpack_require__(2368);
+var anObject = __webpack_require__(3938);
+var getMethod = __webpack_require__(6457);
+
+module.exports = function (iterator, kind, value) {
+  var innerResult, innerError;
+  anObject(iterator);
+  try {
+    innerResult = getMethod(iterator, 'return');
+    if (!innerResult) {
+      if (kind === 'throw') throw value;
+      return value;
+    }
+    innerResult = call(innerResult, iterator);
+  } catch (error) {
+    innerError = true;
+    innerResult = error;
+  }
+  if (kind === 'throw') throw value;
+  if (innerError) throw innerResult;
+  anObject(innerResult);
+  return value;
+};
+
+
+/***/ }),
+
+/***/ 1523:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var call = __webpack_require__(2368);
+var create = __webpack_require__(3105);
+var createNonEnumerableProperty = __webpack_require__(7712);
+var defineBuiltIns = __webpack_require__(2760);
+var wellKnownSymbol = __webpack_require__(1602);
+var InternalStateModule = __webpack_require__(9206);
+var getMethod = __webpack_require__(6457);
+var IteratorPrototype = (__webpack_require__(9306).IteratorPrototype);
+var createIterResultObject = __webpack_require__(8296);
+var iteratorClose = __webpack_require__(9868);
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+var ITERATOR_HELPER = 'IteratorHelper';
+var WRAP_FOR_VALID_ITERATOR = 'WrapForValidIterator';
+var setInternalState = InternalStateModule.set;
+
+var createIteratorProxyPrototype = function (IS_ITERATOR) {
+  var getInternalState = InternalStateModule.getterFor(IS_ITERATOR ? WRAP_FOR_VALID_ITERATOR : ITERATOR_HELPER);
+
+  return defineBuiltIns(create(IteratorPrototype), {
+    next: function next() {
+      var state = getInternalState(this);
+      // for simplification:
+      //   for `%WrapForValidIteratorPrototype%.next` our `nextHandler` returns `IterResultObject`
+      //   for `%IteratorHelperPrototype%.next` - just a value
+      if (IS_ITERATOR) return state.nextHandler();
+      try {
+        var result = state.done ? undefined : state.nextHandler();
+        return createIterResultObject(result, state.done);
+      } catch (error) {
+        state.done = true;
+        throw error;
+      }
+    },
+    'return': function () {
+      var state = getInternalState(this);
+      var iterator = state.iterator;
+      state.done = true;
+      if (IS_ITERATOR) {
+        var returnMethod = getMethod(iterator, 'return');
+        return returnMethod ? call(returnMethod, iterator) : createIterResultObject(undefined, true);
+      }
+      if (state.inner) try {
+        iteratorClose(state.inner.iterator, 'normal');
+      } catch (error) {
+        return iteratorClose(iterator, 'throw', error);
+      }
+      iteratorClose(iterator, 'normal');
+      return createIterResultObject(undefined, true);
+    }
+  });
+};
+
+var WrapForValidIteratorPrototype = createIteratorProxyPrototype(true);
+var IteratorHelperPrototype = createIteratorProxyPrototype(false);
+
+createNonEnumerableProperty(IteratorHelperPrototype, TO_STRING_TAG, 'Iterator Helper');
+
+module.exports = function (nextHandler, IS_ITERATOR) {
+  var IteratorProxy = function Iterator(record, state) {
+    if (state) {
+      state.iterator = record.iterator;
+      state.next = record.next;
+    } else state = record;
+    state.type = IS_ITERATOR ? WRAP_FOR_VALID_ITERATOR : ITERATOR_HELPER;
+    state.nextHandler = nextHandler;
+    state.counter = 0;
+    state.done = false;
+    setInternalState(this, state);
+  };
+
+  IteratorProxy.prototype = IS_ITERATOR ? WrapForValidIteratorPrototype : IteratorHelperPrototype;
+
+  return IteratorProxy;
+};
+
+
+/***/ }),
+
+/***/ 8318:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var call = __webpack_require__(2368);
+var aCallable = __webpack_require__(4601);
+var anObject = __webpack_require__(3938);
+var getIteratorDirect = __webpack_require__(938);
+var createIteratorProxy = __webpack_require__(1523);
+var callWithSafeIterationClosing = __webpack_require__(1332);
+
+var IteratorProxy = createIteratorProxy(function () {
+  var iterator = this.iterator;
+  var result = anObject(call(this.next, iterator));
+  var done = this.done = !!result.done;
+  if (!done) return callWithSafeIterationClosing(iterator, this.mapper, [result.value, this.counter++], true);
+});
+
+// `Iterator.prototype.map` method
+// https://github.com/tc39/proposal-iterator-helpers
+module.exports = function map(mapper) {
+  anObject(this);
+  aCallable(mapper);
+  return new IteratorProxy(getIteratorDirect(this), {
+    mapper: mapper
+  });
+};
+
+
+/***/ }),
+
+/***/ 9306:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var fails = __webpack_require__(2074);
+var isCallable = __webpack_require__(8420);
+var isObject = __webpack_require__(5335);
+var create = __webpack_require__(3105);
+var getPrototypeOf = __webpack_require__(7970);
+var defineBuiltIn = __webpack_require__(7485);
+var wellKnownSymbol = __webpack_require__(1602);
+var IS_PURE = __webpack_require__(6926);
+
+var ITERATOR = wellKnownSymbol('iterator');
+var BUGGY_SAFARI_ITERATORS = false;
+
+// `%IteratorPrototype%` object
+// https://tc39.es/ecma262/#sec-%iteratorprototype%-object
+var IteratorPrototype, PrototypeOfArrayIteratorPrototype, arrayIterator;
+
+/* eslint-disable es/no-array-prototype-keys -- safe */
+if ([].keys) {
+  arrayIterator = [].keys();
+  // Safari 8 has buggy iterators w/o `next`
+  if (!('next' in arrayIterator)) BUGGY_SAFARI_ITERATORS = true;
+  else {
+    PrototypeOfArrayIteratorPrototype = getPrototypeOf(getPrototypeOf(arrayIterator));
+    if (PrototypeOfArrayIteratorPrototype !== Object.prototype) IteratorPrototype = PrototypeOfArrayIteratorPrototype;
+  }
+}
+
+var NEW_ITERATOR_PROTOTYPE = !isObject(IteratorPrototype) || fails(function () {
+  var test = {};
+  // FF44- legacy iterators case
+  return IteratorPrototype[ITERATOR].call(test) !== test;
+});
+
+if (NEW_ITERATOR_PROTOTYPE) IteratorPrototype = {};
+else if (IS_PURE) IteratorPrototype = create(IteratorPrototype);
+
+// `%IteratorPrototype%[@@iterator]()` method
+// https://tc39.es/ecma262/#sec-%iteratorprototype%-@@iterator
+if (!isCallable(IteratorPrototype[ITERATOR])) {
+  defineBuiltIn(IteratorPrototype, ITERATOR, function () {
+    return this;
+  });
+}
+
+module.exports = {
+  IteratorPrototype: IteratorPrototype,
+  BUGGY_SAFARI_ITERATORS: BUGGY_SAFARI_ITERATORS
+};
+
+
+/***/ }),
+
+/***/ 2228:
+/***/ (function(module) {
+
+module.exports = {};
+
+
+/***/ }),
+
+/***/ 3493:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var toLength = __webpack_require__(3747);
 
 // `LengthOfArrayLike` abstract operation
 // https://tc39.es/ecma262/#sec-lengthofarraylike
@@ -860,17 +1510,17 @@ module.exports = function (obj) {
 
 /***/ }),
 
-/***/ 6339:
+/***/ 8218:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var uncurryThis = __webpack_require__(1702);
-var fails = __webpack_require__(7293);
-var isCallable = __webpack_require__(614);
-var hasOwn = __webpack_require__(2597);
-var DESCRIPTORS = __webpack_require__(9781);
-var CONFIGURABLE_FUNCTION_NAME = (__webpack_require__(6530).CONFIGURABLE);
-var inspectSource = __webpack_require__(2788);
-var InternalStateModule = __webpack_require__(9909);
+var uncurryThis = __webpack_require__(281);
+var fails = __webpack_require__(2074);
+var isCallable = __webpack_require__(8420);
+var hasOwn = __webpack_require__(6490);
+var DESCRIPTORS = __webpack_require__(5077);
+var CONFIGURABLE_FUNCTION_NAME = (__webpack_require__(2071).CONFIGURABLE);
+var inspectSource = __webpack_require__(9965);
+var InternalStateModule = __webpack_require__(9206);
 
 var enforceInternalState = InternalStateModule.enforce;
 var getInternalState = InternalStateModule.get;
@@ -921,7 +1571,7 @@ Function.prototype.toString = makeBuiltIn(function toString() {
 
 /***/ }),
 
-/***/ 4758:
+/***/ 9830:
 /***/ (function(module) {
 
 var ceil = Math.ceil;
@@ -938,14 +1588,131 @@ module.exports = Math.trunc || function trunc(x) {
 
 /***/ }),
 
-/***/ 3070:
+/***/ 3105:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+/* global ActiveXObject -- old IE, WSH */
+var anObject = __webpack_require__(3938);
+var definePropertiesModule = __webpack_require__(5318);
+var enumBugKeys = __webpack_require__(290);
+var hiddenKeys = __webpack_require__(7708);
+var html = __webpack_require__(8890);
+var documentCreateElement = __webpack_require__(3262);
+var sharedKey = __webpack_require__(5904);
+
+var GT = '>';
+var LT = '<';
+var PROTOTYPE = 'prototype';
+var SCRIPT = 'script';
+var IE_PROTO = sharedKey('IE_PROTO');
+
+var EmptyConstructor = function () { /* empty */ };
+
+var scriptTag = function (content) {
+  return LT + SCRIPT + GT + content + LT + '/' + SCRIPT + GT;
+};
+
+// Create object with fake `null` prototype: use ActiveX Object with cleared prototype
+var NullProtoObjectViaActiveX = function (activeXDocument) {
+  activeXDocument.write(scriptTag(''));
+  activeXDocument.close();
+  var temp = activeXDocument.parentWindow.Object;
+  activeXDocument = null; // avoid memory leak
+  return temp;
+};
+
+// Create object with fake `null` prototype: use iframe Object with cleared prototype
+var NullProtoObjectViaIFrame = function () {
+  // Thrash, waste and sodomy: IE GC bug
+  var iframe = documentCreateElement('iframe');
+  var JS = 'java' + SCRIPT + ':';
+  var iframeDocument;
+  iframe.style.display = 'none';
+  html.appendChild(iframe);
+  // https://github.com/zloirock/core-js/issues/475
+  iframe.src = String(JS);
+  iframeDocument = iframe.contentWindow.document;
+  iframeDocument.open();
+  iframeDocument.write(scriptTag('document.F=Object'));
+  iframeDocument.close();
+  return iframeDocument.F;
+};
+
+// Check for document.domain and active x support
+// No need to use active x approach when document.domain is not set
+// see https://github.com/es-shims/es5-shim/issues/150
+// variation of https://github.com/kitcambridge/es5-shim/commit/4f738ac066346
+// avoid IE GC bug
+var activeXDocument;
+var NullProtoObject = function () {
+  try {
+    activeXDocument = new ActiveXObject('htmlfile');
+  } catch (error) { /* ignore */ }
+  NullProtoObject = typeof document != 'undefined'
+    ? document.domain && activeXDocument
+      ? NullProtoObjectViaActiveX(activeXDocument) // old IE
+      : NullProtoObjectViaIFrame()
+    : NullProtoObjectViaActiveX(activeXDocument); // WSH
+  var length = enumBugKeys.length;
+  while (length--) delete NullProtoObject[PROTOTYPE][enumBugKeys[length]];
+  return NullProtoObject();
+};
+
+hiddenKeys[IE_PROTO] = true;
+
+// `Object.create` method
+// https://tc39.es/ecma262/#sec-object.create
+// eslint-disable-next-line es/no-object-create -- safe
+module.exports = Object.create || function create(O, Properties) {
+  var result;
+  if (O !== null) {
+    EmptyConstructor[PROTOTYPE] = anObject(O);
+    result = new EmptyConstructor();
+    EmptyConstructor[PROTOTYPE] = null;
+    // add "__proto__" for Object.getPrototypeOf polyfill
+    result[IE_PROTO] = O;
+  } else result = NullProtoObject();
+  return Properties === undefined ? result : definePropertiesModule.f(result, Properties);
+};
+
+
+/***/ }),
+
+/***/ 5318:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-var DESCRIPTORS = __webpack_require__(9781);
-var IE8_DOM_DEFINE = __webpack_require__(4664);
-var V8_PROTOTYPE_DEFINE_BUG = __webpack_require__(3353);
-var anObject = __webpack_require__(9670);
-var toPropertyKey = __webpack_require__(4948);
+var DESCRIPTORS = __webpack_require__(5077);
+var V8_PROTOTYPE_DEFINE_BUG = __webpack_require__(4491);
+var definePropertyModule = __webpack_require__(3610);
+var anObject = __webpack_require__(3938);
+var toIndexedObject = __webpack_require__(5476);
+var objectKeys = __webpack_require__(1641);
+
+// `Object.defineProperties` method
+// https://tc39.es/ecma262/#sec-object.defineproperties
+// eslint-disable-next-line es/no-object-defineproperties -- safe
+exports.f = DESCRIPTORS && !V8_PROTOTYPE_DEFINE_BUG ? Object.defineProperties : function defineProperties(O, Properties) {
+  anObject(O);
+  var props = toIndexedObject(Properties);
+  var keys = objectKeys(Properties);
+  var length = keys.length;
+  var index = 0;
+  var key;
+  while (length > index) definePropertyModule.f(O, key = keys[index++], props[key]);
+  return O;
+};
+
+
+/***/ }),
+
+/***/ 3610:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+var DESCRIPTORS = __webpack_require__(5077);
+var IE8_DOM_DEFINE = __webpack_require__(7694);
+var V8_PROTOTYPE_DEFINE_BUG = __webpack_require__(4491);
+var anObject = __webpack_require__(3938);
+var toPropertyKey = __webpack_require__(6032);
 
 var $TypeError = TypeError;
 // eslint-disable-next-line es/no-object-defineproperty -- safe
@@ -988,17 +1755,17 @@ exports.f = DESCRIPTORS ? V8_PROTOTYPE_DEFINE_BUG ? function defineProperty(O, P
 
 /***/ }),
 
-/***/ 1236:
+/***/ 7632:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-var DESCRIPTORS = __webpack_require__(9781);
-var call = __webpack_require__(6916);
-var propertyIsEnumerableModule = __webpack_require__(5296);
-var createPropertyDescriptor = __webpack_require__(9114);
-var toIndexedObject = __webpack_require__(5656);
-var toPropertyKey = __webpack_require__(4948);
-var hasOwn = __webpack_require__(2597);
-var IE8_DOM_DEFINE = __webpack_require__(4664);
+var DESCRIPTORS = __webpack_require__(5077);
+var call = __webpack_require__(2368);
+var propertyIsEnumerableModule = __webpack_require__(9304);
+var createPropertyDescriptor = __webpack_require__(6843);
+var toIndexedObject = __webpack_require__(5476);
+var toPropertyKey = __webpack_require__(6032);
+var hasOwn = __webpack_require__(6490);
+var IE8_DOM_DEFINE = __webpack_require__(7694);
 
 // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
 var $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
@@ -1017,11 +1784,11 @@ exports.f = DESCRIPTORS ? $getOwnPropertyDescriptor : function getOwnPropertyDes
 
 /***/ }),
 
-/***/ 8006:
+/***/ 4789:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-var internalObjectKeys = __webpack_require__(6324);
-var enumBugKeys = __webpack_require__(748);
+var internalObjectKeys = __webpack_require__(6347);
+var enumBugKeys = __webpack_require__(290);
 
 var hiddenKeys = enumBugKeys.concat('length', 'prototype');
 
@@ -1035,7 +1802,7 @@ exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O) {
 
 /***/ }),
 
-/***/ 5181:
+/***/ 8916:
 /***/ (function(__unused_webpack_module, exports) {
 
 // eslint-disable-next-line es/no-object-getownpropertysymbols -- safe
@@ -1044,24 +1811,52 @@ exports.f = Object.getOwnPropertySymbols;
 
 /***/ }),
 
-/***/ 7976:
+/***/ 7970:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var uncurryThis = __webpack_require__(1702);
+var hasOwn = __webpack_require__(6490);
+var isCallable = __webpack_require__(8420);
+var toObject = __webpack_require__(2612);
+var sharedKey = __webpack_require__(5904);
+var CORRECT_PROTOTYPE_GETTER = __webpack_require__(7168);
+
+var IE_PROTO = sharedKey('IE_PROTO');
+var $Object = Object;
+var ObjectPrototype = $Object.prototype;
+
+// `Object.getPrototypeOf` method
+// https://tc39.es/ecma262/#sec-object.getprototypeof
+// eslint-disable-next-line es/no-object-getprototypeof -- safe
+module.exports = CORRECT_PROTOTYPE_GETTER ? $Object.getPrototypeOf : function (O) {
+  var object = toObject(O);
+  if (hasOwn(object, IE_PROTO)) return object[IE_PROTO];
+  var constructor = object.constructor;
+  if (isCallable(constructor) && object instanceof constructor) {
+    return constructor.prototype;
+  } return object instanceof $Object ? ObjectPrototype : null;
+};
+
+
+/***/ }),
+
+/***/ 7658:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var uncurryThis = __webpack_require__(281);
 
 module.exports = uncurryThis({}.isPrototypeOf);
 
 
 /***/ }),
 
-/***/ 6324:
+/***/ 6347:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var uncurryThis = __webpack_require__(1702);
-var hasOwn = __webpack_require__(2597);
-var toIndexedObject = __webpack_require__(5656);
-var indexOf = (__webpack_require__(1318).indexOf);
-var hiddenKeys = __webpack_require__(3501);
+var uncurryThis = __webpack_require__(281);
+var hasOwn = __webpack_require__(6490);
+var toIndexedObject = __webpack_require__(5476);
+var indexOf = (__webpack_require__(8186).indexOf);
+var hiddenKeys = __webpack_require__(7708);
 
 var push = uncurryThis([].push);
 
@@ -1081,7 +1876,23 @@ module.exports = function (object, names) {
 
 /***/ }),
 
-/***/ 5296:
+/***/ 1641:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var internalObjectKeys = __webpack_require__(6347);
+var enumBugKeys = __webpack_require__(290);
+
+// `Object.keys` method
+// https://tc39.es/ecma262/#sec-object.keys
+// eslint-disable-next-line es/no-object-keys -- safe
+module.exports = Object.keys || function keys(O) {
+  return internalObjectKeys(O, enumBugKeys);
+};
+
+
+/***/ }),
+
+/***/ 9304:
 /***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
@@ -1103,12 +1914,12 @@ exports.f = NASHORN_BUG ? function propertyIsEnumerable(V) {
 
 /***/ }),
 
-/***/ 2140:
+/***/ 9751:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var call = __webpack_require__(6916);
-var isCallable = __webpack_require__(614);
-var isObject = __webpack_require__(111);
+var call = __webpack_require__(2368);
+var isCallable = __webpack_require__(8420);
+var isObject = __webpack_require__(5335);
 
 var $TypeError = TypeError;
 
@@ -1125,14 +1936,14 @@ module.exports = function (input, pref) {
 
 /***/ }),
 
-/***/ 3887:
+/***/ 5816:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var getBuiltIn = __webpack_require__(5005);
-var uncurryThis = __webpack_require__(1702);
-var getOwnPropertyNamesModule = __webpack_require__(8006);
-var getOwnPropertySymbolsModule = __webpack_require__(5181);
-var anObject = __webpack_require__(9670);
+var getBuiltIn = __webpack_require__(6492);
+var uncurryThis = __webpack_require__(281);
+var getOwnPropertyNamesModule = __webpack_require__(4789);
+var getOwnPropertySymbolsModule = __webpack_require__(8916);
+var anObject = __webpack_require__(3938);
 
 var concat = uncurryThis([].concat);
 
@@ -1146,10 +1957,10 @@ module.exports = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
 
 /***/ }),
 
-/***/ 4488:
+/***/ 1229:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var isNullOrUndefined = __webpack_require__(8554);
+var isNullOrUndefined = __webpack_require__(8406);
 
 var $TypeError = TypeError;
 
@@ -1163,11 +1974,329 @@ module.exports = function (it) {
 
 /***/ }),
 
-/***/ 6200:
+/***/ 9583:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var shared = __webpack_require__(2309);
-var uid = __webpack_require__(9711);
+var SetHelpers = __webpack_require__(1171);
+var iterate = __webpack_require__(8896);
+
+var Set = SetHelpers.Set;
+var add = SetHelpers.add;
+
+module.exports = function (set) {
+  var result = new Set();
+  iterate(set, function (it) {
+    add(result, it);
+  });
+  return result;
+};
+
+
+/***/ }),
+
+/***/ 5643:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(1009);
+var SetHelpers = __webpack_require__(1171);
+var clone = __webpack_require__(9583);
+var size = __webpack_require__(605);
+var getSetRecord = __webpack_require__(2926);
+var iterateSet = __webpack_require__(8896);
+var iterateSimple = __webpack_require__(64);
+
+var has = SetHelpers.has;
+var remove = SetHelpers.remove;
+
+// `Set.prototype.difference` method
+// https://github.com/tc39/proposal-set-methods
+module.exports = function difference(other) {
+  var O = aSet(this);
+  var otherRec = getSetRecord(other);
+  var result = clone(O);
+  if (size(O) <= otherRec.size) iterateSet(O, function (e) {
+    if (otherRec.includes(e)) remove(result, e);
+  });
+  else iterateSimple(otherRec.getIterator(), function (e) {
+    if (has(O, e)) remove(result, e);
+  });
+  return result;
+};
+
+
+/***/ }),
+
+/***/ 1171:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var uncurryThis = __webpack_require__(281);
+
+// eslint-disable-next-line es/no-set -- safe
+var SetPrototype = Set.prototype;
+
+module.exports = {
+  // eslint-disable-next-line es/no-set -- safe
+  Set: Set,
+  add: uncurryThis(SetPrototype.add),
+  has: uncurryThis(SetPrototype.has),
+  remove: uncurryThis(SetPrototype['delete']),
+  proto: SetPrototype
+};
+
+
+/***/ }),
+
+/***/ 9697:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(1009);
+var SetHelpers = __webpack_require__(1171);
+var size = __webpack_require__(605);
+var getSetRecord = __webpack_require__(2926);
+var iterateSet = __webpack_require__(8896);
+var iterateSimple = __webpack_require__(64);
+
+var Set = SetHelpers.Set;
+var add = SetHelpers.add;
+var has = SetHelpers.has;
+
+// `Set.prototype.intersection` method
+// https://github.com/tc39/proposal-set-methods
+module.exports = function intersection(other) {
+  var O = aSet(this);
+  var otherRec = getSetRecord(other);
+  var result = new Set();
+
+  if (size(O) > otherRec.size) {
+    iterateSimple(otherRec.getIterator(), function (e) {
+      if (has(O, e)) add(result, e);
+    });
+  } else {
+    iterateSet(O, function (e) {
+      if (otherRec.includes(e)) add(result, e);
+    });
+  }
+
+  return result;
+};
+
+
+/***/ }),
+
+/***/ 8194:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(1009);
+var has = (__webpack_require__(1171).has);
+var size = __webpack_require__(605);
+var getSetRecord = __webpack_require__(2926);
+var iterateSet = __webpack_require__(8896);
+var iterateSimple = __webpack_require__(64);
+var iteratorClose = __webpack_require__(9868);
+
+// `Set.prototype.isDisjointFrom` method
+// https://tc39.github.io/proposal-set-methods/#Set.prototype.isDisjointFrom
+module.exports = function isDisjointFrom(other) {
+  var O = aSet(this);
+  var otherRec = getSetRecord(other);
+  if (size(O) <= otherRec.size) return iterateSet(O, function (e) {
+    if (otherRec.includes(e)) return false;
+  }, true) !== false;
+  var iterator = otherRec.getIterator();
+  return iterateSimple(iterator, function (e) {
+    if (has(O, e)) return iteratorClose(iterator, 'normal', false);
+  }) !== false;
+};
+
+
+/***/ }),
+
+/***/ 3601:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(1009);
+var size = __webpack_require__(605);
+var iterate = __webpack_require__(8896);
+var getSetRecord = __webpack_require__(2926);
+
+// `Set.prototype.isSubsetOf` method
+// https://tc39.github.io/proposal-set-methods/#Set.prototype.isSubsetOf
+module.exports = function isSubsetOf(other) {
+  var O = aSet(this);
+  var otherRec = getSetRecord(other);
+  if (size(O) > otherRec.size) return false;
+  return iterate(O, function (e) {
+    if (!otherRec.includes(e)) return false;
+  }, true) !== false;
+};
+
+
+/***/ }),
+
+/***/ 3632:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(1009);
+var has = (__webpack_require__(1171).has);
+var size = __webpack_require__(605);
+var getSetRecord = __webpack_require__(2926);
+var iterateSimple = __webpack_require__(64);
+var iteratorClose = __webpack_require__(9868);
+
+// `Set.prototype.isSupersetOf` method
+// https://tc39.github.io/proposal-set-methods/#Set.prototype.isSupersetOf
+module.exports = function isSupersetOf(other) {
+  var O = aSet(this);
+  var otherRec = getSetRecord(other);
+  if (size(O) < otherRec.size) return false;
+  var iterator = otherRec.getIterator();
+  return iterateSimple(iterator, function (e) {
+    if (!has(O, e)) return iteratorClose(iterator, 'normal', false);
+  }) !== false;
+};
+
+
+/***/ }),
+
+/***/ 8896:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var uncurryThis = __webpack_require__(281);
+var iterateSimple = __webpack_require__(64);
+var SetHelpers = __webpack_require__(1171);
+
+var Set = SetHelpers.Set;
+var SetPrototype = SetHelpers.proto;
+var forEach = uncurryThis(SetPrototype.forEach);
+var keys = uncurryThis(SetPrototype.keys);
+var next = keys(new Set()).next;
+
+module.exports = function (set, fn, interruptible) {
+  return interruptible ? iterateSimple(keys(set), fn, next) : forEach(set, fn);
+};
+
+
+/***/ }),
+
+/***/ 8223:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var getBuiltIn = __webpack_require__(6492);
+
+var createEmptySetLike = function () {
+  return {
+    size: 0,
+    has: function () {
+      return false;
+    },
+    keys: function () {
+      return {
+        next: function () {
+          return { done: true };
+        }
+      };
+    }
+  };
+};
+
+module.exports = function (name) {
+  try {
+    var Set = getBuiltIn('Set');
+    new Set()[name](createEmptySetLike());
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+
+/***/ }),
+
+/***/ 605:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var uncurryThisAccessor = __webpack_require__(1385);
+var SetHelpers = __webpack_require__(1171);
+
+module.exports = uncurryThisAccessor(SetHelpers.proto, 'size', 'get') || function (set) {
+  return set.size;
+};
+
+
+/***/ }),
+
+/***/ 4753:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(1009);
+var SetHelpers = __webpack_require__(1171);
+var clone = __webpack_require__(9583);
+var getSetRecord = __webpack_require__(2926);
+var iterateSimple = __webpack_require__(64);
+
+var add = SetHelpers.add;
+var has = SetHelpers.has;
+var remove = SetHelpers.remove;
+
+// `Set.prototype.symmetricDifference` method
+// https://github.com/tc39/proposal-set-methods
+module.exports = function symmetricDifference(other) {
+  var O = aSet(this);
+  var keysIter = getSetRecord(other).getIterator();
+  var result = clone(O);
+  iterateSimple(keysIter, function (e) {
+    if (has(O, e)) remove(result, e);
+    else add(result, e);
+  });
+  return result;
+};
+
+
+/***/ }),
+
+/***/ 1869:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var aSet = __webpack_require__(1009);
+var add = (__webpack_require__(1171).add);
+var clone = __webpack_require__(9583);
+var getSetRecord = __webpack_require__(2926);
+var iterateSimple = __webpack_require__(64);
+
+// `Set.prototype.union` method
+// https://github.com/tc39/proposal-set-methods
+module.exports = function union(other) {
+  var O = aSet(this);
+  var keysIter = getSetRecord(other).getIterator();
+  var result = clone(O);
+  iterateSimple(keysIter, function (it) {
+    add(result, it);
+  });
+  return result;
+};
+
+
+/***/ }),
+
+/***/ 5904:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var shared = __webpack_require__(2);
+var uid = __webpack_require__(665);
 
 var keys = shared('keys');
 
@@ -1178,11 +2307,11 @@ module.exports = function (key) {
 
 /***/ }),
 
-/***/ 5465:
+/***/ 9310:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var global = __webpack_require__(7854);
-var defineGlobalProperty = __webpack_require__(3072);
+var global = __webpack_require__(200);
+var defineGlobalProperty = __webpack_require__(9430);
 
 var SHARED = '__core-js_shared__';
 var store = global[SHARED] || defineGlobalProperty(SHARED, {});
@@ -1192,11 +2321,11 @@ module.exports = store;
 
 /***/ }),
 
-/***/ 2309:
+/***/ 2:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var IS_PURE = __webpack_require__(1913);
-var store = __webpack_require__(5465);
+var IS_PURE = __webpack_require__(6926);
+var store = __webpack_require__(9310);
 
 (module.exports = function (key, value) {
   return store[key] || (store[key] = value !== undefined ? value : {});
@@ -1211,13 +2340,13 @@ var store = __webpack_require__(5465);
 
 /***/ }),
 
-/***/ 6293:
+/***/ 2072:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /* eslint-disable es/no-symbol -- required for testing */
-var V8_VERSION = __webpack_require__(7392);
-var fails = __webpack_require__(7293);
-var global = __webpack_require__(7854);
+var V8_VERSION = __webpack_require__(6845);
+var fails = __webpack_require__(2074);
+var global = __webpack_require__(200);
 
 var $String = global.String;
 
@@ -1236,10 +2365,10 @@ module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
 
 /***/ }),
 
-/***/ 1400:
+/***/ 6539:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var toIntegerOrInfinity = __webpack_require__(9303);
+var toIntegerOrInfinity = __webpack_require__(9328);
 
 var max = Math.max;
 var min = Math.min;
@@ -1255,12 +2384,12 @@ module.exports = function (index, length) {
 
 /***/ }),
 
-/***/ 5656:
+/***/ 5476:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 // toObject with fallback for non-array-like ES3 strings
-var IndexedObject = __webpack_require__(8361);
-var requireObjectCoercible = __webpack_require__(4488);
+var IndexedObject = __webpack_require__(8664);
+var requireObjectCoercible = __webpack_require__(1229);
 
 module.exports = function (it) {
   return IndexedObject(requireObjectCoercible(it));
@@ -1269,10 +2398,10 @@ module.exports = function (it) {
 
 /***/ }),
 
-/***/ 9303:
+/***/ 9328:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var trunc = __webpack_require__(4758);
+var trunc = __webpack_require__(9830);
 
 // `ToIntegerOrInfinity` abstract operation
 // https://tc39.es/ecma262/#sec-tointegerorinfinity
@@ -1285,10 +2414,10 @@ module.exports = function (argument) {
 
 /***/ }),
 
-/***/ 7466:
+/***/ 3747:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var toIntegerOrInfinity = __webpack_require__(9303);
+var toIntegerOrInfinity = __webpack_require__(9328);
 
 var min = Math.min;
 
@@ -1301,10 +2430,10 @@ module.exports = function (argument) {
 
 /***/ }),
 
-/***/ 7908:
+/***/ 2612:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var requireObjectCoercible = __webpack_require__(4488);
+var requireObjectCoercible = __webpack_require__(1229);
 
 var $Object = Object;
 
@@ -1317,15 +2446,15 @@ module.exports = function (argument) {
 
 /***/ }),
 
-/***/ 7593:
+/***/ 874:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var call = __webpack_require__(6916);
-var isObject = __webpack_require__(111);
-var isSymbol = __webpack_require__(2190);
-var getMethod = __webpack_require__(8173);
-var ordinaryToPrimitive = __webpack_require__(2140);
-var wellKnownSymbol = __webpack_require__(5112);
+var call = __webpack_require__(2368);
+var isObject = __webpack_require__(5335);
+var isSymbol = __webpack_require__(2328);
+var getMethod = __webpack_require__(6457);
+var ordinaryToPrimitive = __webpack_require__(9751);
+var wellKnownSymbol = __webpack_require__(1602);
 
 var $TypeError = TypeError;
 var TO_PRIMITIVE = wellKnownSymbol('toPrimitive');
@@ -1349,11 +2478,11 @@ module.exports = function (input, pref) {
 
 /***/ }),
 
-/***/ 4948:
+/***/ 6032:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var toPrimitive = __webpack_require__(7593);
-var isSymbol = __webpack_require__(2190);
+var toPrimitive = __webpack_require__(874);
+var isSymbol = __webpack_require__(2328);
 
 // `ToPropertyKey` abstract operation
 // https://tc39.es/ecma262/#sec-topropertykey
@@ -1365,7 +2494,22 @@ module.exports = function (argument) {
 
 /***/ }),
 
-/***/ 6330:
+/***/ 3129:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__(1602);
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+var test = {};
+
+test[TO_STRING_TAG] = 'z';
+
+module.exports = String(test) === '[object z]';
+
+
+/***/ }),
+
+/***/ 3838:
 /***/ (function(module) {
 
 var $String = String;
@@ -1381,10 +2525,10 @@ module.exports = function (argument) {
 
 /***/ }),
 
-/***/ 9711:
+/***/ 665:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var uncurryThis = __webpack_require__(1702);
+var uncurryThis = __webpack_require__(281);
 
 var id = 0;
 var postfix = Math.random();
@@ -1397,11 +2541,11 @@ module.exports = function (key) {
 
 /***/ }),
 
-/***/ 3307:
+/***/ 5225:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 /* eslint-disable es/no-symbol -- required for testing */
-var NATIVE_SYMBOL = __webpack_require__(6293);
+var NATIVE_SYMBOL = __webpack_require__(2072);
 
 module.exports = NATIVE_SYMBOL
   && !Symbol.sham
@@ -1410,11 +2554,11 @@ module.exports = NATIVE_SYMBOL
 
 /***/ }),
 
-/***/ 3353:
+/***/ 4491:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var DESCRIPTORS = __webpack_require__(9781);
-var fails = __webpack_require__(7293);
+var DESCRIPTORS = __webpack_require__(5077);
+var fails = __webpack_require__(2074);
 
 // V8 ~ Chrome 36-
 // https://bugs.chromium.org/p/v8/issues/detail?id=3334
@@ -1429,11 +2573,11 @@ module.exports = DESCRIPTORS && fails(function () {
 
 /***/ }),
 
-/***/ 4811:
+/***/ 8369:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var global = __webpack_require__(7854);
-var isCallable = __webpack_require__(614);
+var global = __webpack_require__(200);
+var isCallable = __webpack_require__(8420);
 
 var WeakMap = global.WeakMap;
 
@@ -1442,15 +2586,15 @@ module.exports = isCallable(WeakMap) && /native code/.test(String(WeakMap));
 
 /***/ }),
 
-/***/ 5112:
+/***/ 1602:
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-var global = __webpack_require__(7854);
-var shared = __webpack_require__(2309);
-var hasOwn = __webpack_require__(2597);
-var uid = __webpack_require__(9711);
-var NATIVE_SYMBOL = __webpack_require__(6293);
-var USE_SYMBOL_AS_UID = __webpack_require__(3307);
+var global = __webpack_require__(200);
+var shared = __webpack_require__(2);
+var hasOwn = __webpack_require__(6490);
+var uid = __webpack_require__(665);
+var NATIVE_SYMBOL = __webpack_require__(2072);
+var USE_SYMBOL_AS_UID = __webpack_require__(5225);
 
 var Symbol = global.Symbol;
 var WellKnownSymbolsStore = shared('wks');
@@ -1467,17 +2611,47 @@ module.exports = function (name) {
 
 /***/ }),
 
-/***/ 7658:
+/***/ 7746:
 /***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
 
 "use strict";
 
-var $ = __webpack_require__(2109);
-var toObject = __webpack_require__(7908);
-var lengthOfArrayLike = __webpack_require__(6244);
-var setArrayLength = __webpack_require__(3658);
-var doesNotExceedSafeInteger = __webpack_require__(7207);
-var fails = __webpack_require__(7293);
+var $ = __webpack_require__(1605);
+var $includes = (__webpack_require__(8186).includes);
+var fails = __webpack_require__(2074);
+var addToUnscopables = __webpack_require__(298);
+
+// FF99+ bug
+var BROKEN_ON_SPARSE = fails(function () {
+  // eslint-disable-next-line es/no-array-prototype-includes -- detection
+  return !Array(1).includes();
+});
+
+// `Array.prototype.includes` method
+// https://tc39.es/ecma262/#sec-array.prototype.includes
+$({ target: 'Array', proto: true, forced: BROKEN_ON_SPARSE }, {
+  includes: function includes(el /* , fromIndex = 0 */) {
+    return $includes(this, el, arguments.length > 1 ? arguments[1] : undefined);
+  }
+});
+
+// https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
+addToUnscopables('includes');
+
+
+/***/ }),
+
+/***/ 8743:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1605);
+var toObject = __webpack_require__(2612);
+var lengthOfArrayLike = __webpack_require__(3493);
+var setArrayLength = __webpack_require__(6648);
+var doesNotExceedSafeInteger = __webpack_require__(7242);
+var fails = __webpack_require__(2074);
 
 var INCORRECT_TO_LENGTH = fails(function () {
   return [].push.call({ length: 0x100000000 }, 1) !== 4294967297;
@@ -1517,7 +2691,408 @@ $({ target: 'Array', proto: true, arity: 1, forced: FORCED }, {
 
 /***/ }),
 
-/***/ 5732:
+/***/ 3725:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1605);
+var global = __webpack_require__(200);
+var anInstance = __webpack_require__(5190);
+var isCallable = __webpack_require__(8420);
+var createNonEnumerableProperty = __webpack_require__(7712);
+var fails = __webpack_require__(2074);
+var hasOwn = __webpack_require__(6490);
+var wellKnownSymbol = __webpack_require__(1602);
+var IteratorPrototype = (__webpack_require__(9306).IteratorPrototype);
+var IS_PURE = __webpack_require__(6926);
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+
+var NativeIterator = global.Iterator;
+
+// FF56- have non-standard global helper `Iterator`
+var FORCED = IS_PURE
+  || !isCallable(NativeIterator)
+  || NativeIterator.prototype !== IteratorPrototype
+  // FF44- non-standard `Iterator` passes previous tests
+  || !fails(function () { NativeIterator({}); });
+
+var IteratorConstructor = function Iterator() {
+  anInstance(this, IteratorPrototype);
+};
+
+if (!hasOwn(IteratorPrototype, TO_STRING_TAG)) {
+  createNonEnumerableProperty(IteratorPrototype, TO_STRING_TAG, 'Iterator');
+}
+
+if (FORCED || !hasOwn(IteratorPrototype, 'constructor') || IteratorPrototype.constructor === Object) {
+  createNonEnumerableProperty(IteratorPrototype, 'constructor', IteratorConstructor);
+}
+
+IteratorConstructor.prototype = IteratorPrototype;
+
+// `Iterator` constructor
+// https://github.com/tc39/proposal-iterator-helpers
+$({ global: true, constructor: true, forced: FORCED }, {
+  Iterator: IteratorConstructor
+});
+
+
+/***/ }),
+
+/***/ 5019:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1605);
+var call = __webpack_require__(2368);
+var aCallable = __webpack_require__(4601);
+var anObject = __webpack_require__(3938);
+var getIteratorDirect = __webpack_require__(938);
+var createIteratorProxy = __webpack_require__(1523);
+var callWithSafeIterationClosing = __webpack_require__(1332);
+
+var IteratorProxy = createIteratorProxy(function () {
+  var iterator = this.iterator;
+  var predicate = this.predicate;
+  var next = this.next;
+  var result, done, value;
+  while (true) {
+    result = anObject(call(next, iterator));
+    done = this.done = !!result.done;
+    if (done) return;
+    value = result.value;
+    if (callWithSafeIterationClosing(iterator, predicate, [value, this.counter++], true)) return value;
+  }
+});
+
+// `Iterator.prototype.filter` method
+// https://github.com/tc39/proposal-iterator-helpers
+$({ target: 'Iterator', proto: true, real: true }, {
+  filter: function filter(predicate) {
+    anObject(this);
+    aCallable(predicate);
+    return new IteratorProxy(getIteratorDirect(this), {
+      predicate: predicate
+    });
+  }
+});
+
+
+/***/ }),
+
+/***/ 2598:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1605);
+var iterate = __webpack_require__(2929);
+var aCallable = __webpack_require__(4601);
+var anObject = __webpack_require__(3938);
+var getIteratorDirect = __webpack_require__(938);
+
+// `Iterator.prototype.find` method
+// https://github.com/tc39/proposal-iterator-helpers
+$({ target: 'Iterator', proto: true, real: true }, {
+  find: function find(predicate) {
+    anObject(this);
+    aCallable(predicate);
+    var record = getIteratorDirect(this);
+    var counter = 0;
+    return iterate(record, function (value, stop) {
+      if (predicate(value, counter++)) return stop(value);
+    }, { IS_RECORD: true, INTERRUPTED: true }).result;
+  }
+});
+
+
+/***/ }),
+
+/***/ 5337:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1605);
+var call = __webpack_require__(2368);
+var aCallable = __webpack_require__(4601);
+var anObject = __webpack_require__(3938);
+var getIteratorDirect = __webpack_require__(938);
+var getIteratorFlattenable = __webpack_require__(781);
+var createIteratorProxy = __webpack_require__(1523);
+var iteratorClose = __webpack_require__(9868);
+
+var IteratorProxy = createIteratorProxy(function () {
+  var iterator = this.iterator;
+  var mapper = this.mapper;
+  var result, inner;
+
+  while (true) {
+    if (inner = this.inner) try {
+      result = anObject(call(inner.next, inner.iterator));
+      if (!result.done) return result.value;
+      this.inner = null;
+    } catch (error) { iteratorClose(iterator, 'throw', error); }
+
+    result = anObject(call(this.next, iterator));
+
+    if (this.done = !!result.done) return;
+
+    try {
+      this.inner = getIteratorFlattenable(mapper(result.value, this.counter++));
+    } catch (error) { iteratorClose(iterator, 'throw', error); }
+  }
+});
+
+// `Iterator.prototype.flatMap` method
+// https://github.com/tc39/proposal-iterator-helpers
+$({ target: 'Iterator', proto: true, real: true }, {
+  flatMap: function flatMap(mapper) {
+    anObject(this);
+    aCallable(mapper);
+    return new IteratorProxy(getIteratorDirect(this), {
+      mapper: mapper,
+      inner: null
+    });
+  }
+});
+
+
+/***/ }),
+
+/***/ 9838:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1605);
+var iterate = __webpack_require__(2929);
+var aCallable = __webpack_require__(4601);
+var anObject = __webpack_require__(3938);
+var getIteratorDirect = __webpack_require__(938);
+
+// `Iterator.prototype.forEach` method
+// https://github.com/tc39/proposal-iterator-helpers
+$({ target: 'Iterator', proto: true, real: true }, {
+  forEach: function forEach(fn) {
+    anObject(this);
+    aCallable(fn);
+    var record = getIteratorDirect(this);
+    var counter = 0;
+    iterate(record, function (value) {
+      fn(value, counter++);
+    }, { IS_RECORD: true });
+  }
+});
+
+
+/***/ }),
+
+/***/ 1339:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+var $ = __webpack_require__(1605);
+var map = __webpack_require__(8318);
+
+// `Iterator.prototype.map` method
+// https://github.com/tc39/proposal-iterator-helpers
+$({ target: 'Iterator', proto: true, real: true }, {
+  map: map
+});
+
+
+/***/ }),
+
+/***/ 9471:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1605);
+var iterate = __webpack_require__(2929);
+var aCallable = __webpack_require__(4601);
+var anObject = __webpack_require__(3938);
+var getIteratorDirect = __webpack_require__(938);
+
+var $TypeError = TypeError;
+
+// `Iterator.prototype.reduce` method
+// https://github.com/tc39/proposal-iterator-helpers
+$({ target: 'Iterator', proto: true, real: true }, {
+  reduce: function reduce(reducer /* , initialValue */) {
+    anObject(this);
+    aCallable(reducer);
+    var record = getIteratorDirect(this);
+    var noInitial = arguments.length < 2;
+    var accumulator = noInitial ? undefined : arguments[1];
+    var counter = 0;
+    iterate(record, function (value) {
+      if (noInitial) {
+        noInitial = false;
+        accumulator = value;
+      } else {
+        accumulator = reducer(accumulator, value, counter);
+      }
+      counter++;
+    }, { IS_RECORD: true });
+    if (noInitial) throw $TypeError('Reduce of empty iterator with no initial value');
+    return accumulator;
+  }
+});
+
+
+/***/ }),
+
+/***/ 9229:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(1605);
+var iterate = __webpack_require__(2929);
+var aCallable = __webpack_require__(4601);
+var anObject = __webpack_require__(3938);
+var getIteratorDirect = __webpack_require__(938);
+
+// `Iterator.prototype.some` method
+// https://github.com/tc39/proposal-iterator-helpers
+$({ target: 'Iterator', proto: true, real: true }, {
+  some: function some(predicate) {
+    anObject(this);
+    aCallable(predicate);
+    var record = getIteratorDirect(this);
+    var counter = 0;
+    return iterate(record, function (value, stop) {
+      if (predicate(value, counter++)) return stop();
+    }, { IS_RECORD: true, INTERRUPTED: true }).stopped;
+  }
+});
+
+
+/***/ }),
+
+/***/ 292:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+var $ = __webpack_require__(1605);
+var difference = __webpack_require__(5643);
+var setMethodAcceptSetLike = __webpack_require__(8223);
+
+// `Set.prototype.difference` method
+// https://github.com/tc39/proposal-set-methods
+$({ target: 'Set', proto: true, real: true, forced: !setMethodAcceptSetLike('difference') }, {
+  difference: difference
+});
+
+
+/***/ }),
+
+/***/ 9074:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+var $ = __webpack_require__(1605);
+var fails = __webpack_require__(2074);
+var intersection = __webpack_require__(9697);
+var setMethodAcceptSetLike = __webpack_require__(8223);
+
+var INCORRECT = !setMethodAcceptSetLike('intersection') || fails(function () {
+  // eslint-disable-next-line es/no-array-from, es/no-set -- testing
+  return Array.from(new Set([1, 2, 3]).intersection(new Set([3, 2]))) != '3,2';
+});
+
+// `Set.prototype.intersection` method
+// https://github.com/tc39/proposal-set-methods
+$({ target: 'Set', proto: true, real: true, forced: INCORRECT }, {
+  intersection: intersection
+});
+
+
+/***/ }),
+
+/***/ 11:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+var $ = __webpack_require__(1605);
+var isDisjointFrom = __webpack_require__(8194);
+var setMethodAcceptSetLike = __webpack_require__(8223);
+
+// `Set.prototype.isDisjointFrom` method
+// https://github.com/tc39/proposal-set-methods
+$({ target: 'Set', proto: true, real: true, forced: !setMethodAcceptSetLike('isDisjointFrom') }, {
+  isDisjointFrom: isDisjointFrom
+});
+
+
+/***/ }),
+
+/***/ 2818:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+var $ = __webpack_require__(1605);
+var isSubsetOf = __webpack_require__(3601);
+var setMethodAcceptSetLike = __webpack_require__(8223);
+
+// `Set.prototype.isSubsetOf` method
+// https://github.com/tc39/proposal-set-methods
+$({ target: 'Set', proto: true, real: true, forced: !setMethodAcceptSetLike('isSubsetOf') }, {
+  isSubsetOf: isSubsetOf
+});
+
+
+/***/ }),
+
+/***/ 2289:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+var $ = __webpack_require__(1605);
+var isSupersetOf = __webpack_require__(3632);
+var setMethodAcceptSetLike = __webpack_require__(8223);
+
+// `Set.prototype.isSupersetOf` method
+// https://github.com/tc39/proposal-set-methods
+$({ target: 'Set', proto: true, real: true, forced: !setMethodAcceptSetLike('isSupersetOf') }, {
+  isSupersetOf: isSupersetOf
+});
+
+
+/***/ }),
+
+/***/ 4694:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+var $ = __webpack_require__(1605);
+var symmetricDifference = __webpack_require__(4753);
+var setMethodAcceptSetLike = __webpack_require__(8223);
+
+// `Set.prototype.symmetricDifference` method
+// https://github.com/tc39/proposal-set-methods
+$({ target: 'Set', proto: true, real: true, forced: !setMethodAcceptSetLike('symmetricDifference') }, {
+  symmetricDifference: symmetricDifference
+});
+
+
+/***/ }),
+
+/***/ 1784:
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+var $ = __webpack_require__(1605);
+var union = __webpack_require__(1869);
+var setMethodAcceptSetLike = __webpack_require__(8223);
+
+// `Set.prototype.union` method
+// https://github.com/tc39/proposal-set-methods
+$({ target: 'Set', proto: true, real: true, forced: !setMethodAcceptSetLike('union') }, {
+  union: union
+});
+
+
+/***/ }),
+
+/***/ 9389:
 /***/ (function(__unused_webpack_module, exports) {
 
 /*
@@ -4241,7 +5816,7 @@ $({ target: 'Array', proto: true, arity: 1, forced: FORCED }, {
 
 /***/ }),
 
-/***/ 5243:
+/***/ 3481:
 /***/ (function(__unused_webpack_module, exports) {
 
 /* @preserve
@@ -18696,7 +20271,7 @@ $({ target: 'Array', proto: true, arity: 1, forced: FORCED }, {
 
 /***/ }),
 
-/***/ 3744:
+/***/ 6262:
 /***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
@@ -18705,7 +20280,7 @@ var __webpack_unused_export__;
 __webpack_unused_export__ = ({ value: true });
 // runtime helper for setting properties on components
 // in a tree-shakable way
-exports.Z = (sfc, props) => {
+exports.A = (sfc, props) => {
     const target = sfc.__vccOpts || sfc;
     for (const [key, val] of props) {
         target[key] = val;
@@ -18790,7 +20365,7 @@ exports.Z = (sfc, props) => {
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+// This entry needs to be wrapped in an IIFE because it needs to be in strict mode.
 !function() {
 "use strict";
 // ESM COMPAT FLAG
@@ -18798,600 +20373,601 @@ __webpack_require__.r(__webpack_exports__);
 
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, {
-  "createDashboardEditorApp": function() { return /* reexport */ createDashboardEditorApp; },
-  "createDashboardListApp": function() { return /* reexport */ createDashboardListApp; },
-  "createDashboardViewerApp": function() { return /* reexport */ createDashboardViewerApp; }
+  createDashboardEditorApp: function() { return /* reexport */ createDashboardEditorApp; },
+  createDashboardListApp: function() { return /* reexport */ createDashboardListApp; },
+  createDashboardViewerApp: function() { return /* reexport */ createDashboardViewerApp; }
 });
 
 // NAMESPACE OBJECT: ./node_modules/d3/src/index.js
 var d3_src_namespaceObject = {};
 __webpack_require__.r(d3_src_namespaceObject);
 __webpack_require__.d(d3_src_namespaceObject, {
-  "Adder": function() { return Adder; },
-  "Delaunay": function() { return Delaunay; },
-  "FormatSpecifier": function() { return FormatSpecifier; },
-  "InternMap": function() { return InternMap; },
-  "InternSet": function() { return InternSet; },
-  "Node": function() { return hierarchy_Node; },
-  "Path": function() { return Path; },
-  "Voronoi": function() { return Voronoi; },
-  "ZoomTransform": function() { return Transform; },
-  "active": function() { return active; },
-  "arc": function() { return src_arc; },
-  "area": function() { return d3_shape_src_area; },
-  "areaRadial": function() { return areaRadial; },
-  "ascending": function() { return ascending; },
-  "autoType": function() { return autoType; },
-  "axisBottom": function() { return axisBottom; },
-  "axisLeft": function() { return axisLeft; },
-  "axisRight": function() { return axisRight; },
-  "axisTop": function() { return axisTop; },
-  "bin": function() { return bin; },
-  "bisect": function() { return bisect; },
-  "bisectCenter": function() { return bisectCenter; },
-  "bisectLeft": function() { return bisectLeft; },
-  "bisectRight": function() { return bisectRight; },
-  "bisector": function() { return bisector; },
-  "blob": function() { return blob; },
-  "blur": function() { return blur_blur; },
-  "blur2": function() { return blur2; },
-  "blurImage": function() { return blurImage; },
-  "brush": function() { return brush; },
-  "brushSelection": function() { return brushSelection; },
-  "brushX": function() { return brushX; },
-  "brushY": function() { return brushY; },
-  "buffer": function() { return src_buffer; },
-  "chord": function() { return chord; },
-  "chordDirected": function() { return chordDirected; },
-  "chordTranspose": function() { return chordTranspose; },
-  "cluster": function() { return cluster; },
-  "color": function() { return color; },
-  "contourDensity": function() { return density; },
-  "contours": function() { return src_contours; },
-  "count": function() { return count; },
-  "create": function() { return src_create; },
-  "creator": function() { return creator; },
-  "cross": function() { return cross; },
-  "csv": function() { return dsv_csv; },
-  "csvFormat": function() { return csvFormat; },
-  "csvFormatBody": function() { return csvFormatBody; },
-  "csvFormatRow": function() { return csvFormatRow; },
-  "csvFormatRows": function() { return csvFormatRows; },
-  "csvFormatValue": function() { return csvFormatValue; },
-  "csvParse": function() { return csvParse; },
-  "csvParseRows": function() { return csvParseRows; },
-  "cubehelix": function() { return cubehelix_cubehelix; },
-  "cumsum": function() { return cumsum; },
-  "curveBasis": function() { return curve_basis; },
-  "curveBasisClosed": function() { return curve_basisClosed; },
-  "curveBasisOpen": function() { return basisOpen; },
-  "curveBumpX": function() { return bumpX; },
-  "curveBumpY": function() { return bumpY; },
-  "curveBundle": function() { return bundle; },
-  "curveCardinal": function() { return cardinal; },
-  "curveCardinalClosed": function() { return cardinalClosed; },
-  "curveCardinalOpen": function() { return cardinalOpen; },
-  "curveCatmullRom": function() { return catmullRom; },
-  "curveCatmullRomClosed": function() { return catmullRomClosed; },
-  "curveCatmullRomOpen": function() { return catmullRomOpen; },
-  "curveLinear": function() { return curve_linear; },
-  "curveLinearClosed": function() { return linearClosed; },
-  "curveMonotoneX": function() { return monotoneX; },
-  "curveMonotoneY": function() { return monotoneY; },
-  "curveNatural": function() { return natural; },
-  "curveStep": function() { return step; },
-  "curveStepAfter": function() { return stepAfter; },
-  "curveStepBefore": function() { return stepBefore; },
-  "descending": function() { return descending; },
-  "deviation": function() { return deviation; },
-  "difference": function() { return difference; },
-  "disjoint": function() { return disjoint; },
-  "dispatch": function() { return src_dispatch; },
-  "drag": function() { return drag; },
-  "dragDisable": function() { return nodrag; },
-  "dragEnable": function() { return yesdrag; },
-  "dsv": function() { return dsv_dsv; },
-  "dsvFormat": function() { return dsv; },
-  "easeBack": function() { return backInOut; },
-  "easeBackIn": function() { return backIn; },
-  "easeBackInOut": function() { return backInOut; },
-  "easeBackOut": function() { return backOut; },
-  "easeBounce": function() { return bounceOut; },
-  "easeBounceIn": function() { return bounceIn; },
-  "easeBounceInOut": function() { return bounceInOut; },
-  "easeBounceOut": function() { return bounceOut; },
-  "easeCircle": function() { return circleInOut; },
-  "easeCircleIn": function() { return circleIn; },
-  "easeCircleInOut": function() { return circleInOut; },
-  "easeCircleOut": function() { return circleOut; },
-  "easeCubic": function() { return cubicInOut; },
-  "easeCubicIn": function() { return cubicIn; },
-  "easeCubicInOut": function() { return cubicInOut; },
-  "easeCubicOut": function() { return cubicOut; },
-  "easeElastic": function() { return elasticOut; },
-  "easeElasticIn": function() { return elasticIn; },
-  "easeElasticInOut": function() { return elasticInOut; },
-  "easeElasticOut": function() { return elasticOut; },
-  "easeExp": function() { return expInOut; },
-  "easeExpIn": function() { return expIn; },
-  "easeExpInOut": function() { return expInOut; },
-  "easeExpOut": function() { return expOut; },
-  "easeLinear": function() { return linear_linear; },
-  "easePoly": function() { return polyInOut; },
-  "easePolyIn": function() { return polyIn; },
-  "easePolyInOut": function() { return polyInOut; },
-  "easePolyOut": function() { return polyOut; },
-  "easeQuad": function() { return quadInOut; },
-  "easeQuadIn": function() { return quadIn; },
-  "easeQuadInOut": function() { return quadInOut; },
-  "easeQuadOut": function() { return quadOut; },
-  "easeSin": function() { return sinInOut; },
-  "easeSinIn": function() { return sinIn; },
-  "easeSinInOut": function() { return sinInOut; },
-  "easeSinOut": function() { return sinOut; },
-  "every": function() { return every; },
-  "extent": function() { return extent; },
-  "fcumsum": function() { return fcumsum; },
-  "filter": function() { return filter; },
-  "flatGroup": function() { return flatGroup; },
-  "flatRollup": function() { return flatRollup; },
-  "forceCenter": function() { return src_center; },
-  "forceCollide": function() { return collide; },
-  "forceLink": function() { return src_link; },
-  "forceManyBody": function() { return manyBody; },
-  "forceRadial": function() { return radial; },
-  "forceSimulation": function() { return src_simulation; },
-  "forceX": function() { return src_x; },
-  "forceY": function() { return src_y; },
-  "format": function() { return defaultLocale_format; },
-  "formatDefaultLocale": function() { return defaultLocale; },
-  "formatLocale": function() { return locale; },
-  "formatPrefix": function() { return formatPrefix; },
-  "formatSpecifier": function() { return formatSpecifier; },
-  "fsum": function() { return fsum; },
-  "geoAlbers": function() { return albers; },
-  "geoAlbersUsa": function() { return albersUsa; },
-  "geoArea": function() { return d3_geo_src_area; },
-  "geoAzimuthalEqualArea": function() { return azimuthalEqualArea; },
-  "geoAzimuthalEqualAreaRaw": function() { return azimuthalEqualAreaRaw; },
-  "geoAzimuthalEquidistant": function() { return azimuthalEquidistant; },
-  "geoAzimuthalEquidistantRaw": function() { return azimuthalEquidistantRaw; },
-  "geoBounds": function() { return bounds; },
-  "geoCentroid": function() { return centroid; },
-  "geoCircle": function() { return circle; },
-  "geoClipAntimeridian": function() { return antimeridian; },
-  "geoClipCircle": function() { return clip_circle; },
-  "geoClipExtent": function() { return clip_extent; },
-  "geoClipRectangle": function() { return clipRectangle; },
-  "geoConicConformal": function() { return conicConformal; },
-  "geoConicConformalRaw": function() { return conicConformalRaw; },
-  "geoConicEqualArea": function() { return conicEqualArea; },
-  "geoConicEqualAreaRaw": function() { return conicEqualAreaRaw; },
-  "geoConicEquidistant": function() { return conicEquidistant; },
-  "geoConicEquidistantRaw": function() { return conicEquidistantRaw; },
-  "geoContains": function() { return src_contains; },
-  "geoDistance": function() { return distance; },
-  "geoEqualEarth": function() { return equalEarth; },
-  "geoEqualEarthRaw": function() { return equalEarthRaw; },
-  "geoEquirectangular": function() { return equirectangular; },
-  "geoEquirectangularRaw": function() { return equirectangularRaw; },
-  "geoGnomonic": function() { return gnomonic; },
-  "geoGnomonicRaw": function() { return gnomonicRaw; },
-  "geoGraticule": function() { return graticule; },
-  "geoGraticule10": function() { return graticule10; },
-  "geoIdentity": function() { return projection_identity; },
-  "geoInterpolate": function() { return src_interpolate; },
-  "geoLength": function() { return src_length; },
-  "geoMercator": function() { return mercator; },
-  "geoMercatorRaw": function() { return mercatorRaw; },
-  "geoNaturalEarth1": function() { return naturalEarth1; },
-  "geoNaturalEarth1Raw": function() { return naturalEarth1Raw; },
-  "geoOrthographic": function() { return orthographic; },
-  "geoOrthographicRaw": function() { return orthographicRaw; },
-  "geoPath": function() { return src_path; },
-  "geoProjection": function() { return projection; },
-  "geoProjectionMutator": function() { return projectionMutator; },
-  "geoRotation": function() { return rotation; },
-  "geoStereographic": function() { return stereographic; },
-  "geoStereographicRaw": function() { return stereographicRaw; },
-  "geoStream": function() { return stream; },
-  "geoTransform": function() { return src_transform; },
-  "geoTransverseMercator": function() { return transverseMercator; },
-  "geoTransverseMercatorRaw": function() { return transverseMercatorRaw; },
-  "gray": function() { return gray; },
-  "greatest": function() { return greatest; },
-  "greatestIndex": function() { return greatestIndex; },
-  "group": function() { return group; },
-  "groupSort": function() { return groupSort; },
-  "groups": function() { return groups; },
-  "hcl": function() { return hcl; },
-  "hierarchy": function() { return hierarchy; },
-  "histogram": function() { return bin; },
-  "hsl": function() { return hsl; },
-  "html": function() { return xml_html; },
-  "image": function() { return src_image; },
-  "index": function() { return index; },
-  "indexes": function() { return indexes; },
-  "interpolate": function() { return value; },
-  "interpolateArray": function() { return src_array; },
-  "interpolateBasis": function() { return src_basis; },
-  "interpolateBasisClosed": function() { return basisClosed; },
-  "interpolateBlues": function() { return Blues; },
-  "interpolateBrBG": function() { return BrBG; },
-  "interpolateBuGn": function() { return BuGn; },
-  "interpolateBuPu": function() { return BuPu; },
-  "interpolateCividis": function() { return cividis; },
-  "interpolateCool": function() { return cool; },
-  "interpolateCubehelix": function() { return src_cubehelix; },
-  "interpolateCubehelixDefault": function() { return sequential_multi_cubehelix; },
-  "interpolateCubehelixLong": function() { return cubehelixLong; },
-  "interpolateDate": function() { return date; },
-  "interpolateDiscrete": function() { return discrete; },
-  "interpolateGnBu": function() { return GnBu; },
-  "interpolateGreens": function() { return Greens; },
-  "interpolateGreys": function() { return Greys; },
-  "interpolateHcl": function() { return src_hcl; },
-  "interpolateHclLong": function() { return hclLong; },
-  "interpolateHsl": function() { return src_hsl; },
-  "interpolateHslLong": function() { return hslLong; },
-  "interpolateHue": function() { return src_hue; },
-  "interpolateInferno": function() { return inferno; },
-  "interpolateLab": function() { return lab_lab; },
-  "interpolateMagma": function() { return magma; },
-  "interpolateNumber": function() { return src_number; },
-  "interpolateNumberArray": function() { return numberArray; },
-  "interpolateObject": function() { return object; },
-  "interpolateOrRd": function() { return OrRd; },
-  "interpolateOranges": function() { return Oranges; },
-  "interpolatePRGn": function() { return PRGn; },
-  "interpolatePiYG": function() { return PiYG; },
-  "interpolatePlasma": function() { return plasma; },
-  "interpolatePuBu": function() { return PuBu; },
-  "interpolatePuBuGn": function() { return PuBuGn; },
-  "interpolatePuOr": function() { return PuOr; },
-  "interpolatePuRd": function() { return PuRd; },
-  "interpolatePurples": function() { return Purples; },
-  "interpolateRainbow": function() { return rainbow; },
-  "interpolateRdBu": function() { return RdBu; },
-  "interpolateRdGy": function() { return RdGy; },
-  "interpolateRdPu": function() { return RdPu; },
-  "interpolateRdYlBu": function() { return RdYlBu; },
-  "interpolateRdYlGn": function() { return RdYlGn; },
-  "interpolateReds": function() { return Reds; },
-  "interpolateRgb": function() { return rgb; },
-  "interpolateRgbBasis": function() { return rgbBasis; },
-  "interpolateRgbBasisClosed": function() { return rgbBasisClosed; },
-  "interpolateRound": function() { return src_round; },
-  "interpolateSinebow": function() { return sinebow; },
-  "interpolateSpectral": function() { return Spectral; },
-  "interpolateString": function() { return string; },
-  "interpolateTransformCss": function() { return interpolateTransformCss; },
-  "interpolateTransformSvg": function() { return interpolateTransformSvg; },
-  "interpolateTurbo": function() { return turbo; },
-  "interpolateViridis": function() { return viridis; },
-  "interpolateWarm": function() { return warm; },
-  "interpolateYlGn": function() { return YlGn; },
-  "interpolateYlGnBu": function() { return YlGnBu; },
-  "interpolateYlOrBr": function() { return YlOrBr; },
-  "interpolateYlOrRd": function() { return YlOrRd; },
-  "interpolateZoom": function() { return src_zoom; },
-  "interrupt": function() { return interrupt; },
-  "intersection": function() { return intersection; },
-  "interval": function() { return src_interval; },
-  "isoFormat": function() { return isoFormat; },
-  "isoParse": function() { return isoParse; },
-  "json": function() { return json; },
-  "lab": function() { return lab; },
-  "lch": function() { return lch; },
-  "least": function() { return least; },
-  "leastIndex": function() { return leastIndex; },
-  "line": function() { return src_line; },
-  "lineRadial": function() { return src_lineRadial; },
-  "link": function() { return link_link; },
-  "linkHorizontal": function() { return linkHorizontal; },
-  "linkRadial": function() { return linkRadial; },
-  "linkVertical": function() { return linkVertical; },
-  "local": function() { return local_local; },
-  "map": function() { return map_map; },
-  "matcher": function() { return matcher; },
-  "max": function() { return max; },
-  "maxIndex": function() { return maxIndex; },
-  "mean": function() { return mean; },
-  "median": function() { return median; },
-  "medianIndex": function() { return medianIndex; },
-  "merge": function() { return merge; },
-  "min": function() { return min; },
-  "minIndex": function() { return minIndex; },
-  "mode": function() { return mode; },
-  "namespace": function() { return namespace; },
-  "namespaces": function() { return namespaces; },
-  "nice": function() { return nice; },
-  "now": function() { return now; },
-  "pack": function() { return pack; },
-  "packEnclose": function() { return enclose; },
-  "packSiblings": function() { return siblings; },
-  "pairs": function() { return pairs; },
-  "partition": function() { return partition; },
-  "path": function() { return path; },
-  "pathRound": function() { return pathRound; },
-  "permute": function() { return permute; },
-  "pie": function() { return pie; },
-  "piecewise": function() { return piecewise; },
-  "pointRadial": function() { return pointRadial; },
-  "pointer": function() { return pointer; },
-  "pointers": function() { return pointers; },
-  "polygonArea": function() { return d3_polygon_src_area; },
-  "polygonCentroid": function() { return src_centroid; },
-  "polygonContains": function() { return d3_polygon_src_contains; },
-  "polygonHull": function() { return hull; },
-  "polygonLength": function() { return d3_polygon_src_length; },
-  "precisionFixed": function() { return precisionFixed; },
-  "precisionPrefix": function() { return precisionPrefix; },
-  "precisionRound": function() { return precisionRound; },
-  "quadtree": function() { return quadtree; },
-  "quantile": function() { return quantile; },
-  "quantileIndex": function() { return quantileIndex; },
-  "quantileSorted": function() { return quantileSorted; },
-  "quantize": function() { return quantize; },
-  "quickselect": function() { return quickselect; },
-  "radialArea": function() { return areaRadial; },
-  "radialLine": function() { return src_lineRadial; },
-  "randomBates": function() { return bates; },
-  "randomBernoulli": function() { return bernoulli; },
-  "randomBeta": function() { return beta; },
-  "randomBinomial": function() { return binomial; },
-  "randomCauchy": function() { return cauchy; },
-  "randomExponential": function() { return src_exponential; },
-  "randomGamma": function() { return src_gamma; },
-  "randomGeometric": function() { return geometric; },
-  "randomInt": function() { return src_int; },
-  "randomIrwinHall": function() { return irwinHall; },
-  "randomLcg": function() { return lcg_lcg; },
-  "randomLogNormal": function() { return logNormal; },
-  "randomLogistic": function() { return logistic; },
-  "randomNormal": function() { return normal; },
-  "randomPareto": function() { return pareto; },
-  "randomPoisson": function() { return poisson; },
-  "randomUniform": function() { return uniform; },
-  "randomWeibull": function() { return weibull; },
-  "range": function() { return range_range; },
-  "rank": function() { return rank; },
-  "reduce": function() { return reduce; },
-  "reverse": function() { return reverse_reverse; },
-  "rgb": function() { return color_rgb; },
-  "ribbon": function() { return src_ribbon; },
-  "ribbonArrow": function() { return ribbonArrow; },
-  "rollup": function() { return rollup; },
-  "rollups": function() { return rollups; },
-  "scaleBand": function() { return band; },
-  "scaleDiverging": function() { return diverging; },
-  "scaleDivergingLog": function() { return divergingLog; },
-  "scaleDivergingPow": function() { return divergingPow; },
-  "scaleDivergingSqrt": function() { return divergingSqrt; },
-  "scaleDivergingSymlog": function() { return divergingSymlog; },
-  "scaleIdentity": function() { return src_identity_identity; },
-  "scaleImplicit": function() { return implicit; },
-  "scaleLinear": function() { return src_linear_linear; },
-  "scaleLog": function() { return log_log; },
-  "scaleOrdinal": function() { return ordinal; },
-  "scalePoint": function() { return point; },
-  "scalePow": function() { return pow_pow; },
-  "scaleQuantile": function() { return quantile_quantile; },
-  "scaleQuantize": function() { return quantize_quantize; },
-  "scaleRadial": function() { return radial_radial; },
-  "scaleSequential": function() { return sequential; },
-  "scaleSequentialLog": function() { return sequentialLog; },
-  "scaleSequentialPow": function() { return sequentialPow; },
-  "scaleSequentialQuantile": function() { return sequentialQuantile; },
-  "scaleSequentialSqrt": function() { return sequentialSqrt; },
-  "scaleSequentialSymlog": function() { return sequentialSymlog; },
-  "scaleSqrt": function() { return pow_sqrt; },
-  "scaleSymlog": function() { return symlog; },
-  "scaleThreshold": function() { return threshold; },
-  "scaleTime": function() { return time; },
-  "scaleUtc": function() { return utcTime; },
-  "scan": function() { return scan; },
-  "schemeAccent": function() { return Accent; },
-  "schemeBlues": function() { return Blues_scheme; },
-  "schemeBrBG": function() { return scheme; },
-  "schemeBuGn": function() { return BuGn_scheme; },
-  "schemeBuPu": function() { return BuPu_scheme; },
-  "schemeCategory10": function() { return category10; },
-  "schemeDark2": function() { return Dark2; },
-  "schemeGnBu": function() { return GnBu_scheme; },
-  "schemeGreens": function() { return Greens_scheme; },
-  "schemeGreys": function() { return Greys_scheme; },
-  "schemeOrRd": function() { return OrRd_scheme; },
-  "schemeOranges": function() { return Oranges_scheme; },
-  "schemePRGn": function() { return PRGn_scheme; },
-  "schemePaired": function() { return Paired; },
-  "schemePastel1": function() { return Pastel1; },
-  "schemePastel2": function() { return Pastel2; },
-  "schemePiYG": function() { return PiYG_scheme; },
-  "schemePuBu": function() { return PuBu_scheme; },
-  "schemePuBuGn": function() { return PuBuGn_scheme; },
-  "schemePuOr": function() { return PuOr_scheme; },
-  "schemePuRd": function() { return PuRd_scheme; },
-  "schemePurples": function() { return Purples_scheme; },
-  "schemeRdBu": function() { return RdBu_scheme; },
-  "schemeRdGy": function() { return RdGy_scheme; },
-  "schemeRdPu": function() { return RdPu_scheme; },
-  "schemeRdYlBu": function() { return RdYlBu_scheme; },
-  "schemeRdYlGn": function() { return RdYlGn_scheme; },
-  "schemeReds": function() { return Reds_scheme; },
-  "schemeSet1": function() { return Set1; },
-  "schemeSet2": function() { return Set2; },
-  "schemeSet3": function() { return Set3; },
-  "schemeSpectral": function() { return Spectral_scheme; },
-  "schemeTableau10": function() { return Tableau10; },
-  "schemeYlGn": function() { return YlGn_scheme; },
-  "schemeYlGnBu": function() { return YlGnBu_scheme; },
-  "schemeYlOrBr": function() { return YlOrBr_scheme; },
-  "schemeYlOrRd": function() { return YlOrRd_scheme; },
-  "select": function() { return src_select; },
-  "selectAll": function() { return src_selectAll; },
-  "selection": function() { return src_selection; },
-  "selector": function() { return selector; },
-  "selectorAll": function() { return selectorAll; },
-  "shuffle": function() { return shuffle; },
-  "shuffler": function() { return shuffler; },
-  "some": function() { return some; },
-  "sort": function() { return sort_sort; },
-  "stack": function() { return src_stack; },
-  "stackOffsetDiverging": function() { return offset_diverging; },
-  "stackOffsetExpand": function() { return expand; },
-  "stackOffsetNone": function() { return offset_none; },
-  "stackOffsetSilhouette": function() { return silhouette; },
-  "stackOffsetWiggle": function() { return wiggle; },
-  "stackOrderAppearance": function() { return appearance; },
-  "stackOrderAscending": function() { return order_ascending; },
-  "stackOrderDescending": function() { return order_descending; },
-  "stackOrderInsideOut": function() { return insideOut; },
-  "stackOrderNone": function() { return order_none; },
-  "stackOrderReverse": function() { return reverse; },
-  "stratify": function() { return stratify; },
-  "style": function() { return style_styleValue; },
-  "subset": function() { return subset; },
-  "sum": function() { return sum_sum; },
-  "superset": function() { return superset; },
-  "svg": function() { return svg; },
-  "symbol": function() { return symbol_Symbol; },
-  "symbolAsterisk": function() { return asterisk; },
-  "symbolCircle": function() { return symbol_circle; },
-  "symbolCross": function() { return symbol_cross; },
-  "symbolDiamond": function() { return diamond; },
-  "symbolDiamond2": function() { return diamond2; },
-  "symbolPlus": function() { return plus; },
-  "symbolSquare": function() { return symbol_square; },
-  "symbolSquare2": function() { return square2; },
-  "symbolStar": function() { return star; },
-  "symbolTimes": function() { return times; },
-  "symbolTriangle": function() { return triangle; },
-  "symbolTriangle2": function() { return triangle2; },
-  "symbolWye": function() { return wye; },
-  "symbolX": function() { return times; },
-  "symbols": function() { return symbolsFill; },
-  "symbolsFill": function() { return symbolsFill; },
-  "symbolsStroke": function() { return symbolsStroke; },
-  "text": function() { return src_text; },
-  "thresholdFreedmanDiaconis": function() { return thresholdFreedmanDiaconis; },
-  "thresholdScott": function() { return thresholdScott; },
-  "thresholdSturges": function() { return thresholdSturges; },
-  "tickFormat": function() { return tickFormat; },
-  "tickIncrement": function() { return tickIncrement; },
-  "tickStep": function() { return tickStep; },
-  "ticks": function() { return ticks; },
-  "timeDay": function() { return timeDay; },
-  "timeDays": function() { return timeDays; },
-  "timeFormat": function() { return timeFormat; },
-  "timeFormatDefaultLocale": function() { return defaultLocale_defaultLocale; },
-  "timeFormatLocale": function() { return formatLocale; },
-  "timeFriday": function() { return timeFriday; },
-  "timeFridays": function() { return timeFridays; },
-  "timeHour": function() { return timeHour; },
-  "timeHours": function() { return timeHours; },
-  "timeInterval": function() { return timeInterval; },
-  "timeMillisecond": function() { return millisecond; },
-  "timeMilliseconds": function() { return milliseconds; },
-  "timeMinute": function() { return timeMinute; },
-  "timeMinutes": function() { return timeMinutes; },
-  "timeMonday": function() { return timeMonday; },
-  "timeMondays": function() { return timeMondays; },
-  "timeMonth": function() { return timeMonth; },
-  "timeMonths": function() { return timeMonths; },
-  "timeParse": function() { return timeParse; },
-  "timeSaturday": function() { return timeSaturday; },
-  "timeSaturdays": function() { return timeSaturdays; },
-  "timeSecond": function() { return second; },
-  "timeSeconds": function() { return seconds; },
-  "timeSunday": function() { return timeSunday; },
-  "timeSundays": function() { return timeSundays; },
-  "timeThursday": function() { return timeThursday; },
-  "timeThursdays": function() { return timeThursdays; },
-  "timeTickInterval": function() { return timeTickInterval; },
-  "timeTicks": function() { return timeTicks; },
-  "timeTuesday": function() { return timeTuesday; },
-  "timeTuesdays": function() { return timeTuesdays; },
-  "timeWednesday": function() { return timeWednesday; },
-  "timeWednesdays": function() { return timeWednesdays; },
-  "timeWeek": function() { return timeSunday; },
-  "timeWeeks": function() { return timeSundays; },
-  "timeYear": function() { return timeYear; },
-  "timeYears": function() { return timeYears; },
-  "timeout": function() { return src_timeout; },
-  "timer": function() { return timer; },
-  "timerFlush": function() { return timerFlush; },
-  "transition": function() { return transition_transition; },
-  "transpose": function() { return transpose; },
-  "tree": function() { return tree; },
-  "treemap": function() { return treemap; },
-  "treemapBinary": function() { return binary; },
-  "treemapDice": function() { return dice; },
-  "treemapResquarify": function() { return resquarify; },
-  "treemapSlice": function() { return treemap_slice; },
-  "treemapSliceDice": function() { return sliceDice; },
-  "treemapSquarify": function() { return squarify; },
-  "tsv": function() { return dsv_tsv; },
-  "tsvFormat": function() { return tsvFormat; },
-  "tsvFormatBody": function() { return tsvFormatBody; },
-  "tsvFormatRow": function() { return tsvFormatRow; },
-  "tsvFormatRows": function() { return tsvFormatRows; },
-  "tsvFormatValue": function() { return tsvFormatValue; },
-  "tsvParse": function() { return tsvParse; },
-  "tsvParseRows": function() { return tsvParseRows; },
-  "union": function() { return union; },
-  "unixDay": function() { return unixDay; },
-  "unixDays": function() { return unixDays; },
-  "utcDay": function() { return utcDay; },
-  "utcDays": function() { return utcDays; },
-  "utcFormat": function() { return utcFormat; },
-  "utcFriday": function() { return utcFriday; },
-  "utcFridays": function() { return utcFridays; },
-  "utcHour": function() { return utcHour; },
-  "utcHours": function() { return utcHours; },
-  "utcMillisecond": function() { return millisecond; },
-  "utcMilliseconds": function() { return milliseconds; },
-  "utcMinute": function() { return utcMinute; },
-  "utcMinutes": function() { return utcMinutes; },
-  "utcMonday": function() { return utcMonday; },
-  "utcMondays": function() { return utcMondays; },
-  "utcMonth": function() { return utcMonth; },
-  "utcMonths": function() { return utcMonths; },
-  "utcParse": function() { return utcParse; },
-  "utcSaturday": function() { return utcSaturday; },
-  "utcSaturdays": function() { return utcSaturdays; },
-  "utcSecond": function() { return second; },
-  "utcSeconds": function() { return seconds; },
-  "utcSunday": function() { return utcSunday; },
-  "utcSundays": function() { return utcSundays; },
-  "utcThursday": function() { return utcThursday; },
-  "utcThursdays": function() { return utcThursdays; },
-  "utcTickInterval": function() { return utcTickInterval; },
-  "utcTicks": function() { return utcTicks; },
-  "utcTuesday": function() { return utcTuesday; },
-  "utcTuesdays": function() { return utcTuesdays; },
-  "utcWednesday": function() { return utcWednesday; },
-  "utcWednesdays": function() { return utcWednesdays; },
-  "utcWeek": function() { return utcSunday; },
-  "utcWeeks": function() { return utcSundays; },
-  "utcYear": function() { return utcYear; },
-  "utcYears": function() { return utcYears; },
-  "variance": function() { return variance; },
-  "window": function() { return src_window; },
-  "xml": function() { return xml; },
-  "zip": function() { return zip; },
-  "zoom": function() { return zoom; },
-  "zoomIdentity": function() { return transform_identity; },
-  "zoomTransform": function() { return transform; }
+  Adder: function() { return Adder; },
+  Delaunay: function() { return Delaunay; },
+  FormatSpecifier: function() { return FormatSpecifier; },
+  InternMap: function() { return InternMap; },
+  InternSet: function() { return InternSet; },
+  Node: function() { return hierarchy_Node; },
+  Path: function() { return Path; },
+  Voronoi: function() { return Voronoi; },
+  ZoomTransform: function() { return Transform; },
+  active: function() { return active; },
+  arc: function() { return src_arc; },
+  area: function() { return d3_shape_src_area; },
+  areaRadial: function() { return areaRadial; },
+  ascending: function() { return ascending; },
+  autoType: function() { return autoType; },
+  axisBottom: function() { return axisBottom; },
+  axisLeft: function() { return axisLeft; },
+  axisRight: function() { return axisRight; },
+  axisTop: function() { return axisTop; },
+  bin: function() { return bin; },
+  bisect: function() { return bisect; },
+  bisectCenter: function() { return bisectCenter; },
+  bisectLeft: function() { return bisectLeft; },
+  bisectRight: function() { return bisectRight; },
+  bisector: function() { return bisector; },
+  blob: function() { return blob; },
+  blur: function() { return blur_blur; },
+  blur2: function() { return blur2; },
+  blurImage: function() { return blurImage; },
+  brush: function() { return brush; },
+  brushSelection: function() { return brushSelection; },
+  brushX: function() { return brushX; },
+  brushY: function() { return brushY; },
+  buffer: function() { return src_buffer; },
+  chord: function() { return chord; },
+  chordDirected: function() { return chordDirected; },
+  chordTranspose: function() { return chordTranspose; },
+  cluster: function() { return cluster; },
+  color: function() { return color; },
+  contourDensity: function() { return density; },
+  contours: function() { return src_contours; },
+  count: function() { return count; },
+  create: function() { return src_create; },
+  creator: function() { return creator; },
+  cross: function() { return cross; },
+  csv: function() { return dsv_csv; },
+  csvFormat: function() { return csvFormat; },
+  csvFormatBody: function() { return csvFormatBody; },
+  csvFormatRow: function() { return csvFormatRow; },
+  csvFormatRows: function() { return csvFormatRows; },
+  csvFormatValue: function() { return csvFormatValue; },
+  csvParse: function() { return csvParse; },
+  csvParseRows: function() { return csvParseRows; },
+  cubehelix: function() { return cubehelix_cubehelix; },
+  cumsum: function() { return cumsum; },
+  curveBasis: function() { return curve_basis; },
+  curveBasisClosed: function() { return curve_basisClosed; },
+  curveBasisOpen: function() { return basisOpen; },
+  curveBumpX: function() { return bumpX; },
+  curveBumpY: function() { return bumpY; },
+  curveBundle: function() { return bundle; },
+  curveCardinal: function() { return cardinal; },
+  curveCardinalClosed: function() { return cardinalClosed; },
+  curveCardinalOpen: function() { return cardinalOpen; },
+  curveCatmullRom: function() { return catmullRom; },
+  curveCatmullRomClosed: function() { return catmullRomClosed; },
+  curveCatmullRomOpen: function() { return catmullRomOpen; },
+  curveLinear: function() { return curve_linear; },
+  curveLinearClosed: function() { return linearClosed; },
+  curveMonotoneX: function() { return monotoneX; },
+  curveMonotoneY: function() { return monotoneY; },
+  curveNatural: function() { return natural; },
+  curveStep: function() { return step; },
+  curveStepAfter: function() { return stepAfter; },
+  curveStepBefore: function() { return stepBefore; },
+  descending: function() { return descending; },
+  deviation: function() { return deviation; },
+  difference: function() { return difference; },
+  disjoint: function() { return disjoint; },
+  dispatch: function() { return src_dispatch; },
+  drag: function() { return drag; },
+  dragDisable: function() { return nodrag; },
+  dragEnable: function() { return yesdrag; },
+  dsv: function() { return dsv_dsv; },
+  dsvFormat: function() { return dsv; },
+  easeBack: function() { return backInOut; },
+  easeBackIn: function() { return backIn; },
+  easeBackInOut: function() { return backInOut; },
+  easeBackOut: function() { return backOut; },
+  easeBounce: function() { return bounceOut; },
+  easeBounceIn: function() { return bounceIn; },
+  easeBounceInOut: function() { return bounceInOut; },
+  easeBounceOut: function() { return bounceOut; },
+  easeCircle: function() { return circleInOut; },
+  easeCircleIn: function() { return circleIn; },
+  easeCircleInOut: function() { return circleInOut; },
+  easeCircleOut: function() { return circleOut; },
+  easeCubic: function() { return cubicInOut; },
+  easeCubicIn: function() { return cubicIn; },
+  easeCubicInOut: function() { return cubicInOut; },
+  easeCubicOut: function() { return cubicOut; },
+  easeElastic: function() { return elasticOut; },
+  easeElasticIn: function() { return elasticIn; },
+  easeElasticInOut: function() { return elasticInOut; },
+  easeElasticOut: function() { return elasticOut; },
+  easeExp: function() { return expInOut; },
+  easeExpIn: function() { return expIn; },
+  easeExpInOut: function() { return expInOut; },
+  easeExpOut: function() { return expOut; },
+  easeLinear: function() { return linear_linear; },
+  easePoly: function() { return polyInOut; },
+  easePolyIn: function() { return polyIn; },
+  easePolyInOut: function() { return polyInOut; },
+  easePolyOut: function() { return polyOut; },
+  easeQuad: function() { return quadInOut; },
+  easeQuadIn: function() { return quadIn; },
+  easeQuadInOut: function() { return quadInOut; },
+  easeQuadOut: function() { return quadOut; },
+  easeSin: function() { return sinInOut; },
+  easeSinIn: function() { return sinIn; },
+  easeSinInOut: function() { return sinInOut; },
+  easeSinOut: function() { return sinOut; },
+  every: function() { return every; },
+  extent: function() { return extent; },
+  fcumsum: function() { return fcumsum; },
+  filter: function() { return filter; },
+  flatGroup: function() { return flatGroup; },
+  flatRollup: function() { return flatRollup; },
+  forceCenter: function() { return src_center; },
+  forceCollide: function() { return collide; },
+  forceLink: function() { return src_link; },
+  forceManyBody: function() { return manyBody; },
+  forceRadial: function() { return radial; },
+  forceSimulation: function() { return src_simulation; },
+  forceX: function() { return src_x; },
+  forceY: function() { return src_y; },
+  format: function() { return defaultLocale_format; },
+  formatDefaultLocale: function() { return defaultLocale; },
+  formatLocale: function() { return locale; },
+  formatPrefix: function() { return formatPrefix; },
+  formatSpecifier: function() { return formatSpecifier; },
+  fsum: function() { return fsum; },
+  geoAlbers: function() { return albers; },
+  geoAlbersUsa: function() { return albersUsa; },
+  geoArea: function() { return d3_geo_src_area; },
+  geoAzimuthalEqualArea: function() { return azimuthalEqualArea; },
+  geoAzimuthalEqualAreaRaw: function() { return azimuthalEqualAreaRaw; },
+  geoAzimuthalEquidistant: function() { return azimuthalEquidistant; },
+  geoAzimuthalEquidistantRaw: function() { return azimuthalEquidistantRaw; },
+  geoBounds: function() { return bounds; },
+  geoCentroid: function() { return centroid; },
+  geoCircle: function() { return circle; },
+  geoClipAntimeridian: function() { return antimeridian; },
+  geoClipCircle: function() { return clip_circle; },
+  geoClipExtent: function() { return clip_extent; },
+  geoClipRectangle: function() { return clipRectangle; },
+  geoConicConformal: function() { return conicConformal; },
+  geoConicConformalRaw: function() { return conicConformalRaw; },
+  geoConicEqualArea: function() { return conicEqualArea; },
+  geoConicEqualAreaRaw: function() { return conicEqualAreaRaw; },
+  geoConicEquidistant: function() { return conicEquidistant; },
+  geoConicEquidistantRaw: function() { return conicEquidistantRaw; },
+  geoContains: function() { return src_contains; },
+  geoDistance: function() { return distance; },
+  geoEqualEarth: function() { return equalEarth; },
+  geoEqualEarthRaw: function() { return equalEarthRaw; },
+  geoEquirectangular: function() { return equirectangular; },
+  geoEquirectangularRaw: function() { return equirectangularRaw; },
+  geoGnomonic: function() { return gnomonic; },
+  geoGnomonicRaw: function() { return gnomonicRaw; },
+  geoGraticule: function() { return graticule; },
+  geoGraticule10: function() { return graticule10; },
+  geoIdentity: function() { return projection_identity; },
+  geoInterpolate: function() { return src_interpolate; },
+  geoLength: function() { return src_length; },
+  geoMercator: function() { return mercator; },
+  geoMercatorRaw: function() { return mercatorRaw; },
+  geoNaturalEarth1: function() { return naturalEarth1; },
+  geoNaturalEarth1Raw: function() { return naturalEarth1Raw; },
+  geoOrthographic: function() { return orthographic; },
+  geoOrthographicRaw: function() { return orthographicRaw; },
+  geoPath: function() { return src_path; },
+  geoProjection: function() { return projection; },
+  geoProjectionMutator: function() { return projectionMutator; },
+  geoRotation: function() { return rotation; },
+  geoStereographic: function() { return stereographic; },
+  geoStereographicRaw: function() { return stereographicRaw; },
+  geoStream: function() { return stream; },
+  geoTransform: function() { return src_transform; },
+  geoTransverseMercator: function() { return transverseMercator; },
+  geoTransverseMercatorRaw: function() { return transverseMercatorRaw; },
+  gray: function() { return gray; },
+  greatest: function() { return greatest; },
+  greatestIndex: function() { return greatestIndex; },
+  group: function() { return group; },
+  groupSort: function() { return groupSort; },
+  groups: function() { return groups; },
+  hcl: function() { return hcl; },
+  hierarchy: function() { return hierarchy; },
+  histogram: function() { return bin; },
+  hsl: function() { return hsl; },
+  html: function() { return xml_html; },
+  image: function() { return src_image; },
+  index: function() { return index; },
+  indexes: function() { return indexes; },
+  interpolate: function() { return value; },
+  interpolateArray: function() { return src_array; },
+  interpolateBasis: function() { return src_basis; },
+  interpolateBasisClosed: function() { return basisClosed; },
+  interpolateBlues: function() { return Blues; },
+  interpolateBrBG: function() { return BrBG; },
+  interpolateBuGn: function() { return BuGn; },
+  interpolateBuPu: function() { return BuPu; },
+  interpolateCividis: function() { return cividis; },
+  interpolateCool: function() { return cool; },
+  interpolateCubehelix: function() { return src_cubehelix; },
+  interpolateCubehelixDefault: function() { return sequential_multi_cubehelix; },
+  interpolateCubehelixLong: function() { return cubehelixLong; },
+  interpolateDate: function() { return date; },
+  interpolateDiscrete: function() { return discrete; },
+  interpolateGnBu: function() { return GnBu; },
+  interpolateGreens: function() { return Greens; },
+  interpolateGreys: function() { return Greys; },
+  interpolateHcl: function() { return src_hcl; },
+  interpolateHclLong: function() { return hclLong; },
+  interpolateHsl: function() { return src_hsl; },
+  interpolateHslLong: function() { return hslLong; },
+  interpolateHue: function() { return src_hue; },
+  interpolateInferno: function() { return inferno; },
+  interpolateLab: function() { return lab_lab; },
+  interpolateMagma: function() { return magma; },
+  interpolateNumber: function() { return src_number; },
+  interpolateNumberArray: function() { return numberArray; },
+  interpolateObject: function() { return object; },
+  interpolateOrRd: function() { return OrRd; },
+  interpolateOranges: function() { return Oranges; },
+  interpolatePRGn: function() { return PRGn; },
+  interpolatePiYG: function() { return PiYG; },
+  interpolatePlasma: function() { return plasma; },
+  interpolatePuBu: function() { return PuBu; },
+  interpolatePuBuGn: function() { return PuBuGn; },
+  interpolatePuOr: function() { return PuOr; },
+  interpolatePuRd: function() { return PuRd; },
+  interpolatePurples: function() { return Purples; },
+  interpolateRainbow: function() { return rainbow; },
+  interpolateRdBu: function() { return RdBu; },
+  interpolateRdGy: function() { return RdGy; },
+  interpolateRdPu: function() { return RdPu; },
+  interpolateRdYlBu: function() { return RdYlBu; },
+  interpolateRdYlGn: function() { return RdYlGn; },
+  interpolateReds: function() { return Reds; },
+  interpolateRgb: function() { return rgb; },
+  interpolateRgbBasis: function() { return rgbBasis; },
+  interpolateRgbBasisClosed: function() { return rgbBasisClosed; },
+  interpolateRound: function() { return src_round; },
+  interpolateSinebow: function() { return sinebow; },
+  interpolateSpectral: function() { return Spectral; },
+  interpolateString: function() { return string; },
+  interpolateTransformCss: function() { return interpolateTransformCss; },
+  interpolateTransformSvg: function() { return interpolateTransformSvg; },
+  interpolateTurbo: function() { return turbo; },
+  interpolateViridis: function() { return viridis; },
+  interpolateWarm: function() { return warm; },
+  interpolateYlGn: function() { return YlGn; },
+  interpolateYlGnBu: function() { return YlGnBu; },
+  interpolateYlOrBr: function() { return YlOrBr; },
+  interpolateYlOrRd: function() { return YlOrRd; },
+  interpolateZoom: function() { return src_zoom; },
+  interrupt: function() { return interrupt; },
+  intersection: function() { return intersection; },
+  interval: function() { return src_interval; },
+  isoFormat: function() { return isoFormat; },
+  isoParse: function() { return isoParse; },
+  json: function() { return json; },
+  lab: function() { return lab; },
+  lch: function() { return lch; },
+  least: function() { return least; },
+  leastIndex: function() { return leastIndex; },
+  line: function() { return src_line; },
+  lineRadial: function() { return src_lineRadial; },
+  link: function() { return link_link; },
+  linkHorizontal: function() { return linkHorizontal; },
+  linkRadial: function() { return linkRadial; },
+  linkVertical: function() { return linkVertical; },
+  local: function() { return local_local; },
+  map: function() { return map_map; },
+  matcher: function() { return matcher; },
+  max: function() { return max; },
+  maxIndex: function() { return maxIndex; },
+  mean: function() { return mean; },
+  median: function() { return median; },
+  medianIndex: function() { return medianIndex; },
+  merge: function() { return merge; },
+  min: function() { return min; },
+  minIndex: function() { return minIndex; },
+  mode: function() { return mode; },
+  namespace: function() { return namespace; },
+  namespaces: function() { return namespaces; },
+  nice: function() { return nice; },
+  now: function() { return now; },
+  pack: function() { return pack; },
+  packEnclose: function() { return enclose; },
+  packSiblings: function() { return siblings; },
+  pairs: function() { return pairs; },
+  partition: function() { return partition; },
+  path: function() { return path; },
+  pathRound: function() { return pathRound; },
+  permute: function() { return permute; },
+  pie: function() { return pie; },
+  piecewise: function() { return piecewise; },
+  pointRadial: function() { return pointRadial; },
+  pointer: function() { return pointer; },
+  pointers: function() { return pointers; },
+  polygonArea: function() { return d3_polygon_src_area; },
+  polygonCentroid: function() { return src_centroid; },
+  polygonContains: function() { return d3_polygon_src_contains; },
+  polygonHull: function() { return hull; },
+  polygonLength: function() { return d3_polygon_src_length; },
+  precisionFixed: function() { return precisionFixed; },
+  precisionPrefix: function() { return precisionPrefix; },
+  precisionRound: function() { return precisionRound; },
+  quadtree: function() { return quadtree; },
+  quantile: function() { return quantile; },
+  quantileIndex: function() { return quantileIndex; },
+  quantileSorted: function() { return quantileSorted; },
+  quantize: function() { return quantize; },
+  quickselect: function() { return quickselect; },
+  radialArea: function() { return areaRadial; },
+  radialLine: function() { return src_lineRadial; },
+  randomBates: function() { return bates; },
+  randomBernoulli: function() { return bernoulli; },
+  randomBeta: function() { return beta; },
+  randomBinomial: function() { return binomial; },
+  randomCauchy: function() { return cauchy; },
+  randomExponential: function() { return src_exponential; },
+  randomGamma: function() { return src_gamma; },
+  randomGeometric: function() { return geometric; },
+  randomInt: function() { return src_int; },
+  randomIrwinHall: function() { return irwinHall; },
+  randomLcg: function() { return lcg_lcg; },
+  randomLogNormal: function() { return logNormal; },
+  randomLogistic: function() { return logistic; },
+  randomNormal: function() { return normal; },
+  randomPareto: function() { return pareto; },
+  randomPoisson: function() { return poisson; },
+  randomUniform: function() { return uniform; },
+  randomWeibull: function() { return weibull; },
+  range: function() { return range_range; },
+  rank: function() { return rank; },
+  reduce: function() { return reduce; },
+  reverse: function() { return reverse_reverse; },
+  rgb: function() { return color_rgb; },
+  ribbon: function() { return src_ribbon; },
+  ribbonArrow: function() { return ribbonArrow; },
+  rollup: function() { return rollup; },
+  rollups: function() { return rollups; },
+  scaleBand: function() { return band; },
+  scaleDiverging: function() { return diverging; },
+  scaleDivergingLog: function() { return divergingLog; },
+  scaleDivergingPow: function() { return divergingPow; },
+  scaleDivergingSqrt: function() { return divergingSqrt; },
+  scaleDivergingSymlog: function() { return divergingSymlog; },
+  scaleIdentity: function() { return identity_identity; },
+  scaleImplicit: function() { return implicit; },
+  scaleLinear: function() { return src_linear_linear; },
+  scaleLog: function() { return log_log; },
+  scaleOrdinal: function() { return ordinal; },
+  scalePoint: function() { return point; },
+  scalePow: function() { return pow_pow; },
+  scaleQuantile: function() { return quantile_quantile; },
+  scaleQuantize: function() { return quantize_quantize; },
+  scaleRadial: function() { return radial_radial; },
+  scaleSequential: function() { return sequential; },
+  scaleSequentialLog: function() { return sequentialLog; },
+  scaleSequentialPow: function() { return sequentialPow; },
+  scaleSequentialQuantile: function() { return sequentialQuantile; },
+  scaleSequentialSqrt: function() { return sequentialSqrt; },
+  scaleSequentialSymlog: function() { return sequentialSymlog; },
+  scaleSqrt: function() { return pow_sqrt; },
+  scaleSymlog: function() { return symlog; },
+  scaleThreshold: function() { return threshold; },
+  scaleTime: function() { return time; },
+  scaleUtc: function() { return utcTime; },
+  scan: function() { return scan; },
+  schemeAccent: function() { return Accent; },
+  schemeBlues: function() { return Blues_scheme; },
+  schemeBrBG: function() { return scheme; },
+  schemeBuGn: function() { return BuGn_scheme; },
+  schemeBuPu: function() { return BuPu_scheme; },
+  schemeCategory10: function() { return category10; },
+  schemeDark2: function() { return Dark2; },
+  schemeGnBu: function() { return GnBu_scheme; },
+  schemeGreens: function() { return Greens_scheme; },
+  schemeGreys: function() { return Greys_scheme; },
+  schemeOrRd: function() { return OrRd_scheme; },
+  schemeOranges: function() { return Oranges_scheme; },
+  schemePRGn: function() { return PRGn_scheme; },
+  schemePaired: function() { return Paired; },
+  schemePastel1: function() { return Pastel1; },
+  schemePastel2: function() { return Pastel2; },
+  schemePiYG: function() { return PiYG_scheme; },
+  schemePuBu: function() { return PuBu_scheme; },
+  schemePuBuGn: function() { return PuBuGn_scheme; },
+  schemePuOr: function() { return PuOr_scheme; },
+  schemePuRd: function() { return PuRd_scheme; },
+  schemePurples: function() { return Purples_scheme; },
+  schemeRdBu: function() { return RdBu_scheme; },
+  schemeRdGy: function() { return RdGy_scheme; },
+  schemeRdPu: function() { return RdPu_scheme; },
+  schemeRdYlBu: function() { return RdYlBu_scheme; },
+  schemeRdYlGn: function() { return RdYlGn_scheme; },
+  schemeReds: function() { return Reds_scheme; },
+  schemeSet1: function() { return Set1; },
+  schemeSet2: function() { return Set2; },
+  schemeSet3: function() { return Set3; },
+  schemeSpectral: function() { return Spectral_scheme; },
+  schemeTableau10: function() { return Tableau10; },
+  schemeYlGn: function() { return YlGn_scheme; },
+  schemeYlGnBu: function() { return YlGnBu_scheme; },
+  schemeYlOrBr: function() { return YlOrBr_scheme; },
+  schemeYlOrRd: function() { return YlOrRd_scheme; },
+  select: function() { return src_select; },
+  selectAll: function() { return src_selectAll; },
+  selection: function() { return src_selection; },
+  selector: function() { return selector; },
+  selectorAll: function() { return selectorAll; },
+  shuffle: function() { return shuffle; },
+  shuffler: function() { return shuffler; },
+  some: function() { return some; },
+  sort: function() { return sort; },
+  stack: function() { return src_stack; },
+  stackOffsetDiverging: function() { return offset_diverging; },
+  stackOffsetExpand: function() { return expand; },
+  stackOffsetNone: function() { return offset_none; },
+  stackOffsetSilhouette: function() { return silhouette; },
+  stackOffsetWiggle: function() { return wiggle; },
+  stackOrderAppearance: function() { return appearance; },
+  stackOrderAscending: function() { return order_ascending; },
+  stackOrderDescending: function() { return order_descending; },
+  stackOrderInsideOut: function() { return insideOut; },
+  stackOrderNone: function() { return order_none; },
+  stackOrderReverse: function() { return reverse; },
+  stratify: function() { return stratify; },
+  style: function() { return style_styleValue; },
+  subset: function() { return subset; },
+  sum: function() { return sum; },
+  superset: function() { return superset; },
+  svg: function() { return svg; },
+  symbol: function() { return symbol_Symbol; },
+  symbolAsterisk: function() { return asterisk; },
+  symbolCircle: function() { return symbol_circle; },
+  symbolCross: function() { return symbol_cross; },
+  symbolDiamond: function() { return diamond; },
+  symbolDiamond2: function() { return diamond2; },
+  symbolPlus: function() { return plus; },
+  symbolSquare: function() { return symbol_square; },
+  symbolSquare2: function() { return square2; },
+  symbolStar: function() { return star; },
+  symbolTimes: function() { return times; },
+  symbolTriangle: function() { return triangle; },
+  symbolTriangle2: function() { return triangle2; },
+  symbolWye: function() { return wye; },
+  symbolX: function() { return times; },
+  symbols: function() { return symbolsFill; },
+  symbolsFill: function() { return symbolsFill; },
+  symbolsStroke: function() { return symbolsStroke; },
+  text: function() { return src_text; },
+  thresholdFreedmanDiaconis: function() { return thresholdFreedmanDiaconis; },
+  thresholdScott: function() { return thresholdScott; },
+  thresholdSturges: function() { return thresholdSturges; },
+  tickFormat: function() { return tickFormat; },
+  tickIncrement: function() { return tickIncrement; },
+  tickStep: function() { return tickStep; },
+  ticks: function() { return ticks; },
+  timeDay: function() { return timeDay; },
+  timeDays: function() { return timeDays; },
+  timeFormat: function() { return timeFormat; },
+  timeFormatDefaultLocale: function() { return defaultLocale_defaultLocale; },
+  timeFormatLocale: function() { return formatLocale; },
+  timeFriday: function() { return timeFriday; },
+  timeFridays: function() { return timeFridays; },
+  timeHour: function() { return timeHour; },
+  timeHours: function() { return timeHours; },
+  timeInterval: function() { return timeInterval; },
+  timeMillisecond: function() { return millisecond; },
+  timeMilliseconds: function() { return milliseconds; },
+  timeMinute: function() { return timeMinute; },
+  timeMinutes: function() { return timeMinutes; },
+  timeMonday: function() { return timeMonday; },
+  timeMondays: function() { return timeMondays; },
+  timeMonth: function() { return timeMonth; },
+  timeMonths: function() { return timeMonths; },
+  timeParse: function() { return timeParse; },
+  timeSaturday: function() { return timeSaturday; },
+  timeSaturdays: function() { return timeSaturdays; },
+  timeSecond: function() { return second; },
+  timeSeconds: function() { return seconds; },
+  timeSunday: function() { return timeSunday; },
+  timeSundays: function() { return timeSundays; },
+  timeThursday: function() { return timeThursday; },
+  timeThursdays: function() { return timeThursdays; },
+  timeTickInterval: function() { return timeTickInterval; },
+  timeTicks: function() { return timeTicks; },
+  timeTuesday: function() { return timeTuesday; },
+  timeTuesdays: function() { return timeTuesdays; },
+  timeWednesday: function() { return timeWednesday; },
+  timeWednesdays: function() { return timeWednesdays; },
+  timeWeek: function() { return timeSunday; },
+  timeWeeks: function() { return timeSundays; },
+  timeYear: function() { return timeYear; },
+  timeYears: function() { return timeYears; },
+  timeout: function() { return src_timeout; },
+  timer: function() { return timer; },
+  timerFlush: function() { return timerFlush; },
+  transition: function() { return transition_transition; },
+  transpose: function() { return transpose; },
+  tree: function() { return tree; },
+  treemap: function() { return treemap; },
+  treemapBinary: function() { return binary; },
+  treemapDice: function() { return dice; },
+  treemapResquarify: function() { return resquarify; },
+  treemapSlice: function() { return treemap_slice; },
+  treemapSliceDice: function() { return sliceDice; },
+  treemapSquarify: function() { return squarify; },
+  tsv: function() { return dsv_tsv; },
+  tsvFormat: function() { return tsvFormat; },
+  tsvFormatBody: function() { return tsvFormatBody; },
+  tsvFormatRow: function() { return tsvFormatRow; },
+  tsvFormatRows: function() { return tsvFormatRows; },
+  tsvFormatValue: function() { return tsvFormatValue; },
+  tsvParse: function() { return tsvParse; },
+  tsvParseRows: function() { return tsvParseRows; },
+  union: function() { return union; },
+  unixDay: function() { return unixDay; },
+  unixDays: function() { return unixDays; },
+  utcDay: function() { return utcDay; },
+  utcDays: function() { return utcDays; },
+  utcFormat: function() { return utcFormat; },
+  utcFriday: function() { return utcFriday; },
+  utcFridays: function() { return utcFridays; },
+  utcHour: function() { return utcHour; },
+  utcHours: function() { return utcHours; },
+  utcMillisecond: function() { return millisecond; },
+  utcMilliseconds: function() { return milliseconds; },
+  utcMinute: function() { return utcMinute; },
+  utcMinutes: function() { return utcMinutes; },
+  utcMonday: function() { return utcMonday; },
+  utcMondays: function() { return utcMondays; },
+  utcMonth: function() { return utcMonth; },
+  utcMonths: function() { return utcMonths; },
+  utcParse: function() { return utcParse; },
+  utcSaturday: function() { return utcSaturday; },
+  utcSaturdays: function() { return utcSaturdays; },
+  utcSecond: function() { return second; },
+  utcSeconds: function() { return seconds; },
+  utcSunday: function() { return utcSunday; },
+  utcSundays: function() { return utcSundays; },
+  utcThursday: function() { return utcThursday; },
+  utcThursdays: function() { return utcThursdays; },
+  utcTickInterval: function() { return utcTickInterval; },
+  utcTicks: function() { return utcTicks; },
+  utcTuesday: function() { return utcTuesday; },
+  utcTuesdays: function() { return utcTuesdays; },
+  utcWednesday: function() { return utcWednesday; },
+  utcWednesdays: function() { return utcWednesdays; },
+  utcWeek: function() { return utcSunday; },
+  utcWeeks: function() { return utcSundays; },
+  utcYear: function() { return utcYear; },
+  utcYears: function() { return utcYears; },
+  variance: function() { return variance; },
+  window: function() { return src_window; },
+  xml: function() { return xml; },
+  zip: function() { return zip; },
+  zoom: function() { return zoom; },
+  zoomIdentity: function() { return transform_identity; },
+  zoomTransform: function() { return transform; }
 });
 
-;// CONCATENATED MODULE: ./node_modules/@vue/cli-service/lib/commands/build/setPublicPath.js
+;// ./node_modules/@vue/cli-service/lib/commands/build/setPublicPath.js
 /* eslint-disable no-var */
 // This file is imported into lib/wc client bundles.
 
 if (typeof window !== 'undefined') {
   var currentScript = window.document.currentScript
-  if (false) { var getCurrentScript; }
+  if (false) // removed by dead control flow
+{ var getCurrentScript; }
 
   var src = currentScript && currentScript.src.match(/(.+\/)[^/]+\.js(\?.*)?$/)
   if (src) {
@@ -19402,7 +20978,7 @@ if (typeof window !== 'undefined') {
 // Indicate to webpack that this file can be concatenated
 /* harmony default export */ var setPublicPath = (null);
 
-;// CONCATENATED MODULE: ./node_modules/@vue/shared/dist/shared.esm-bundler.js
+;// ./node_modules/@vue/shared/dist/shared.esm-bundler.js
 /**
  * Make a map and return a function for checking if a key
  * is in that map.
@@ -19410,7 +20986,7 @@ if (typeof window !== 'undefined') {
  * \/\*#\_\_PURE\_\_\*\/
  * So that rollup can tree-shake them if necessary.
  */
-function shared_esm_bundler_makeMap(str, expectsLowerCase) {
+function makeMap(str, expectsLowerCase) {
     const map = Object.create(null);
     const list = str.split(',');
     for (let i = 0; i < list.length; i++) {
@@ -19451,9 +21027,9 @@ const slotFlagsText = {
 const GLOBALS_WHITE_LISTED = 'Infinity,undefined,NaN,isFinite,isNaN,parseFloat,parseInt,decodeURI,' +
     'decodeURIComponent,encodeURI,encodeURIComponent,Math,Number,Date,Array,' +
     'Object,Boolean,String,RegExp,Map,Set,JSON,Intl,BigInt';
-const isGloballyWhitelisted = /*#__PURE__*/ shared_esm_bundler_makeMap(GLOBALS_WHITE_LISTED);
+const isGloballyWhitelisted = /*#__PURE__*/ makeMap(GLOBALS_WHITE_LISTED);
 
-const shared_esm_bundler_range = 2;
+const range = 2;
 function generateCodeFrame(source, start = 0, end = source.length) {
     // Split the content into individual lines but capture the newline sequence
     // that separated each line. This is important because the actual sequence is
@@ -19470,7 +21046,7 @@ function generateCodeFrame(source, start = 0, end = source.length) {
             lines[i].length +
                 ((newlineSequences[i] && newlineSequences[i].length) || 0);
         if (count >= start) {
-            for (let j = i - shared_esm_bundler_range; j <= i + shared_esm_bundler_range || end > count; j++) {
+            for (let j = i - range; j <= i + range || end > count; j++) {
                 if (j < 0 || j >= lines.length)
                     continue;
                 const line = j + 1;
@@ -19498,7 +21074,7 @@ function generateCodeFrame(source, start = 0, end = source.length) {
 }
 
 function normalizeStyle(value) {
-    if (shared_esm_bundler_isArray(value)) {
+    if (isArray(value)) {
         const res = {};
         for (let i = 0; i < value.length; i++) {
             const item = value[i];
@@ -19516,7 +21092,7 @@ function normalizeStyle(value) {
     else if (isString(value)) {
         return value;
     }
-    else if (shared_esm_bundler_isObject(value)) {
+    else if (isObject(value)) {
         return value;
     }
 }
@@ -19543,7 +21119,7 @@ function stringifyStyle(styles) {
     }
     for (const key in styles) {
         const value = styles[key];
-        const normalizedKey = key.startsWith(`--`) ? key : shared_esm_bundler_hyphenate(key);
+        const normalizedKey = key.startsWith(`--`) ? key : hyphenate(key);
         if (isString(value) || typeof value === 'number') {
             // only render valid values
             ret += `${normalizedKey}:${value};`;
@@ -19556,7 +21132,7 @@ function normalizeClass(value) {
     if (isString(value)) {
         res = value;
     }
-    else if (shared_esm_bundler_isArray(value)) {
+    else if (isArray(value)) {
         for (let i = 0; i < value.length; i++) {
             const normalized = normalizeClass(value[i]);
             if (normalized) {
@@ -19564,7 +21140,7 @@ function normalizeClass(value) {
             }
         }
     }
-    else if (shared_esm_bundler_isObject(value)) {
+    else if (isObject(value)) {
         for (const name in value) {
             if (value[name]) {
                 res += name + ' ';
@@ -19613,17 +21189,17 @@ const VOID_TAGS = 'area,base,br,col,embed,hr,img,input,link,meta,param,source,tr
  * Compiler only.
  * Do NOT use in runtime code paths unless behind `(process.env.NODE_ENV !== 'production')` flag.
  */
-const shared_esm_bundler_isHTMLTag = /*#__PURE__*/ (/* unused pure expression or super */ null && (shared_esm_bundler_makeMap(HTML_TAGS)));
+const isHTMLTag = /*#__PURE__*/ (/* unused pure expression or super */ null && (makeMap(HTML_TAGS)));
 /**
  * Compiler only.
  * Do NOT use in runtime code paths unless behind `(process.env.NODE_ENV !== 'production')` flag.
  */
-const shared_esm_bundler_isSVGTag = /*#__PURE__*/ (/* unused pure expression or super */ null && (shared_esm_bundler_makeMap(SVG_TAGS)));
+const isSVGTag = /*#__PURE__*/ (/* unused pure expression or super */ null && (makeMap(SVG_TAGS)));
 /**
  * Compiler only.
  * Do NOT use in runtime code paths unless behind `(process.env.NODE_ENV !== 'production')` flag.
  */
-const isVoidTag = /*#__PURE__*/ (/* unused pure expression or super */ null && (shared_esm_bundler_makeMap(VOID_TAGS)));
+const isVoidTag = /*#__PURE__*/ (/* unused pure expression or super */ null && (makeMap(VOID_TAGS)));
 
 /**
  * On the client we only need to offer special cases for boolean attributes that
@@ -19637,11 +21213,11 @@ const isVoidTag = /*#__PURE__*/ (/* unused pure expression or super */ null && (
  * - readonly -> readOnly
  */
 const specialBooleanAttrs = `itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,readonly`;
-const isSpecialBooleanAttr = /*#__PURE__*/ shared_esm_bundler_makeMap(specialBooleanAttrs);
+const isSpecialBooleanAttr = /*#__PURE__*/ makeMap(specialBooleanAttrs);
 /**
  * The full list is needed during SSR to produce the correct initial markup.
  */
-const isBooleanAttr = /*#__PURE__*/ shared_esm_bundler_makeMap(specialBooleanAttrs +
+const isBooleanAttr = /*#__PURE__*/ makeMap(specialBooleanAttrs +
     `,async,autofocus,autoplay,controls,default,defer,disabled,hidden,` +
     `loop,open,required,reversed,scoped,seamless,` +
     `checked,muted,multiple,selected`);
@@ -19676,7 +21252,7 @@ const propsToAttrMap = {
  * Don't also forget to allow `data-*` and `aria-*`!
  * Generated from https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
  */
-const isKnownHtmlAttr = /*#__PURE__*/ (/* unused pure expression or super */ null && (shared_esm_bundler_makeMap(`accept,accept-charset,accesskey,action,align,allow,alt,async,` +
+const isKnownHtmlAttr = /*#__PURE__*/ (/* unused pure expression or super */ null && (makeMap(`accept,accept-charset,accesskey,action,align,allow,alt,async,` +
     `autocapitalize,autocomplete,autofocus,autoplay,background,bgcolor,` +
     `border,buffered,capture,challenge,charset,checked,cite,class,code,` +
     `codebase,color,cols,colspan,content,contenteditable,contextmenu,controls,` +
@@ -19694,7 +21270,7 @@ const isKnownHtmlAttr = /*#__PURE__*/ (/* unused pure expression or super */ nul
 /**
  * Generated from https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
  */
-const isKnownSvgAttr = /*#__PURE__*/ (/* unused pure expression or super */ null && (shared_esm_bundler_makeMap(`xmlns,accent-height,accumulate,additive,alignment-baseline,alphabetic,amplitude,` +
+const isKnownSvgAttr = /*#__PURE__*/ (/* unused pure expression or super */ null && (makeMap(`xmlns,accent-height,accumulate,additive,alignment-baseline,alphabetic,amplitude,` +
     `arabic-form,ascent,attributeName,attributeType,azimuth,baseFrequency,` +
     `baseline-shift,baseProfile,bbox,begin,bias,by,calcMode,cap-height,class,` +
     `clip,clipPathUnits,clip-path,clip-rule,color,color-interpolation,` +
@@ -19784,11 +21360,11 @@ function looseCompareArrays(a, b) {
         return false;
     let equal = true;
     for (let i = 0; equal && i < a.length; i++) {
-        equal = shared_esm_bundler_looseEqual(a[i], b[i]);
+        equal = looseEqual(a[i], b[i]);
     }
     return equal;
 }
-function shared_esm_bundler_looseEqual(a, b) {
+function looseEqual(a, b) {
     if (a === b)
         return true;
     let aValidType = isDate(a);
@@ -19801,13 +21377,13 @@ function shared_esm_bundler_looseEqual(a, b) {
     if (aValidType || bValidType) {
         return a === b;
     }
-    aValidType = shared_esm_bundler_isArray(a);
-    bValidType = shared_esm_bundler_isArray(b);
+    aValidType = isArray(a);
+    bValidType = isArray(b);
     if (aValidType || bValidType) {
         return aValidType && bValidType ? looseCompareArrays(a, b) : false;
     }
-    aValidType = shared_esm_bundler_isObject(a);
-    bValidType = shared_esm_bundler_isObject(b);
+    aValidType = isObject(a);
+    bValidType = isObject(b);
     if (aValidType || bValidType) {
         /* istanbul ignore if: this if will probably never be called */
         if (!aValidType || !bValidType) {
@@ -19823,15 +21399,15 @@ function shared_esm_bundler_looseEqual(a, b) {
             const bHasKey = b.hasOwnProperty(key);
             if ((aHasKey && !bHasKey) ||
                 (!aHasKey && bHasKey) ||
-                !shared_esm_bundler_looseEqual(a[key], b[key])) {
+                !looseEqual(a[key], b[key])) {
                 return false;
             }
         }
     }
     return String(a) === String(b);
 }
-function shared_esm_bundler_looseIndexOf(arr, val) {
-    return arr.findIndex(item => shared_esm_bundler_looseEqual(item, val));
+function looseIndexOf(arr, val) {
+    return arr.findIndex(item => looseEqual(item, val));
 }
 
 /**
@@ -19843,9 +21419,9 @@ const toDisplayString = (val) => {
         ? val
         : val == null
             ? ''
-            : shared_esm_bundler_isArray(val) ||
-                (shared_esm_bundler_isObject(val) &&
-                    (val.toString === objectToString || !shared_esm_bundler_isFunction(val.toString)))
+            : isArray(val) ||
+                (isObject(val) &&
+                    (val.toString === objectToString || !isFunction(val.toString)))
                 ? JSON.stringify(val, replacer, 2)
                 : String(val);
 };
@@ -19862,30 +21438,30 @@ const replacer = (_key, val) => {
             }, {})
         };
     }
-    else if (shared_esm_bundler_isSet(val)) {
+    else if (isSet(val)) {
         return {
             [`Set(${val.size})`]: [...val.values()]
         };
     }
-    else if (shared_esm_bundler_isObject(val) && !shared_esm_bundler_isArray(val) && !isPlainObject(val)) {
+    else if (isObject(val) && !isArray(val) && !isPlainObject(val)) {
         return String(val);
     }
     return val;
 };
 
-const shared_esm_bundler_EMPTY_OBJ = ( false)
+const EMPTY_OBJ = ( false)
     ? 0
     : {};
 const EMPTY_ARR = ( false) ? 0 : [];
-const shared_esm_bundler_NOOP = () => { };
+const NOOP = () => { };
 /**
  * Always return false.
  */
-const shared_esm_bundler_NO = () => false;
+const NO = () => false;
 const onRE = /^on[^a-z]/;
-const shared_esm_bundler_isOn = (key) => onRE.test(key);
+const isOn = (key) => onRE.test(key);
 const isModelListener = (key) => key.startsWith('onUpdate:');
-const shared_esm_bundler_extend = Object.assign;
+const extend = Object.assign;
 const remove = (arr, el) => {
     const i = arr.indexOf(el);
     if (i > -1) {
@@ -19893,22 +21469,22 @@ const remove = (arr, el) => {
     }
 };
 const shared_esm_bundler_hasOwnProperty = Object.prototype.hasOwnProperty;
-const shared_esm_bundler_hasOwn = (val, key) => shared_esm_bundler_hasOwnProperty.call(val, key);
-const shared_esm_bundler_isArray = Array.isArray;
+const hasOwn = (val, key) => shared_esm_bundler_hasOwnProperty.call(val, key);
+const isArray = Array.isArray;
 const isMap = (val) => toTypeString(val) === '[object Map]';
-const shared_esm_bundler_isSet = (val) => toTypeString(val) === '[object Set]';
+const isSet = (val) => toTypeString(val) === '[object Set]';
 const isDate = (val) => toTypeString(val) === '[object Date]';
 const isRegExp = (val) => toTypeString(val) === '[object RegExp]';
-const shared_esm_bundler_isFunction = (val) => typeof val === 'function';
+const isFunction = (val) => typeof val === 'function';
 const isString = (val) => typeof val === 'string';
 const isSymbol = (val) => typeof val === 'symbol';
-const shared_esm_bundler_isObject = (val) => val !== null && typeof val === 'object';
-const shared_esm_bundler_isPromise = (val) => {
-    return shared_esm_bundler_isObject(val) && shared_esm_bundler_isFunction(val.then) && shared_esm_bundler_isFunction(val.catch);
+const isObject = (val) => val !== null && typeof val === 'object';
+const isPromise = (val) => {
+    return isObject(val) && isFunction(val.then) && isFunction(val.catch);
 };
 const objectToString = Object.prototype.toString;
 const toTypeString = (value) => objectToString.call(value);
-const shared_esm_bundler_toRawType = (value) => {
+const toRawType = (value) => {
     // extract "RawType" from strings like "[object RawType]"
     return toTypeString(value).slice(8, -1);
 };
@@ -19917,13 +21493,13 @@ const isIntegerKey = (key) => isString(key) &&
     key !== 'NaN' &&
     key[0] !== '-' &&
     '' + parseInt(key, 10) === key;
-const shared_esm_bundler_isReservedProp = /*#__PURE__*/ shared_esm_bundler_makeMap(
+const isReservedProp = /*#__PURE__*/ makeMap(
 // the leading comma is intentional so empty string "" is also included
 ',key,ref,ref_for,ref_key,' +
     'onVnodeBeforeMount,onVnodeMounted,' +
     'onVnodeBeforeUpdate,onVnodeUpdated,' +
     'onVnodeBeforeUnmount,onVnodeUnmounted');
-const shared_esm_bundler_isBuiltInDirective = /*#__PURE__*/ (/* unused pure expression or super */ null && (shared_esm_bundler_makeMap('bind,cloak,else-if,else,for,html,if,model,on,once,pre,show,slot,text,memo')));
+const isBuiltInDirective = /*#__PURE__*/ (/* unused pure expression or super */ null && (makeMap('bind,cloak,else-if,else,for,html,if,model,on,once,pre,show,slot,text,memo')));
 const cacheStringFunction = (fn) => {
     const cache = Object.create(null);
     return ((str) => {
@@ -19942,17 +21518,17 @@ const hyphenateRE = /\B([A-Z])/g;
 /**
  * @private
  */
-const shared_esm_bundler_hyphenate = cacheStringFunction((str) => str.replace(hyphenateRE, '-$1').toLowerCase());
+const hyphenate = cacheStringFunction((str) => str.replace(hyphenateRE, '-$1').toLowerCase());
 /**
  * @private
  */
-const shared_esm_bundler_capitalize = cacheStringFunction((str) => str.charAt(0).toUpperCase() + str.slice(1));
+const capitalize = cacheStringFunction((str) => str.charAt(0).toUpperCase() + str.slice(1));
 /**
  * @private
  */
-const shared_esm_bundler_toHandlerKey = cacheStringFunction((str) => str ? `on${shared_esm_bundler_capitalize(str)}` : ``);
+const toHandlerKey = cacheStringFunction((str) => str ? `on${capitalize(str)}` : ``);
 // compare whether a value has changed, accounting for NaN.
-const shared_esm_bundler_hasChanged = (value, oldValue) => !Object.is(value, oldValue);
+const hasChanged = (value, oldValue) => !Object.is(value, oldValue);
 const invokeArrayFns = (fns, arg) => {
     for (let i = 0; i < fns.length; i++) {
         fns[i](arg);
@@ -19977,7 +21553,7 @@ const looseToNumber = (val) => {
  * Only conerces number-like strings
  * "123-foo" will be returned as-is
  */
-const shared_esm_bundler_toNumber = (val) => {
+const toNumber = (val) => {
     const n = isString(val) ? Number(val) : NaN;
     return isNaN(n) ? val : n;
 };
@@ -20004,10 +21580,14 @@ function genPropsAccessExp(name) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
+;// ./node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
+/* unused harmony import specifier */ var reactivity_esm_bundler_extend;
+/* unused harmony import specifier */ var reactivity_esm_bundler_toRawType;
+/* unused harmony import specifier */ var reactivity_esm_bundler_hasChanged;
+/* unused harmony import specifier */ var reactivity_esm_bundler_isArray;
 
 
-function reactivity_esm_bundler_warn(msg, ...args) {
+function warn(msg, ...args) {
     console.warn(`[Vue warn] ${msg}`, ...args);
 }
 
@@ -20047,7 +21627,8 @@ class EffectScope {
                 activeEffectScope = currentEffectScope;
             }
         }
-        else if ((false)) {}
+        else if ((false)) // removed by dead control flow
+{}
     }
     /**
      * This should only be called on non-detached scopes
@@ -20106,7 +21687,8 @@ function onScopeDispose(fn) {
     if (activeEffectScope) {
         activeEffectScope.cleanups.push(fn);
     }
-    else if ((false)) {}
+    else if ((false)) // removed by dead control flow
+{}
 }
 
 const createDep = (effects) => {
@@ -20233,7 +21815,7 @@ function effect(fn, options) {
     }
     const _effect = new ReactiveEffect(fn);
     if (options) {
-        extend(_effect, options);
+        reactivity_esm_bundler_extend(_effect, options);
         if (options.scope)
             recordEffectScope(_effect, options.scope);
     }
@@ -20292,7 +21874,8 @@ function trackEffects(dep, debuggerEventExtraInfo) {
     if (shouldTrack) {
         dep.add(activeEffect);
         activeEffect.deps.push(dep);
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
     }
 }
 function trigger(target, type, key, newValue, oldValue, oldTarget) {
@@ -20307,7 +21890,7 @@ function trigger(target, type, key, newValue, oldValue, oldTarget) {
         // trigger all effects for target
         deps = [...depsMap.values()];
     }
-    else if (key === 'length' && shared_esm_bundler_isArray(target)) {
+    else if (key === 'length' && isArray(target)) {
         const newLength = Number(newValue);
         depsMap.forEach((dep, key) => {
             if (key === 'length' || key >= newLength) {
@@ -20323,7 +21906,7 @@ function trigger(target, type, key, newValue, oldValue, oldTarget) {
         // also run for iteration key on ADD | DELETE | Map.SET
         switch (type) {
             case "add" /* TriggerOpTypes.ADD */:
-                if (!shared_esm_bundler_isArray(target)) {
+                if (!isArray(target)) {
                     deps.push(depsMap.get(ITERATE_KEY));
                     if (isMap(target)) {
                         deps.push(depsMap.get(MAP_KEY_ITERATE_KEY));
@@ -20335,7 +21918,7 @@ function trigger(target, type, key, newValue, oldValue, oldTarget) {
                 }
                 break;
             case "delete" /* TriggerOpTypes.DELETE */:
-                if (!shared_esm_bundler_isArray(target)) {
+                if (!isArray(target)) {
                     deps.push(depsMap.get(ITERATE_KEY));
                     if (isMap(target)) {
                         deps.push(depsMap.get(MAP_KEY_ITERATE_KEY));
@@ -20354,7 +21937,8 @@ function trigger(target, type, key, newValue, oldValue, oldTarget) {
         : undefined;
     if (deps.length === 1) {
         if (deps[0]) {
-            if ((false)) {}
+            if ((false)) // removed by dead control flow
+{}
             else {
                 triggerEffects(deps[0]);
             }
@@ -20367,7 +21951,8 @@ function trigger(target, type, key, newValue, oldValue, oldTarget) {
                 effects.push(...dep);
             }
         }
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
         else {
             triggerEffects(createDep(effects));
         }
@@ -20375,7 +21960,7 @@ function trigger(target, type, key, newValue, oldValue, oldTarget) {
 }
 function triggerEffects(dep, debuggerEventExtraInfo) {
     // spread into array for stabilization
-    const effects = shared_esm_bundler_isArray(dep) ? dep : [...dep];
+    const effects = isArray(dep) ? dep : [...dep];
     for (const effect of effects) {
         if (effect.computed) {
             triggerEffect(effect, debuggerEventExtraInfo);
@@ -20389,7 +21974,8 @@ function triggerEffects(dep, debuggerEventExtraInfo) {
 }
 function triggerEffect(effect, debuggerEventExtraInfo) {
     if (effect !== activeEffect || effect.allowRecurse) {
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         if (effect.scheduler) {
             effect.scheduler();
         }
@@ -20403,7 +21989,7 @@ function getDepFromReactive(object, key) {
     return (_a = targetMap.get(object)) === null || _a === void 0 ? void 0 : _a.get(key);
 }
 
-const isNonTrackableKeys = /*#__PURE__*/ shared_esm_bundler_makeMap(`__proto__,__v_isRef,__isVue`);
+const isNonTrackableKeys = /*#__PURE__*/ makeMap(`__proto__,__v_isRef,__isVue`);
 const builtInSymbols = new Set(
 /*#__PURE__*/
 Object.getOwnPropertyNames(Symbol)
@@ -20422,7 +22008,7 @@ function createArrayInstrumentations() {
     const instrumentations = {};
     ['includes', 'indexOf', 'lastIndexOf'].forEach(key => {
         instrumentations[key] = function (...args) {
-            const arr = reactivity_esm_bundler_toRaw(this);
+            const arr = toRaw(this);
             for (let i = 0, l = this.length; i < l; i++) {
                 track(arr, "get" /* TrackOpTypes.GET */, i + '');
             }
@@ -20430,7 +22016,7 @@ function createArrayInstrumentations() {
             const res = arr[key](...args);
             if (res === -1 || res === false) {
                 // if that didn't work, run it again using raw values.
-                return arr[key](...args.map(reactivity_esm_bundler_toRaw));
+                return arr[key](...args.map(toRaw));
             }
             else {
                 return res;
@@ -20440,7 +22026,7 @@ function createArrayInstrumentations() {
     ['push', 'pop', 'shift', 'unshift', 'splice'].forEach(key => {
         instrumentations[key] = function (...args) {
             pauseTracking();
-            const res = reactivity_esm_bundler_toRaw(this)[key].apply(this, args);
+            const res = toRaw(this)[key].apply(this, args);
             resetTracking();
             return res;
         };
@@ -20448,7 +22034,7 @@ function createArrayInstrumentations() {
     return instrumentations;
 }
 function reactivity_esm_bundler_hasOwnProperty(key) {
-    const obj = reactivity_esm_bundler_toRaw(this);
+    const obj = toRaw(this);
     track(obj, "has" /* TrackOpTypes.HAS */, key);
     return obj.hasOwnProperty(key);
 }
@@ -20474,9 +22060,9 @@ function createGetter(isReadonly = false, shallow = false) {
                         : reactiveMap).get(target)) {
             return target;
         }
-        const targetIsArray = shared_esm_bundler_isArray(target);
+        const targetIsArray = isArray(target);
         if (!isReadonly) {
-            if (targetIsArray && shared_esm_bundler_hasOwn(arrayInstrumentations, key)) {
+            if (targetIsArray && hasOwn(arrayInstrumentations, key)) {
                 return Reflect.get(arrayInstrumentations, key, receiver);
             }
             if (key === 'hasOwnProperty') {
@@ -20493,11 +22079,11 @@ function createGetter(isReadonly = false, shallow = false) {
         if (shallow) {
             return res;
         }
-        if (reactivity_esm_bundler_isRef(res)) {
+        if (isRef(res)) {
             // ref unwrapping - skip unwrap for Array + integer key.
             return targetIsArray && isIntegerKey(key) ? res : res.value;
         }
-        if (shared_esm_bundler_isObject(res)) {
+        if (isObject(res)) {
             // Convert returned value into a proxy as well. we do the isObject check
             // here to avoid invalid value warning. Also need to lazy access readonly
             // and reactive here to avoid circular dependency.
@@ -20511,29 +22097,29 @@ const shallowSet = /*#__PURE__*/ createSetter(true);
 function createSetter(shallow = false) {
     return function set(target, key, value, receiver) {
         let oldValue = target[key];
-        if (reactivity_esm_bundler_isReadonly(oldValue) && reactivity_esm_bundler_isRef(oldValue) && !reactivity_esm_bundler_isRef(value)) {
+        if (isReadonly(oldValue) && isRef(oldValue) && !isRef(value)) {
             return false;
         }
         if (!shallow) {
-            if (!isShallow(value) && !reactivity_esm_bundler_isReadonly(value)) {
-                oldValue = reactivity_esm_bundler_toRaw(oldValue);
-                value = reactivity_esm_bundler_toRaw(value);
+            if (!isShallow(value) && !isReadonly(value)) {
+                oldValue = toRaw(oldValue);
+                value = toRaw(value);
             }
-            if (!shared_esm_bundler_isArray(target) && reactivity_esm_bundler_isRef(oldValue) && !reactivity_esm_bundler_isRef(value)) {
+            if (!isArray(target) && isRef(oldValue) && !isRef(value)) {
                 oldValue.value = value;
                 return true;
             }
         }
-        const hadKey = shared_esm_bundler_isArray(target) && isIntegerKey(key)
+        const hadKey = isArray(target) && isIntegerKey(key)
             ? Number(key) < target.length
-            : shared_esm_bundler_hasOwn(target, key);
+            : hasOwn(target, key);
         const result = Reflect.set(target, key, value, receiver);
         // don't trigger if target is something up in the prototype chain of original
-        if (target === reactivity_esm_bundler_toRaw(receiver)) {
+        if (target === toRaw(receiver)) {
             if (!hadKey) {
                 trigger(target, "add" /* TriggerOpTypes.ADD */, key, value);
             }
-            else if (shared_esm_bundler_hasChanged(value, oldValue)) {
+            else if (hasChanged(value, oldValue)) {
                 trigger(target, "set" /* TriggerOpTypes.SET */, key, value, oldValue);
             }
         }
@@ -20541,7 +22127,7 @@ function createSetter(shallow = false) {
     };
 }
 function deleteProperty(target, key) {
-    const hadKey = shared_esm_bundler_hasOwn(target, key);
+    const hadKey = hasOwn(target, key);
     const oldValue = target[key];
     const result = Reflect.deleteProperty(target, key);
     if (result && hadKey) {
@@ -20557,7 +22143,7 @@ function has$1(target, key) {
     return result;
 }
 function ownKeys(target) {
-    track(target, "iterate" /* TrackOpTypes.ITERATE */, shared_esm_bundler_isArray(target) ? 'length' : ITERATE_KEY);
+    track(target, "iterate" /* TrackOpTypes.ITERATE */, isArray(target) ? 'length' : ITERATE_KEY);
     return Reflect.ownKeys(target);
 }
 const mutableHandlers = {
@@ -20570,22 +22156,24 @@ const mutableHandlers = {
 const readonlyHandlers = {
     get: readonlyGet,
     set(target, key) {
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
         return true;
     },
     deleteProperty(target, key) {
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
         return true;
     }
 };
-const shallowReactiveHandlers = /*#__PURE__*/ shared_esm_bundler_extend({}, mutableHandlers, {
+const shallowReactiveHandlers = /*#__PURE__*/ extend({}, mutableHandlers, {
     get: shallowGet,
     set: shallowSet
 });
 // Props handlers are special in the sense that it should not unwrap top-level
 // refs (in order to allow refs to be explicitly passed down), but should
 // retain the reactivity of the normal readonly object.
-const shallowReadonlyHandlers = /*#__PURE__*/ shared_esm_bundler_extend({}, readonlyHandlers, {
+const shallowReadonlyHandlers = /*#__PURE__*/ extend({}, readonlyHandlers, {
     get: shallowReadonlyGet
 });
 
@@ -20595,8 +22183,8 @@ function get(target, key, isReadonly = false, isShallow = false) {
     // #1772: readonly(reactive(Map)) should return readonly + reactive version
     // of the value
     target = target["__v_raw" /* ReactiveFlags.RAW */];
-    const rawTarget = reactivity_esm_bundler_toRaw(target);
-    const rawKey = reactivity_esm_bundler_toRaw(key);
+    const rawTarget = toRaw(target);
+    const rawKey = toRaw(key);
     if (!isReadonly) {
         if (key !== rawKey) {
             track(rawTarget, "get" /* TrackOpTypes.GET */, key);
@@ -20619,8 +22207,8 @@ function get(target, key, isReadonly = false, isShallow = false) {
 }
 function has(key, isReadonly = false) {
     const target = this["__v_raw" /* ReactiveFlags.RAW */];
-    const rawTarget = reactivity_esm_bundler_toRaw(target);
-    const rawKey = reactivity_esm_bundler_toRaw(key);
+    const rawTarget = toRaw(target);
+    const rawKey = toRaw(key);
     if (!isReadonly) {
         if (key !== rawKey) {
             track(rawTarget, "has" /* TrackOpTypes.HAS */, key);
@@ -20633,12 +22221,12 @@ function has(key, isReadonly = false) {
 }
 function size(target, isReadonly = false) {
     target = target["__v_raw" /* ReactiveFlags.RAW */];
-    !isReadonly && track(reactivity_esm_bundler_toRaw(target), "iterate" /* TrackOpTypes.ITERATE */, ITERATE_KEY);
+    !isReadonly && track(toRaw(target), "iterate" /* TrackOpTypes.ITERATE */, ITERATE_KEY);
     return Reflect.get(target, 'size', target);
 }
 function add(value) {
-    value = reactivity_esm_bundler_toRaw(value);
-    const target = reactivity_esm_bundler_toRaw(this);
+    value = toRaw(value);
+    const target = toRaw(this);
     const proto = getProto(target);
     const hadKey = proto.has.call(target, value);
     if (!hadKey) {
@@ -20648,34 +22236,36 @@ function add(value) {
     return this;
 }
 function set(key, value) {
-    value = reactivity_esm_bundler_toRaw(value);
-    const target = reactivity_esm_bundler_toRaw(this);
+    value = toRaw(value);
+    const target = toRaw(this);
     const { has, get } = getProto(target);
     let hadKey = has.call(target, key);
     if (!hadKey) {
-        key = reactivity_esm_bundler_toRaw(key);
+        key = toRaw(key);
         hadKey = has.call(target, key);
     }
-    else if ((false)) {}
+    else if ((false)) // removed by dead control flow
+{}
     const oldValue = get.call(target, key);
     target.set(key, value);
     if (!hadKey) {
         trigger(target, "add" /* TriggerOpTypes.ADD */, key, value);
     }
-    else if (shared_esm_bundler_hasChanged(value, oldValue)) {
+    else if (hasChanged(value, oldValue)) {
         trigger(target, "set" /* TriggerOpTypes.SET */, key, value, oldValue);
     }
     return this;
 }
 function deleteEntry(key) {
-    const target = reactivity_esm_bundler_toRaw(this);
+    const target = toRaw(this);
     const { has, get } = getProto(target);
     let hadKey = has.call(target, key);
     if (!hadKey) {
-        key = reactivity_esm_bundler_toRaw(key);
+        key = toRaw(key);
         hadKey = has.call(target, key);
     }
-    else if ((false)) {}
+    else if ((false)) // removed by dead control flow
+{}
     const oldValue = get ? get.call(target, key) : undefined;
     // forward the operation before queueing reactions
     const result = target.delete(key);
@@ -20685,7 +22275,7 @@ function deleteEntry(key) {
     return result;
 }
 function clear() {
-    const target = reactivity_esm_bundler_toRaw(this);
+    const target = toRaw(this);
     const hadItems = target.size !== 0;
     const oldTarget = ( false)
         ? 0
@@ -20701,7 +22291,7 @@ function createForEach(isReadonly, isShallow) {
     return function forEach(callback, thisArg) {
         const observed = this;
         const target = observed["__v_raw" /* ReactiveFlags.RAW */];
-        const rawTarget = reactivity_esm_bundler_toRaw(target);
+        const rawTarget = toRaw(target);
         const wrap = isShallow ? toShallow : isReadonly ? toReadonly : toReactive;
         !isReadonly && track(rawTarget, "iterate" /* TrackOpTypes.ITERATE */, ITERATE_KEY);
         return target.forEach((value, key) => {
@@ -20715,7 +22305,7 @@ function createForEach(isReadonly, isShallow) {
 function createIterableMethod(method, isReadonly, isShallow) {
     return function (...args) {
         const target = this["__v_raw" /* ReactiveFlags.RAW */];
-        const rawTarget = reactivity_esm_bundler_toRaw(target);
+        const rawTarget = toRaw(target);
         const targetIsMap = isMap(rawTarget);
         const isPair = method === 'entries' || (method === Symbol.iterator && targetIsMap);
         const isKeyOnly = method === 'keys' && targetIsMap;
@@ -20745,7 +22335,8 @@ function createIterableMethod(method, isReadonly, isShallow) {
 }
 function createReadonlyMethod(type) {
     return function (...args) {
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
         return type === "delete" /* TriggerOpTypes.DELETE */ ? false : this;
     };
 }
@@ -20843,7 +22434,7 @@ function createInstrumentationGetter(isReadonly, shallow) {
         else if (key === "__v_raw" /* ReactiveFlags.RAW */) {
             return target;
         }
-        return Reflect.get(shared_esm_bundler_hasOwn(instrumentations, key) && key in target
+        return Reflect.get(hasOwn(instrumentations, key) && key in target
             ? instrumentations
             : target, key, receiver);
     };
@@ -20861,9 +22452,9 @@ const shallowReadonlyCollectionHandlers = {
     get: /*#__PURE__*/ createInstrumentationGetter(true, true)
 };
 function checkIdentityKeys(target, has, key) {
-    const rawKey = reactivity_esm_bundler_toRaw(key);
+    const rawKey = toRaw(key);
     if (rawKey !== key && has.call(target, rawKey)) {
-        const type = toRawType(target);
+        const type = reactivity_esm_bundler_toRawType(target);
         console.warn(`Reactive ${type} contains both the raw and reactive ` +
             `versions of the same object${type === `Map` ? ` as keys` : ``}, ` +
             `which can lead to inconsistencies. ` +
@@ -20893,11 +22484,11 @@ function targetTypeMap(rawType) {
 function getTargetType(value) {
     return value["__v_skip" /* ReactiveFlags.SKIP */] || !Object.isExtensible(value)
         ? 0 /* TargetType.INVALID */
-        : targetTypeMap(shared_esm_bundler_toRawType(value));
+        : targetTypeMap(toRawType(value));
 }
 function reactive(target) {
     // if trying to observe a readonly proxy, return the readonly version.
-    if (reactivity_esm_bundler_isReadonly(target)) {
+    if (isReadonly(target)) {
         return target;
     }
     return createReactiveObject(target, false, mutableHandlers, mutableCollectionHandlers, reactiveMap);
@@ -20927,8 +22518,9 @@ function shallowReadonly(target) {
     return createReactiveObject(target, true, shallowReadonlyHandlers, shallowReadonlyCollectionHandlers, shallowReadonlyMap);
 }
 function createReactiveObject(target, isReadonly, baseHandlers, collectionHandlers, proxyMap) {
-    if (!shared_esm_bundler_isObject(target)) {
-        if ((false)) {}
+    if (!isObject(target)) {
+        if ((false)) // removed by dead control flow
+{}
         return target;
     }
     // target is already a Proxy, return it.
@@ -20951,62 +22543,64 @@ function createReactiveObject(target, isReadonly, baseHandlers, collectionHandle
     proxyMap.set(target, proxy);
     return proxy;
 }
-function reactivity_esm_bundler_isReactive(value) {
-    if (reactivity_esm_bundler_isReadonly(value)) {
-        return reactivity_esm_bundler_isReactive(value["__v_raw" /* ReactiveFlags.RAW */]);
+function isReactive(value) {
+    if (isReadonly(value)) {
+        return isReactive(value["__v_raw" /* ReactiveFlags.RAW */]);
     }
     return !!(value && value["__v_isReactive" /* ReactiveFlags.IS_REACTIVE */]);
 }
-function reactivity_esm_bundler_isReadonly(value) {
+function isReadonly(value) {
     return !!(value && value["__v_isReadonly" /* ReactiveFlags.IS_READONLY */]);
 }
 function isShallow(value) {
     return !!(value && value["__v_isShallow" /* ReactiveFlags.IS_SHALLOW */]);
 }
 function isProxy(value) {
-    return reactivity_esm_bundler_isReactive(value) || reactivity_esm_bundler_isReadonly(value);
+    return isReactive(value) || isReadonly(value);
 }
-function reactivity_esm_bundler_toRaw(observed) {
+function toRaw(observed) {
     const raw = observed && observed["__v_raw" /* ReactiveFlags.RAW */];
-    return raw ? reactivity_esm_bundler_toRaw(raw) : observed;
+    return raw ? toRaw(raw) : observed;
 }
 function markRaw(value) {
     def(value, "__v_skip" /* ReactiveFlags.SKIP */, true);
     return value;
 }
-const toReactive = (value) => shared_esm_bundler_isObject(value) ? reactive(value) : value;
-const toReadonly = (value) => shared_esm_bundler_isObject(value) ? readonly(value) : value;
+const toReactive = (value) => isObject(value) ? reactive(value) : value;
+const toReadonly = (value) => isObject(value) ? readonly(value) : value;
 
 function trackRefValue(ref) {
     if (shouldTrack && activeEffect) {
-        ref = reactivity_esm_bundler_toRaw(ref);
-        if ((false)) {}
+        ref = toRaw(ref);
+        if ((false)) // removed by dead control flow
+{}
         else {
             trackEffects(ref.dep || (ref.dep = createDep()));
         }
     }
 }
 function triggerRefValue(ref, newVal) {
-    ref = reactivity_esm_bundler_toRaw(ref);
+    ref = toRaw(ref);
     const dep = ref.dep;
     if (dep) {
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
         else {
             triggerEffects(dep);
         }
     }
 }
-function reactivity_esm_bundler_isRef(r) {
+function isRef(r) {
     return !!(r && r.__v_isRef === true);
 }
-function reactivity_esm_bundler_ref(value) {
+function ref(value) {
     return createRef(value, false);
 }
 function shallowRef(value) {
     return createRef(value, true);
 }
 function createRef(rawValue, shallow) {
-    if (reactivity_esm_bundler_isRef(rawValue)) {
+    if (isRef(rawValue)) {
         return rawValue;
     }
     return new RefImpl(rawValue, shallow);
@@ -21016,7 +22610,7 @@ class RefImpl {
         this.__v_isShallow = __v_isShallow;
         this.dep = undefined;
         this.__v_isRef = true;
-        this._rawValue = __v_isShallow ? value : reactivity_esm_bundler_toRaw(value);
+        this._rawValue = __v_isShallow ? value : toRaw(value);
         this._value = __v_isShallow ? value : toReactive(value);
     }
     get value() {
@@ -21024,9 +22618,9 @@ class RefImpl {
         return this._value;
     }
     set value(newVal) {
-        const useDirectValue = this.__v_isShallow || isShallow(newVal) || reactivity_esm_bundler_isReadonly(newVal);
-        newVal = useDirectValue ? newVal : reactivity_esm_bundler_toRaw(newVal);
-        if (hasChanged(newVal, this._rawValue)) {
+        const useDirectValue = this.__v_isShallow || isShallow(newVal) || isReadonly(newVal);
+        newVal = useDirectValue ? newVal : toRaw(newVal);
+        if (reactivity_esm_bundler_hasChanged(newVal, this._rawValue)) {
             this._rawValue = newVal;
             this._value = useDirectValue ? newVal : toReactive(newVal);
             triggerRefValue(this, newVal);
@@ -21037,13 +22631,13 @@ function triggerRef(ref) {
     triggerRefValue(ref, ( false) ? 0 : void 0);
 }
 function unref(ref) {
-    return reactivity_esm_bundler_isRef(ref) ? ref.value : ref;
+    return isRef(ref) ? ref.value : ref;
 }
 const shallowUnwrapHandlers = {
     get: (target, key, receiver) => unref(Reflect.get(target, key, receiver)),
     set: (target, key, value, receiver) => {
         const oldValue = target[key];
-        if (reactivity_esm_bundler_isRef(oldValue) && !reactivity_esm_bundler_isRef(value)) {
+        if (isRef(oldValue) && !isRef(value)) {
             oldValue.value = value;
             return true;
         }
@@ -21053,7 +22647,7 @@ const shallowUnwrapHandlers = {
     }
 };
 function proxyRefs(objectWithRefs) {
-    return reactivity_esm_bundler_isReactive(objectWithRefs)
+    return isReactive(objectWithRefs)
         ? objectWithRefs
         : new Proxy(objectWithRefs, shallowUnwrapHandlers);
 }
@@ -21076,8 +22670,9 @@ function customRef(factory) {
     return new CustomRefImpl(factory);
 }
 function toRefs(object) {
-    if (false) {}
-    const ret = isArray(object) ? new Array(object.length) : {};
+    if (false) // removed by dead control flow
+{}
+    const ret = reactivity_esm_bundler_isArray(object) ? new Array(object.length) : {};
     for (const key in object) {
         ret[key] = toRef(object, key);
     }
@@ -21098,12 +22693,12 @@ class ObjectRefImpl {
         this._object[this._key] = newVal;
     }
     get dep() {
-        return getDepFromReactive(reactivity_esm_bundler_toRaw(this._object), this._key);
+        return getDepFromReactive(toRaw(this._object), this._key);
     }
 }
 function toRef(object, key, defaultValue) {
     const val = object[key];
-    return reactivity_esm_bundler_isRef(val)
+    return isRef(val)
         ? val
         : new ObjectRefImpl(object, key, defaultValue);
 }
@@ -21128,7 +22723,7 @@ class ComputedRefImpl {
     }
     get value() {
         // the computed ref may get wrapped by other proxies e.g. readonly() #3376
-        const self = reactivity_esm_bundler_toRaw(this);
+        const self = toRaw(this);
         trackRefValue(self);
         if (self._dirty || !self._cacheable) {
             self._dirty = false;
@@ -21144,19 +22739,20 @@ _a$1 = "__v_isReadonly" /* ReactiveFlags.IS_READONLY */;
 function computed(getterOrOptions, debugOptions, isSSR = false) {
     let getter;
     let setter;
-    const onlyGetter = shared_esm_bundler_isFunction(getterOrOptions);
+    const onlyGetter = isFunction(getterOrOptions);
     if (onlyGetter) {
         getter = getterOrOptions;
         setter = ( false)
             ? 0
-            : shared_esm_bundler_NOOP;
+            : NOOP;
     }
     else {
         getter = getterOrOptions.get;
         setter = getterOrOptions.set;
     }
     const cRef = new ComputedRefImpl(getter, setter, onlyGetter || !setter, isSSR);
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     return cRef;
 }
 
@@ -21227,7 +22823,7 @@ class DeferredComputedRefImpl {
     get value() {
         trackRefValue(this);
         // the computed ref may get wrapped by other proxies e.g. readonly() #3376
-        return reactivity_esm_bundler_toRaw(this)._get();
+        return toRaw(this)._get();
     }
 }
 _a = "__v_isReadonly" /* ReactiveFlags.IS_READONLY */;
@@ -21237,13 +22833,35 @@ function deferredComputed(getter) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js
+;// ./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js
+/* unused harmony import specifier */ var runtime_core_esm_bundler_isRef;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_toRaw;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_ref;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_isString;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_isFunction;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_extend;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_isBuiltInDirective;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_isArray;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_toHandlerKey;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_NOOP;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_hasOwn;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_hyphenate;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_makeMap;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_isObject;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_capitalize;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_toRawType;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_isOn;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_isReservedProp;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_NO;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_isPromise;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_EMPTY_OBJ;
+/* unused harmony import specifier */ var runtime_core_esm_bundler_hasChanged;
 
 
 
 
 
-const stack = [];
+const stack = (/* unused pure expression or super */ null && ([]));
 function pushWarningContext(vnode) {
     stack.push(vnode);
 }
@@ -21255,31 +22873,18 @@ function runtime_core_esm_bundler_warn(msg, ...args) {
         return;
     // avoid props formatting or warn handler tracking deps that might be mutated
     // during patch, leading to infinite recursion.
-    pauseTracking();
-    const instance = stack.length ? stack[stack.length - 1].component : null;
-    const appWarnHandler = instance && instance.appContext.config.warnHandler;
-    const trace = getComponentTrace();
-    if (appWarnHandler) {
-        callWithErrorHandling(appWarnHandler, instance, 11 /* ErrorCodes.APP_WARN_HANDLER */, [
-            msg + args.join(''),
-            instance && instance.proxy,
-            trace
-                .map(({ vnode }) => `at <${formatComponentName(instance, vnode.type)}>`)
-                .join('\n'),
-            trace
-        ]);
-    }
-    else {
-        const warnArgs = [`[Vue warn]: ${msg}`, ...args];
-        /* istanbul ignore if */
-        if (trace.length &&
-            // avoid spamming console during tests
-            !false) {
-            warnArgs.push(`\n`, ...formatTrace(trace));
-        }
-        console.warn(...warnArgs);
-    }
-    resetTracking();
+    // removed by dead control flow
+
+    // removed by dead control flow
+
+    // removed by dead control flow
+
+    // removed by dead control flow
+
+    // removed by dead control flow
+
+    // removed by dead control flow
+
 }
 function getComponentTrace() {
     let currentVNode = stack[stack.length - 1];
@@ -21337,7 +22942,7 @@ function formatProps(props) {
 }
 /* istanbul ignore next */
 function formatProp(key, value, raw) {
-    if (isString(value)) {
+    if (runtime_core_esm_bundler_isString(value)) {
         value = JSON.stringify(value);
         return raw ? value : [`${key}=${value}`];
     }
@@ -21346,15 +22951,15 @@ function formatProp(key, value, raw) {
         value == null) {
         return raw ? value : [`${key}=${value}`];
     }
-    else if (reactivity_esm_bundler_isRef(value)) {
-        value = formatProp(key, reactivity_esm_bundler_toRaw(value.value), true);
+    else if (runtime_core_esm_bundler_isRef(value)) {
+        value = formatProp(key, runtime_core_esm_bundler_toRaw(value.value), true);
         return raw ? value : [`${key}=Ref<`, value, `>`];
     }
-    else if (shared_esm_bundler_isFunction(value)) {
+    else if (runtime_core_esm_bundler_isFunction(value)) {
         return [`${key}=fn${value.name ? `<${value.name}>` : ``}`];
     }
     else {
-        value = reactivity_esm_bundler_toRaw(value);
+        value = runtime_core_esm_bundler_toRaw(value);
         return raw ? value : [`${key}=`, value];
     }
 }
@@ -21364,15 +22969,8 @@ function formatProp(key, value, raw) {
 function assertNumber(val, type) {
     if (true)
         return;
-    if (val === undefined) {
-        return;
-    }
-    else if (typeof val !== 'number') {
-        runtime_core_esm_bundler_warn(`${type} is not a valid number - ` + `got ${JSON.stringify(val)}.`);
-    }
-    else if (isNaN(val)) {
-        runtime_core_esm_bundler_warn(`${type} is NaN - ` + 'the duration expression might be incorrect.');
-    }
+    // removed by dead control flow
+
 }
 
 const ErrorTypeStrings = {
@@ -21418,9 +23016,9 @@ function callWithErrorHandling(fn, instance, type, args) {
     return res;
 }
 function callWithAsyncErrorHandling(fn, instance, type, args) {
-    if (shared_esm_bundler_isFunction(fn)) {
+    if (isFunction(fn)) {
         const res = callWithErrorHandling(fn, instance, type, args);
-        if (res && shared_esm_bundler_isPromise(res)) {
+        if (res && isPromise(res)) {
             res.catch(err => {
                 handleError(err, instance, type);
             });
@@ -21462,7 +23060,8 @@ function handleError(err, instance, type, throwInDev = true) {
     logError(err, type, contextVNode, throwInDev);
 }
 function logError(err, type, contextVNode, throwInDev = true) {
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     else {
         // recover in prod to reduce the impact on end-user
         console.error(err);
@@ -21479,7 +23078,7 @@ let postFlushIndex = 0;
 const resolvedPromise = /*#__PURE__*/ Promise.resolve();
 let currentFlushPromise = null;
 const RECURSION_LIMIT = 100;
-function runtime_core_esm_bundler_nextTick(fn) {
+function nextTick(fn) {
     const p = currentFlushPromise || resolvedPromise;
     return fn ? p.then(this ? fn.bind(this) : fn) : p;
 }
@@ -21529,7 +23128,7 @@ function invalidateJob(job) {
     }
 }
 function queuePostFlushCb(cb) {
-    if (!shared_esm_bundler_isArray(cb)) {
+    if (!isArray(cb)) {
         if (!activePostFlushCbs ||
             !activePostFlushCbs.includes(cb, cb.allowRecurse ? postFlushIndex + 1 : postFlushIndex)) {
             pendingPostFlushCbs.push(cb);
@@ -21546,11 +23145,13 @@ function queuePostFlushCb(cb) {
 function flushPreFlushCbs(seen, 
 // if currently flushing, skip the current job itself
 i = isFlushing ? flushIndex + 1 : 0) {
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     for (; i < runtime_core_esm_bundler_queue.length; i++) {
         const cb = runtime_core_esm_bundler_queue[i];
         if (cb && cb.pre) {
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
             runtime_core_esm_bundler_queue.splice(i, 1);
             i--;
             cb();
@@ -21567,10 +23168,12 @@ function flushPostFlushCbs(seen) {
             return;
         }
         activePostFlushCbs = deduped;
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
         activePostFlushCbs.sort((a, b) => getId(a) - getId(b));
         for (postFlushIndex = 0; postFlushIndex < activePostFlushCbs.length; postFlushIndex++) {
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
             activePostFlushCbs[postFlushIndex]();
         }
         activePostFlushCbs = null;
@@ -21591,7 +23194,8 @@ const comparator = (a, b) => {
 function flushJobs(seen) {
     isFlushPending = false;
     isFlushing = true;
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     // Sort queue before flush.
     // This ensures that:
     // 1. Components are updated from parent to child. (because parent is always
@@ -21607,12 +23211,13 @@ function flushJobs(seen) {
     // would fail to do that (e.g. https://github.com/evanw/esbuild/issues/1610)
     const check = ( false)
         ? 0
-        : shared_esm_bundler_NOOP;
+        : NOOP;
     try {
         for (flushIndex = 0; flushIndex < runtime_core_esm_bundler_queue.length; flushIndex++) {
             const job = runtime_core_esm_bundler_queue[flushIndex];
             if (job && job.active !== false) {
-                if (false) {}
+                if (false) // removed by dead control flow
+{}
                 // console.log(`running:`, job.id)
                 callWithErrorHandling(job, null, 14 /* ErrorCodes.SCHEDULER */);
             }
@@ -21661,7 +23266,8 @@ const hmrDirtyComponents = new Set();
 // it easier to be used in toolings like vue-loader
 // Note: for a component to be eligible for HMR it also needs the __hmrId option
 // to be set so that its instances can be registered / removed.
-if ((false)) {}
+if ((false)) // removed by dead control flow
+{}
 const map = new Map();
 function registerHMR(instance) {
     const id = instance.type.__hmrId;
@@ -21762,7 +23368,7 @@ function reload(id, newComp) {
     });
 }
 function updateComponentDef(oldComp, newComp) {
-    extend(oldComp, newComp);
+    runtime_core_esm_bundler_extend(oldComp, newComp);
     for (const key in oldComp) {
         if (key !== '__file' && !(key in newComp)) {
             delete oldComp[key];
@@ -21833,10 +23439,10 @@ function setDevtoolsHook(hook, target) {
 }
 function devtoolsInitApp(app, version) {
     emit$1("app:init" /* DevtoolsHooks.APP_INIT */, app, version, {
-        Fragment: runtime_core_esm_bundler_Fragment,
+        Fragment,
         Text,
         Comment,
-        Static: runtime_core_esm_bundler_Static
+        Static
     });
 }
 function devtoolsUnmountApp(app) {
@@ -21873,15 +23479,16 @@ function devtoolsComponentEmit(component, event, params) {
 function emit(instance, event, ...rawArgs) {
     if (instance.isUnmounted)
         return;
-    const props = instance.vnode.props || shared_esm_bundler_EMPTY_OBJ;
-    if ((false)) {}
+    const props = instance.vnode.props || EMPTY_OBJ;
+    if ((false)) // removed by dead control flow
+{}
     let args = rawArgs;
     const isModelListener = event.startsWith('update:');
     // for v-model update:xxx events, apply modifiers on args
     const modelArg = isModelListener && event.slice(7);
     if (modelArg && modelArg in props) {
         const modifiersKey = `${modelArg === 'modelValue' ? 'model' : modelArg}Modifiers`;
-        const { number, trim } = props[modifiersKey] || shared_esm_bundler_EMPTY_OBJ;
+        const { number, trim } = props[modifiersKey] || EMPTY_OBJ;
         if (trim) {
             args = rawArgs.map(a => (isString(a) ? a.trim() : a));
         }
@@ -21889,16 +23496,18 @@ function emit(instance, event, ...rawArgs) {
             args = rawArgs.map(looseToNumber);
         }
     }
-    if (false) {}
-    if ((false)) {}
+    if (false) // removed by dead control flow
+{}
+    if ((false)) // removed by dead control flow
+{}
     let handlerName;
-    let handler = props[(handlerName = shared_esm_bundler_toHandlerKey(event))] ||
+    let handler = props[(handlerName = toHandlerKey(event))] ||
         // also try camelCase event handler (#2249)
-        props[(handlerName = shared_esm_bundler_toHandlerKey(camelize(event)))];
+        props[(handlerName = toHandlerKey(camelize(event)))];
     // for v-model update:xxx events, also trigger kebab-case equivalent
     // for props passed via kebab-case
     if (!handler && isModelListener) {
-        handler = props[(handlerName = shared_esm_bundler_toHandlerKey(shared_esm_bundler_hyphenate(event)))];
+        handler = props[(handlerName = toHandlerKey(hyphenate(event)))];
     }
     if (handler) {
         callWithAsyncErrorHandling(handler, instance, 6 /* ErrorCodes.COMPONENT_EVENT_HANDLER */, args);
@@ -21925,12 +23534,12 @@ function normalizeEmitsOptions(comp, appContext, asMixin = false) {
     let normalized = {};
     // apply mixin/extends props
     let hasExtends = false;
-    if ( true && !shared_esm_bundler_isFunction(comp)) {
+    if ( true && !isFunction(comp)) {
         const extendEmits = (raw) => {
             const normalizedFromExtend = normalizeEmitsOptions(raw, appContext, true);
             if (normalizedFromExtend) {
                 hasExtends = true;
-                shared_esm_bundler_extend(normalized, normalizedFromExtend);
+                extend(normalized, normalizedFromExtend);
             }
         };
         if (!asMixin && appContext.mixins.length) {
@@ -21944,18 +23553,18 @@ function normalizeEmitsOptions(comp, appContext, asMixin = false) {
         }
     }
     if (!raw && !hasExtends) {
-        if (shared_esm_bundler_isObject(comp)) {
+        if (isObject(comp)) {
             cache.set(comp, null);
         }
         return null;
     }
-    if (shared_esm_bundler_isArray(raw)) {
+    if (isArray(raw)) {
         raw.forEach(key => (normalized[key] = null));
     }
     else {
-        shared_esm_bundler_extend(normalized, raw);
+        extend(normalized, raw);
     }
-    if (shared_esm_bundler_isObject(comp)) {
+    if (isObject(comp)) {
         cache.set(comp, normalized);
     }
     return normalized;
@@ -21964,13 +23573,13 @@ function normalizeEmitsOptions(comp, appContext, asMixin = false) {
 // e.g. With `emits: { click: null }`, props named `onClick` and `onclick` are
 // both considered matched listeners.
 function isEmitListener(options, key) {
-    if (!options || !shared_esm_bundler_isOn(key)) {
+    if (!options || !isOn(key)) {
         return false;
     }
     key = key.slice(2).replace(/Once$/, '');
-    return (shared_esm_bundler_hasOwn(options, key[0].toLowerCase() + key.slice(1)) ||
-        shared_esm_bundler_hasOwn(options, shared_esm_bundler_hyphenate(key)) ||
-        shared_esm_bundler_hasOwn(options, key));
+    return (hasOwn(options, key[0].toLowerCase() + key.slice(1)) ||
+        hasOwn(options, hyphenate(key)) ||
+        hasOwn(options, key));
 }
 
 /**
@@ -22047,7 +23656,8 @@ function withCtx(fn, ctx = currentRenderingInstance, isNonScopedSlot // false on
                 setBlockTracking(1);
             }
         }
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         return res;
     };
     // mark normalized to avoid duplicated wrapping
@@ -22075,7 +23685,8 @@ function renderComponentRoot(instance) {
     let result;
     let fallthroughAttrs;
     const prev = setCurrentRenderingInstance(instance);
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     try {
         if (vnode.shapeFlag & 4 /* ShapeFlags.STATEFUL_COMPONENT */) {
             // withProxy is a proxy with a different `has` trap only for
@@ -22088,7 +23699,8 @@ function renderComponentRoot(instance) {
             // functional
             const render = Component;
             // in dev, mark attrs accessed if optional props (attrs === props)
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
             result = normalizeVNode(render.length > 1
                 ? render(props, ( false)
                     ? 0
@@ -22102,14 +23714,15 @@ function renderComponentRoot(instance) {
     catch (err) {
         blockStack.length = 0;
         handleError(err, instance, 1 /* ErrorCodes.RENDER_FUNCTION */);
-        result = runtime_core_esm_bundler_createVNode(Comment);
+        result = createVNode(Comment);
     }
     // attr merging
     // in dev mode, comments are preserved, and it's possible for a template
     // to have comments along side the root element which makes it a fragment
     let root = result;
     let setRoot = undefined;
-    if (false /* PatchFlags.DEV_ROOT_FRAGMENT */) {}
+    if (false /* PatchFlags.DEV_ROOT_FRAGMENT */) // removed by dead control flow
+{}
     if (fallthroughAttrs && inheritAttrs !== false) {
         const keys = Object.keys(fallthroughAttrs);
         const { shapeFlag } = root;
@@ -22124,22 +23737,26 @@ function renderComponentRoot(instance) {
                 }
                 root = cloneVNode(root, fallthroughAttrs);
             }
-            else if (false) {}
+            else if (false) // removed by dead control flow
+{}
         }
     }
     // inherit directives
     if (vnode.dirs) {
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         // clone before mutating since the root may be a hoisted vnode
         root = cloneVNode(root);
         root.dirs = root.dirs ? root.dirs.concat(vnode.dirs) : vnode.dirs;
     }
     // inherit transition data
     if (vnode.transition) {
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         root.transition = vnode.transition;
     }
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     else {
         result = root;
     }
@@ -22199,7 +23816,7 @@ function filterSingleRoot(children) {
 const getFunctionalFallthrough = (attrs) => {
     let res;
     for (const key in attrs) {
-        if (key === 'class' || key === 'style' || shared_esm_bundler_isOn(key)) {
+        if (key === 'class' || key === 'style' || isOn(key)) {
             (res || (res = {}))[key] = attrs[key];
         }
     }
@@ -22226,7 +23843,8 @@ function shouldUpdateComponent(prevVNode, nextVNode, optimized) {
     // Parent component's render function was hot-updated. Since this may have
     // caused the child component's slots content to have changed, we need to
     // force the child to update as well.
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     // force child update for runtime directive or transition on component vnode.
     if (nextVNode.dirs || nextVNode.transition) {
         return true;
@@ -22328,7 +23946,7 @@ const Suspense = ((/* unused pure expression or super */ null && (SuspenseImpl))
     );
 function triggerEvent(vnode, name) {
     const eventListener = vnode.props && vnode.props[name];
-    if (shared_esm_bundler_isFunction(eventListener)) {
+    if (isFunction(eventListener)) {
         eventListener();
     }
 }
@@ -22459,10 +24077,12 @@ function patchSuspense(n1, n2, container, anchor, parentComponent, isSVG, slotSc
 let hasWarned = false;
 function createSuspenseBoundary(vnode, parent, parentComponent, container, hiddenContainer, anchor, isSVG, slotScopeIds, optimized, rendererInternals, isHydrating = false) {
     /* istanbul ignore if */
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     const { p: patch, m: move, um: unmount, n: next, o: { parentNode, remove } } = rendererInternals;
-    const timeout = vnode.props ? shared_esm_bundler_toNumber(vnode.props.timeout) : undefined;
-    if ((false)) {}
+    const timeout = vnode.props ? toNumber(vnode.props.timeout) : undefined;
+    if ((false)) // removed by dead control flow
+{}
     const suspense = {
         vnode,
         parent,
@@ -22481,7 +24101,8 @@ function createSuspenseBoundary(vnode, parent, parentComponent, container, hidde
         isUnmounted: false,
         effects: [],
         resolve(resume = false) {
-            if ((false)) {}
+            if ((false)) // removed by dead control flow
+{}
             const { vnode, activeBranch, pendingBranch, pendingId, effects, parentComponent, container } = suspense;
             if (suspense.isHydrating) {
                 suspense.isHydrating = false;
@@ -22595,7 +24216,8 @@ function createSuspenseBoundary(vnode, parent, parentComponent, container, hidde
                 // retry from this component
                 instance.asyncResolved = true;
                 const { vnode } = instance;
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 handleSetupResult(instance, asyncSetupResult, false);
                 if (hydratedEl) {
                     // vnode may have been replaced if an update happened before the
@@ -22615,7 +24237,8 @@ function createSuspenseBoundary(vnode, parent, parentComponent, container, hidde
                     remove(placeholder);
                 }
                 updateHOCHostEl(instance, vnode.el);
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 // only decrease deps count if suspense is not already resolved
                 if (isInPendingSuspense && --suspense.deps === 0) {
                     suspense.resolve();
@@ -22656,11 +24279,11 @@ function normalizeSuspenseChildren(vnode) {
     vnode.ssContent = normalizeSuspenseSlot(isSlotChildren ? children.default : children);
     vnode.ssFallback = isSlotChildren
         ? normalizeSuspenseSlot(children.fallback)
-        : runtime_core_esm_bundler_createVNode(Comment);
+        : createVNode(Comment);
 }
 function normalizeSuspenseSlot(s) {
     let block;
-    if (shared_esm_bundler_isFunction(s)) {
+    if (isFunction(s)) {
         const trackBlock = isBlockTreeEnabled && s._c;
         if (trackBlock) {
             // disableTracking: false
@@ -22676,9 +24299,10 @@ function normalizeSuspenseSlot(s) {
             closeBlock();
         }
     }
-    if (shared_esm_bundler_isArray(s)) {
+    if (isArray(s)) {
         const singleChild = filterSingleRoot(s);
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         s = singleChild;
     }
     s = normalizeVNode(s);
@@ -22689,7 +24313,7 @@ function normalizeSuspenseSlot(s) {
 }
 function queueEffectWithSuspense(fn, suspense) {
     if (suspense && suspense.pendingBranch) {
-        if (shared_esm_bundler_isArray(fn)) {
+        if (isArray(fn)) {
             suspense.effects.push(...fn);
         }
         else {
@@ -22714,7 +24338,8 @@ function setActiveBranch(suspense, branch) {
 
 function provide(key, value) {
     if (!currentInstance) {
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
     }
     else {
         let provides = currentInstance.provides;
@@ -22747,20 +24372,22 @@ function inject(key, defaultValue, treatDefaultAsFactory = false) {
             return provides[key];
         }
         else if (arguments.length > 1) {
-            return treatDefaultAsFactory && shared_esm_bundler_isFunction(defaultValue)
+            return treatDefaultAsFactory && isFunction(defaultValue)
                 ? defaultValue.call(instance.proxy)
                 : defaultValue;
         }
-        else if ((false)) {}
+        else if ((false)) // removed by dead control flow
+{}
     }
-    else if ((false)) {}
+    else if ((false)) // removed by dead control flow
+{}
 }
 
 // Simple effect.
 function watchEffect(effect, options) {
     return doWatch(effect, null, options);
 }
-function runtime_core_esm_bundler_watchPostEffect(effect, options) {
+function watchPostEffect(effect, options) {
     return doWatch(effect, null, ( false) ? 0 : { flush: 'post' });
 }
 function watchSyncEffect(effect, options) {
@@ -22770,11 +24397,13 @@ function watchSyncEffect(effect, options) {
 const INITIAL_WATCHER_VALUE = {};
 // implementation
 function watch(source, cb, options) {
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     return doWatch(source, cb, options);
 }
-function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = shared_esm_bundler_EMPTY_OBJ) {
-    if (false) {}
+function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = EMPTY_OBJ) {
+    if (false) // removed by dead control flow
+{}
     const warnInvalidSource = (s) => {
         runtime_core_esm_bundler_warn(`Invalid watch source: `, s, `A watch source can only be a getter/effect function, a ref, ` +
             `a reactive object, or an array of these types.`);
@@ -22784,25 +24413,25 @@ function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = sh
     let getter;
     let forceTrigger = false;
     let isMultiSource = false;
-    if (reactivity_esm_bundler_isRef(source)) {
+    if (isRef(source)) {
         getter = () => source.value;
         forceTrigger = isShallow(source);
     }
-    else if (reactivity_esm_bundler_isReactive(source)) {
+    else if (isReactive(source)) {
         getter = () => source;
         deep = true;
     }
-    else if (shared_esm_bundler_isArray(source)) {
+    else if (isArray(source)) {
         isMultiSource = true;
-        forceTrigger = source.some(s => reactivity_esm_bundler_isReactive(s) || isShallow(s));
+        forceTrigger = source.some(s => isReactive(s) || isShallow(s));
         getter = () => source.map(s => {
-            if (reactivity_esm_bundler_isRef(s)) {
+            if (isRef(s)) {
                 return s.value;
             }
-            else if (reactivity_esm_bundler_isReactive(s)) {
+            else if (isReactive(s)) {
                 return traverse(s);
             }
-            else if (shared_esm_bundler_isFunction(s)) {
+            else if (isFunction(s)) {
                 return callWithErrorHandling(s, instance, 2 /* ErrorCodes.WATCH_GETTER */);
             }
             else {
@@ -22810,7 +24439,7 @@ function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = sh
             }
         });
     }
-    else if (shared_esm_bundler_isFunction(source)) {
+    else if (isFunction(source)) {
         if (cb) {
             // getter with cb
             getter = () => callWithErrorHandling(source, instance, 2 /* ErrorCodes.WATCH_GETTER */);
@@ -22829,7 +24458,7 @@ function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = sh
         }
     }
     else {
-        getter = shared_esm_bundler_NOOP;
+        getter = NOOP;
         ( false) && 0;
     }
     if (cb && deep) {
@@ -22847,7 +24476,7 @@ function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = sh
     let ssrCleanup;
     if (isInSSRComponentSetup) {
         // we will also not call the invalidate callback (+ runner is not set up)
-        onCleanup = shared_esm_bundler_NOOP;
+        onCleanup = NOOP;
         if (!cb) {
             getter();
         }
@@ -22863,7 +24492,7 @@ function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = sh
             ssrCleanup = ctx.__watcherHandles || (ctx.__watcherHandles = []);
         }
         else {
-            return shared_esm_bundler_NOOP;
+            return NOOP;
         }
     }
     let oldValue = isMultiSource
@@ -22879,8 +24508,8 @@ function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = sh
             if (deep ||
                 forceTrigger ||
                 (isMultiSource
-                    ? newValue.some((v, i) => shared_esm_bundler_hasChanged(v, oldValue[i]))
-                    : shared_esm_bundler_hasChanged(newValue, oldValue)) ||
+                    ? newValue.some((v, i) => hasChanged(v, oldValue[i]))
+                    : hasChanged(newValue, oldValue)) ||
                 (false  )) {
                 // cleanup before running cb again
                 if (cleanup) {
@@ -22922,7 +24551,8 @@ function doWatch(source, cb, { immediate, deep, flush, onTrack, onTrigger } = sh
         scheduler = () => queueJob(job);
     }
     const effect = new ReactiveEffect(getter, scheduler);
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     // initial run
     if (cb) {
         if (immediate) {
@@ -22957,7 +24587,7 @@ function instanceWatch(source, value, options) {
             : () => publicThis[source]
         : source.bind(publicThis, publicThis);
     let cb;
-    if (shared_esm_bundler_isFunction(value)) {
+    if (isFunction(value)) {
         cb = value;
     }
     else {
@@ -22986,7 +24616,7 @@ function createPathGetter(ctx, path) {
     };
 }
 function traverse(value, seen) {
-    if (!shared_esm_bundler_isObject(value) || value["__v_skip" /* ReactiveFlags.SKIP */]) {
+    if (!isObject(value) || value["__v_skip" /* ReactiveFlags.SKIP */]) {
         return value;
     }
     seen = seen || new Set();
@@ -22994,15 +24624,15 @@ function traverse(value, seen) {
         return value;
     }
     seen.add(value);
-    if (reactivity_esm_bundler_isRef(value)) {
+    if (isRef(value)) {
         traverse(value.value, seen);
     }
-    else if (shared_esm_bundler_isArray(value)) {
+    else if (isArray(value)) {
         for (let i = 0; i < value.length; i++) {
             traverse(value[i], seen);
         }
     }
-    else if (shared_esm_bundler_isSet(value) || isMap(value)) {
+    else if (isSet(value) || isMap(value)) {
         value.forEach((v) => {
             traverse(v, seen);
         });
@@ -23022,7 +24652,7 @@ function useTransitionState() {
         isUnmounting: false,
         leavingVNodes: new Map()
     };
-    runtime_core_esm_bundler_onMounted(() => {
+    onMounted(() => {
         state.isMounted = true;
     });
     onBeforeUnmount(() => {
@@ -23054,7 +24684,7 @@ const BaseTransitionImpl = {
         onAppearCancelled: TransitionHookValidator
     },
     setup(props, { slots }) {
-        const instance = runtime_core_esm_bundler_getCurrentInstance();
+        const instance = getCurrentInstance();
         const state = useTransitionState();
         let prevTransitionKey;
         return () => {
@@ -23068,7 +24698,8 @@ const BaseTransitionImpl = {
                 // locate first non-comment child
                 for (const c of children) {
                     if (c.type !== Comment) {
-                        if (false) {}
+                        if (false) // removed by dead control flow
+{}
                         child = c;
                         hasFound = true;
                         if (true)
@@ -23078,10 +24709,11 @@ const BaseTransitionImpl = {
             }
             // there's no need to track reactivity for these props so use the raw
             // props for a bit better perf
-            const rawProps = reactivity_esm_bundler_toRaw(props);
+            const rawProps = toRaw(props);
             const { mode } = rawProps;
             // check mode
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
             if (state.isLeaving) {
                 return emptyPlaceholder(child);
             }
@@ -23171,7 +24803,7 @@ function resolveTransitionHooks(vnode, props, state, instance) {
     const callAsyncHook = (hook, args) => {
         const done = args[1];
         callHook(hook, args);
-        if (shared_esm_bundler_isArray(hook)) {
+        if (isArray(hook)) {
             if (hook.every(hook => hook.length <= 1))
                 done();
         }
@@ -23323,7 +24955,7 @@ function getTransitionRawChildren(children, keepComment = false, parentKey) {
             ? child.key
             : String(parentKey) + String(child.key != null ? child.key : i);
         // handle fragment children case, e.g. v-for
-        if (child.type === runtime_core_esm_bundler_Fragment) {
+        if (child.type === Fragment) {
             if (child.patchFlag & 128 /* PatchFlags.KEYED_FRAGMENT */)
                 keyedFragmentCount++;
             ret = ret.concat(getTransitionRawChildren(child.children, keepComment, key));
@@ -23346,13 +24978,13 @@ function getTransitionRawChildren(children, keepComment = false, parentKey) {
 }
 
 // implementation, close to no-op
-function runtime_core_esm_bundler_defineComponent(options) {
-    return shared_esm_bundler_isFunction(options) ? { setup: options, name: options.name } : options;
+function defineComponent(options) {
+    return isFunction(options) ? { setup: options, name: options.name } : options;
 }
 
 const isAsyncWrapper = (i) => !!i.type.__asyncLoader;
 function defineAsyncComponent(source) {
-    if (isFunction(source)) {
+    if (runtime_core_esm_bundler_isFunction(source)) {
         source = { loader: source };
     }
     const { loader, loadingComponent, errorComponent, delay = 200, timeout, // undefined = never times out
@@ -23387,18 +25019,20 @@ function defineAsyncComponent(source) {
                     if (thisRequest !== pendingRequest && pendingRequest) {
                         return pendingRequest;
                     }
-                    if (false) {}
+                    if (false) // removed by dead control flow
+{}
                     // interop module default
                     if (comp &&
                         (comp.__esModule || comp[Symbol.toStringTag] === 'Module')) {
                         comp = comp.default;
                     }
-                    if (false) {}
+                    if (false) // removed by dead control flow
+{}
                     resolvedComp = comp;
                     return comp;
                 })));
     };
-    return runtime_core_esm_bundler_defineComponent({
+    return defineComponent({
         name: 'AsyncComponentWrapper',
         __asyncLoader: load,
         get __asyncResolved() {
@@ -23424,15 +25058,15 @@ function defineAsyncComponent(source) {
                     .catch(err => {
                     onError(err);
                     return () => errorComponent
-                        ? runtime_core_esm_bundler_createVNode(errorComponent, {
+                        ? createVNode(errorComponent, {
                             error: err
                         })
                         : null;
                 });
             }
-            const loaded = ref(false);
-            const error = ref();
-            const delayed = ref(!!delay);
+            const loaded = runtime_core_esm_bundler_ref(false);
+            const error = runtime_core_esm_bundler_ref();
+            const delayed = runtime_core_esm_bundler_ref(!!delay);
             if (delay) {
                 setTimeout(() => {
                     delayed.value = false;
@@ -23465,12 +25099,12 @@ function defineAsyncComponent(source) {
                     return createInnerComp(resolvedComp, instance);
                 }
                 else if (error.value && errorComponent) {
-                    return runtime_core_esm_bundler_createVNode(errorComponent, {
+                    return createVNode(errorComponent, {
                         error: error.value
                     });
                 }
                 else if (loadingComponent && !delayed.value) {
-                    return runtime_core_esm_bundler_createVNode(loadingComponent);
+                    return createVNode(loadingComponent);
                 }
             };
         }
@@ -23478,7 +25112,7 @@ function defineAsyncComponent(source) {
 }
 function createInnerComp(comp, parent) {
     const { ref, props, children, ce } = parent.vnode;
-    const vnode = runtime_core_esm_bundler_createVNode(comp, props, children);
+    const vnode = createVNode(comp, props, children);
     // ensure inner component inherits the async wrapper's ref owner
     vnode.ref = ref;
     // pass the custom element callback on to the inner comp
@@ -23501,7 +25135,7 @@ const KeepAliveImpl = {
         max: [String, Number]
     },
     setup(props, { slots }) {
-        const instance = runtime_core_esm_bundler_getCurrentInstance();
+        const instance = getCurrentInstance();
         // KeepAlive communicates with the instantiated renderer via the
         // ctx where the renderer passes in its internals,
         // and the KeepAlive instance exposes activate/deactivate implementations.
@@ -23519,7 +25153,8 @@ const KeepAliveImpl = {
         const cache = new Map();
         const keys = new Set();
         let current = null;
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         const parentSuspense = instance.suspense;
         const { renderer: { p: patch, m: move, um: _unmount, o: { createElement } } } = sharedContext;
         const storageContainer = createElement('div');
@@ -23538,7 +25173,8 @@ const KeepAliveImpl = {
                     invokeVNodeHook(vnodeHook, instance.parent, vnode);
                 }
             }, parentSuspense);
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
         };
         sharedContext.deactivate = (vnode) => {
             const instance = vnode.component;
@@ -23553,7 +25189,8 @@ const KeepAliveImpl = {
                 }
                 instance.isDeactivated = true;
             }, parentSuspense);
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
         };
         function unmount(vnode) {
             // reset the shapeFlag so it can be properly unmounted
@@ -23596,7 +25233,7 @@ const KeepAliveImpl = {
                 cache.set(pendingCacheKey, getInnerChild(instance.subTree));
             }
         };
-        runtime_core_esm_bundler_onMounted(cacheSubtree);
+        onMounted(cacheSubtree);
         onUpdated(cacheSubtree);
         onBeforeUnmount(() => {
             cache.forEach(cached => {
@@ -23621,7 +25258,8 @@ const KeepAliveImpl = {
             const children = slots.default();
             const rawVNode = children[0];
             if (children.length > 1) {
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 current = null;
                 return children;
             }
@@ -23691,7 +25329,7 @@ const KeepAliveImpl = {
 // also to avoid inline import() in generated d.ts files
 const KeepAlive = (/* unused pure expression or super */ null && (KeepAliveImpl));
 function matches(pattern, name) {
-    if (shared_esm_bundler_isArray(pattern)) {
+    if (isArray(pattern)) {
         return pattern.some((p) => matches(p, name));
     }
     else if (isString(pattern)) {
@@ -23745,7 +25383,7 @@ function injectToKeepAliveRoot(hook, type, target, keepAliveRoot) {
     // injectHook wraps the original for error handling, so make sure to remove
     // the wrapped version.
     const injected = injectHook(type, hook, keepAliveRoot, true /* prepend */);
-    runtime_core_esm_bundler_onUnmounted(() => {
+    onUnmounted(() => {
         remove(keepAliveRoot[type], injected);
     }, target);
 }
@@ -23789,18 +25427,19 @@ function injectHook(type, hook, target = currentInstance, prepend = false) {
         }
         return wrappedHook;
     }
-    else if ((false)) {}
+    else if ((false)) // removed by dead control flow
+{}
 }
 const createHook = (lifecycle) => (hook, target = currentInstance) => 
 // post-create lifecycle registrations are noops during SSR (except for serverPrefetch)
 (!isInSSRComponentSetup || lifecycle === "sp" /* LifecycleHooks.SERVER_PREFETCH */) &&
     injectHook(lifecycle, (...args) => hook(...args), target);
 const onBeforeMount = createHook("bm" /* LifecycleHooks.BEFORE_MOUNT */);
-const runtime_core_esm_bundler_onMounted = createHook("m" /* LifecycleHooks.MOUNTED */);
+const onMounted = createHook("m" /* LifecycleHooks.MOUNTED */);
 const onBeforeUpdate = createHook("bu" /* LifecycleHooks.BEFORE_UPDATE */);
 const onUpdated = createHook("u" /* LifecycleHooks.UPDATED */);
 const onBeforeUnmount = createHook("bum" /* LifecycleHooks.BEFORE_UNMOUNT */);
-const runtime_core_esm_bundler_onUnmounted = createHook("um" /* LifecycleHooks.UNMOUNTED */);
+const onUnmounted = createHook("um" /* LifecycleHooks.UNMOUNTED */);
 const onServerPrefetch = createHook("sp" /* LifecycleHooks.SERVER_PREFETCH */);
 const onRenderTriggered = createHook("rtg" /* LifecycleHooks.RENDER_TRIGGERED */);
 const onRenderTracked = createHook("rtc" /* LifecycleHooks.RENDER_TRACKED */);
@@ -23821,7 +25460,7 @@ return withDirectives(h(comp), [
 ])
 */
 function validateDirectiveName(name) {
-    if (isBuiltInDirective(name)) {
+    if (runtime_core_esm_bundler_isBuiltInDirective(name)) {
         runtime_core_esm_bundler_warn('Do not use built-in directive ids as custom directive id: ' + name);
     }
 }
@@ -23838,9 +25477,9 @@ function withDirectives(vnode, directives) {
         internalInstance.proxy;
     const bindings = vnode.dirs || (vnode.dirs = []);
     for (let i = 0; i < directives.length; i++) {
-        let [dir, value, arg, modifiers = shared_esm_bundler_EMPTY_OBJ] = directives[i];
+        let [dir, value, arg, modifiers = EMPTY_OBJ] = directives[i];
         if (dir) {
-            if (shared_esm_bundler_isFunction(dir)) {
+            if (isFunction(dir)) {
                 dir = {
                     mounted: dir,
                     updated: dir
@@ -23923,7 +25562,7 @@ function resolveAsset(type, name, warnMissing = true, maybeSelfReference = false
             if (selfName &&
                 (selfName === name ||
                     selfName === camelize(name) ||
-                    selfName === shared_esm_bundler_capitalize(camelize(name)))) {
+                    selfName === capitalize(camelize(name)))) {
                 return Component;
             }
         }
@@ -23937,16 +25576,18 @@ function resolveAsset(type, name, warnMissing = true, maybeSelfReference = false
             // fallback to implicit self-reference
             return Component;
         }
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         return res;
     }
-    else if ((false)) {}
+    else if ((false)) // removed by dead control flow
+{}
 }
 function resolve(registry, name) {
     return (registry &&
         (registry[name] ||
             registry[camelize(name)] ||
-            registry[shared_esm_bundler_capitalize(camelize(name))]));
+            registry[capitalize(camelize(name))]));
 }
 
 /**
@@ -23955,20 +25596,21 @@ function resolve(registry, name) {
 function renderList(source, renderItem, cache, index) {
     let ret;
     const cached = (cache && cache[index]);
-    if (shared_esm_bundler_isArray(source) || isString(source)) {
+    if (isArray(source) || isString(source)) {
         ret = new Array(source.length);
         for (let i = 0, l = source.length; i < l; i++) {
             ret[i] = renderItem(source[i], i, undefined, cached && cached[i]);
         }
     }
     else if (typeof source === 'number') {
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         ret = new Array(source);
         for (let i = 0; i < source; i++) {
             ret[i] = renderItem(i + 1, i, undefined, cached && cached[i]);
         }
     }
-    else if (shared_esm_bundler_isObject(source)) {
+    else if (isObject(source)) {
         if (source[Symbol.iterator]) {
             ret = Array.from(source, (item, i) => renderItem(item, i, undefined, cached && cached[i]));
         }
@@ -23998,7 +25640,7 @@ function createSlots(slots, dynamicSlots) {
     for (let i = 0; i < dynamicSlots.length; i++) {
         const slot = dynamicSlots[i];
         // array of dynamic slot generated by <template v-for="..." #[...]>
-        if (isArray(slot)) {
+        if (runtime_core_esm_bundler_isArray(slot)) {
             for (let j = 0; j < slot.length; j++) {
                 slots[slot[j].name] = slot[j].fn;
             }
@@ -24034,10 +25676,11 @@ fallback, noSlotted) {
             currentRenderingInstance.parent.isCE)) {
         if (name !== 'default')
             props.name = name;
-        return runtime_core_esm_bundler_createVNode('slot', props, fallback && fallback());
+        return createVNode('slot', props, fallback && fallback());
     }
     let slot = slots[name];
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     // a compiled slot disables block tracking by default to avoid manual
     // invocation interfering with template-based block tracking, but in
     // `renderSlot` we can be sure that it's template-based so we can force
@@ -24047,7 +25690,7 @@ fallback, noSlotted) {
     }
     openBlock();
     const validSlotContent = slot && ensureValidVNode(slot(props));
-    const rendered = createBlock(runtime_core_esm_bundler_Fragment, {
+    const rendered = createBlock(Fragment, {
         key: props.key ||
             // slot content array of a dynamic conditional slot may have a branch
             // key attached in the `createSlots` helper, respect that
@@ -24070,7 +25713,7 @@ function ensureValidVNode(vnodes) {
             return true;
         if (child.type === Comment)
             return false;
-        if (child.type === runtime_core_esm_bundler_Fragment &&
+        if (child.type === Fragment &&
             !ensureValidVNode(child.children))
             return false;
         return true;
@@ -24085,11 +25728,12 @@ function ensureValidVNode(vnodes) {
  */
 function toHandlers(obj, preserveCaseIfNecessary) {
     const ret = {};
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     for (const key in obj) {
         ret[preserveCaseIfNecessary && /[A-Z]/.test(key)
             ? `on:${key}`
-            : toHandlerKey(key)] = obj[key];
+            : runtime_core_esm_bundler_toHandlerKey(key)] = obj[key];
     }
     return ret;
 }
@@ -24109,7 +25753,7 @@ const getPublicInstance = (i) => {
 const publicPropertiesMap = 
 // Move PURE marker to new line to workaround compiler discarding it
 // due to type annotation
-/*#__PURE__*/ shared_esm_bundler_extend(Object.create(null), {
+/*#__PURE__*/ extend(Object.create(null), {
     $: i => i,
     $el: i => i.vnode.el,
     $data: i => i.data,
@@ -24122,16 +25766,17 @@ const publicPropertiesMap =
     $emit: i => i.emit,
     $options: i => ( true ? resolveMergedOptions(i) : 0),
     $forceUpdate: i => i.f || (i.f = () => queueJob(i.update)),
-    $nextTick: i => i.n || (i.n = runtime_core_esm_bundler_nextTick.bind(i.proxy)),
+    $nextTick: i => i.n || (i.n = nextTick.bind(i.proxy)),
     $watch: i => ( true ? instanceWatch.bind(i) : 0)
 });
 const isReservedPrefix = (key) => key === '_' || key === '$';
-const hasSetupBinding = (state, key) => state !== shared_esm_bundler_EMPTY_OBJ && !state.__isScriptSetup && shared_esm_bundler_hasOwn(state, key);
+const hasSetupBinding = (state, key) => state !== EMPTY_OBJ && !state.__isScriptSetup && hasOwn(state, key);
 const PublicInstanceProxyHandlers = {
     get({ _: instance }, key) {
         const { ctx, setupState, data, props, accessCache, type, appContext } = instance;
         // for internal formatters to know that this is a Vue instance
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         // data / props / ctx
         // This getter gets called for every property access on the render context
         // during render and is a major hotspot. The most expensive part of this
@@ -24158,7 +25803,7 @@ const PublicInstanceProxyHandlers = {
                 accessCache[key] = 1 /* AccessTypes.SETUP */;
                 return setupState[key];
             }
-            else if (data !== shared_esm_bundler_EMPTY_OBJ && shared_esm_bundler_hasOwn(data, key)) {
+            else if (data !== EMPTY_OBJ && hasOwn(data, key)) {
                 accessCache[key] = 2 /* AccessTypes.DATA */;
                 return data[key];
             }
@@ -24166,11 +25811,11 @@ const PublicInstanceProxyHandlers = {
             // only cache other properties when instance has declared (thus stable)
             // props
             (normalizedProps = instance.propsOptions[0]) &&
-                shared_esm_bundler_hasOwn(normalizedProps, key)) {
+                hasOwn(normalizedProps, key)) {
                 accessCache[key] = 3 /* AccessTypes.PROPS */;
                 return props[key];
             }
-            else if (ctx !== shared_esm_bundler_EMPTY_OBJ && shared_esm_bundler_hasOwn(ctx, key)) {
+            else if (ctx !== EMPTY_OBJ && hasOwn(ctx, key)) {
                 accessCache[key] = 4 /* AccessTypes.CONTEXT */;
                 return ctx[key];
             }
@@ -24194,7 +25839,7 @@ const PublicInstanceProxyHandlers = {
             (cssModule = cssModule[key])) {
             return cssModule;
         }
-        else if (ctx !== shared_esm_bundler_EMPTY_OBJ && shared_esm_bundler_hasOwn(ctx, key)) {
+        else if (ctx !== EMPTY_OBJ && hasOwn(ctx, key)) {
             // user may set custom properties to `this` that start with `$`
             accessCache[key] = 4 /* AccessTypes.CONTEXT */;
             return ctx[key];
@@ -24202,12 +25847,13 @@ const PublicInstanceProxyHandlers = {
         else if (
         // global properties
         ((globalProperties = appContext.config.globalProperties),
-            shared_esm_bundler_hasOwn(globalProperties, key))) {
+            hasOwn(globalProperties, key))) {
             {
                 return globalProperties[key];
             }
         }
-        else if (false) {}
+        else if (false) // removed by dead control flow
+{}
     },
     set({ _: instance }, key, value) {
         const { data, setupState, ctx } = instance;
@@ -24215,12 +25861,13 @@ const PublicInstanceProxyHandlers = {
             setupState[key] = value;
             return true;
         }
-        else if (false) {}
-        else if (data !== shared_esm_bundler_EMPTY_OBJ && shared_esm_bundler_hasOwn(data, key)) {
+        else if (false) // removed by dead control flow
+{}
+        else if (data !== EMPTY_OBJ && hasOwn(data, key)) {
             data[key] = value;
             return true;
         }
-        else if (shared_esm_bundler_hasOwn(instance.props, key)) {
+        else if (hasOwn(instance.props, key)) {
             ( false) && 0;
             return false;
         }
@@ -24230,7 +25877,8 @@ const PublicInstanceProxyHandlers = {
             return false;
         }
         else {
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
             else {
                 ctx[key] = value;
             }
@@ -24240,26 +25888,27 @@ const PublicInstanceProxyHandlers = {
     has({ _: { data, setupState, accessCache, ctx, appContext, propsOptions } }, key) {
         let normalizedProps;
         return (!!accessCache[key] ||
-            (data !== shared_esm_bundler_EMPTY_OBJ && shared_esm_bundler_hasOwn(data, key)) ||
+            (data !== EMPTY_OBJ && hasOwn(data, key)) ||
             hasSetupBinding(setupState, key) ||
-            ((normalizedProps = propsOptions[0]) && shared_esm_bundler_hasOwn(normalizedProps, key)) ||
-            shared_esm_bundler_hasOwn(ctx, key) ||
-            shared_esm_bundler_hasOwn(publicPropertiesMap, key) ||
-            shared_esm_bundler_hasOwn(appContext.config.globalProperties, key));
+            ((normalizedProps = propsOptions[0]) && hasOwn(normalizedProps, key)) ||
+            hasOwn(ctx, key) ||
+            hasOwn(publicPropertiesMap, key) ||
+            hasOwn(appContext.config.globalProperties, key));
     },
     defineProperty(target, key, descriptor) {
         if (descriptor.get != null) {
             // invalidate key cache of a getter based property #5417
             target._.accessCache[key] = 0;
         }
-        else if (shared_esm_bundler_hasOwn(descriptor, 'value')) {
+        else if (hasOwn(descriptor, 'value')) {
             this.set(target, key, descriptor.value, null);
         }
         return Reflect.defineProperty(target, key, descriptor);
     }
 };
-if (false) {}
-const RuntimeCompiledPublicInstanceProxyHandlers = /*#__PURE__*/ shared_esm_bundler_extend({}, PublicInstanceProxyHandlers, {
+if (false) // removed by dead control flow
+{}
+const RuntimeCompiledPublicInstanceProxyHandlers = /*#__PURE__*/ extend({}, PublicInstanceProxyHandlers, {
     get(target, key) {
         // fast path for unscopables when using `with` block
         if (key === Symbol.unscopables) {
@@ -24269,7 +25918,8 @@ const RuntimeCompiledPublicInstanceProxyHandlers = /*#__PURE__*/ shared_esm_bund
     },
     has(_, key) {
         const has = key[0] !== '_' && !isGloballyWhitelisted(key);
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         return has;
     }
 });
@@ -24293,7 +25943,7 @@ function createDevRenderContext(instance) {
             get: () => publicPropertiesMap[key](instance),
             // intercepted by the proxy so no need for implementation,
             // but needed to prevent set errors
-            set: NOOP
+            set: runtime_core_esm_bundler_NOOP
         });
     });
     return target;
@@ -24307,7 +25957,7 @@ function exposePropsOnRenderContext(instance) {
                 enumerable: true,
                 configurable: true,
                 get: () => instance.props[key],
-                set: NOOP
+                set: runtime_core_esm_bundler_NOOP
             });
         });
     }
@@ -24315,7 +25965,7 @@ function exposePropsOnRenderContext(instance) {
 // dev only
 function exposeSetupStateOnRenderContext(instance) {
     const { ctx, setupState } = instance;
-    Object.keys(toRaw(setupState)).forEach(key => {
+    Object.keys(runtime_core_esm_bundler_toRaw(setupState)).forEach(key => {
         if (!setupState.__isScriptSetup) {
             if (isReservedPrefix(key[0])) {
                 runtime_core_esm_bundler_warn(`setup() return property ${JSON.stringify(key)} should not start with "$" or "_" ` +
@@ -24326,7 +25976,7 @@ function exposeSetupStateOnRenderContext(instance) {
                 enumerable: true,
                 configurable: true,
                 get: () => setupState[key],
-                set: NOOP
+                set: runtime_core_esm_bundler_NOOP
             });
         }
     });
@@ -24365,7 +26015,8 @@ function applyOptions(instance) {
     // assets
     components, directives, filters } = options;
     const checkDuplicateProperties = ( false) ? 0 : null;
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     // options initialization order (to be consistent with Vue 2):
     // - props (already done outside of this function)
     // - inject
@@ -24379,29 +26030,35 @@ function applyOptions(instance) {
     if (methods) {
         for (const key in methods) {
             const methodHandler = methods[key];
-            if (shared_esm_bundler_isFunction(methodHandler)) {
+            if (isFunction(methodHandler)) {
                 // In dev mode, we use the `createRenderContext` function to define
                 // methods to the proxy target, and those are read-only but
                 // reconfigurable, so it needs to be redefined here
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 else {
                     ctx[key] = methodHandler.bind(publicThis);
                 }
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
             }
-            else if ((false)) {}
+            else if ((false)) // removed by dead control flow
+{}
         }
     }
     if (dataOptions) {
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         const data = dataOptions.call(publicThis, publicThis);
-        if (false) {}
-        if (!shared_esm_bundler_isObject(data)) {
+        if (false) // removed by dead control flow
+{}
+        if (!isObject(data)) {
             ( false) && 0;
         }
         else {
             instance.data = reactive(data);
-            if ((false)) {}
+            if ((false)) // removed by dead control flow
+{}
         }
     }
     // state initialization complete at this point - start caching access
@@ -24409,17 +26066,18 @@ function applyOptions(instance) {
     if (computedOptions) {
         for (const key in computedOptions) {
             const opt = computedOptions[key];
-            const get = shared_esm_bundler_isFunction(opt)
+            const get = isFunction(opt)
                 ? opt.bind(publicThis, publicThis)
-                : shared_esm_bundler_isFunction(opt.get)
+                : isFunction(opt.get)
                     ? opt.get.bind(publicThis, publicThis)
-                    : shared_esm_bundler_NOOP;
-            if (false) {}
-            const set = !shared_esm_bundler_isFunction(opt) && shared_esm_bundler_isFunction(opt.set)
+                    : NOOP;
+            if (false) // removed by dead control flow
+{}
+            const set = !isFunction(opt) && isFunction(opt.set)
                 ? opt.set.bind(publicThis)
                 : ( false)
                     ? 0
-                    : shared_esm_bundler_NOOP;
+                    : NOOP;
             const c = runtime_core_esm_bundler_computed({
                 get,
                 set
@@ -24430,7 +26088,8 @@ function applyOptions(instance) {
                 get: () => c.value,
                 set: v => (c.value = v)
             });
-            if ((false)) {}
+            if ((false)) // removed by dead control flow
+{}
         }
     }
     if (watchOptions) {
@@ -24439,7 +26098,7 @@ function applyOptions(instance) {
         }
     }
     if (provideOptions) {
-        const provides = shared_esm_bundler_isFunction(provideOptions)
+        const provides = isFunction(provideOptions)
             ? provideOptions.call(publicThis)
             : provideOptions;
         Reflect.ownKeys(provides).forEach(key => {
@@ -24450,7 +26109,7 @@ function applyOptions(instance) {
         callHook(created, instance, "c" /* LifecycleHooks.CREATED */);
     }
     function registerLifecycleHook(register, hook) {
-        if (shared_esm_bundler_isArray(hook)) {
+        if (isArray(hook)) {
             hook.forEach(_hook => register(_hook.bind(publicThis)));
         }
         else if (hook) {
@@ -24458,7 +26117,7 @@ function applyOptions(instance) {
         }
     }
     registerLifecycleHook(onBeforeMount, beforeMount);
-    registerLifecycleHook(runtime_core_esm_bundler_onMounted, mounted);
+    registerLifecycleHook(onMounted, mounted);
     registerLifecycleHook(onBeforeUpdate, beforeUpdate);
     registerLifecycleHook(onUpdated, updated);
     registerLifecycleHook(onActivated, activated);
@@ -24467,9 +26126,9 @@ function applyOptions(instance) {
     registerLifecycleHook(onRenderTracked, renderTracked);
     registerLifecycleHook(onRenderTriggered, renderTriggered);
     registerLifecycleHook(onBeforeUnmount, beforeUnmount);
-    registerLifecycleHook(runtime_core_esm_bundler_onUnmounted, unmounted);
+    registerLifecycleHook(onUnmounted, unmounted);
     registerLifecycleHook(onServerPrefetch, serverPrefetch);
-    if (shared_esm_bundler_isArray(expose)) {
+    if (isArray(expose)) {
         if (expose.length) {
             const exposed = instance.exposed || (instance.exposed = {});
             expose.forEach(key => {
@@ -24485,7 +26144,7 @@ function applyOptions(instance) {
     }
     // options that are handled when creating the instance but also need to be
     // applied from mixins
-    if (render && instance.render === shared_esm_bundler_NOOP) {
+    if (render && instance.render === NOOP) {
         instance.render = render;
     }
     if (inheritAttrs != null) {
@@ -24497,14 +26156,14 @@ function applyOptions(instance) {
     if (directives)
         instance.directives = directives;
 }
-function resolveInjections(injectOptions, ctx, checkDuplicateProperties = shared_esm_bundler_NOOP, unwrapRef = false) {
-    if (shared_esm_bundler_isArray(injectOptions)) {
+function resolveInjections(injectOptions, ctx, checkDuplicateProperties = NOOP, unwrapRef = false) {
+    if (isArray(injectOptions)) {
         injectOptions = normalizeInject(injectOptions);
     }
     for (const key in injectOptions) {
         const opt = injectOptions[key];
         let injected;
-        if (shared_esm_bundler_isObject(opt)) {
+        if (isObject(opt)) {
             if ('default' in opt) {
                 injected = inject(opt.from || key, opt.default, true /* treat default function as factory */);
             }
@@ -24515,7 +26174,7 @@ function resolveInjections(injectOptions, ctx, checkDuplicateProperties = shared
         else {
             injected = inject(opt);
         }
-        if (reactivity_esm_bundler_isRef(injected)) {
+        if (isRef(injected)) {
             // TODO remove the check in 3.3
             if (unwrapRef) {
                 Object.defineProperty(ctx, key, {
@@ -24526,18 +26185,20 @@ function resolveInjections(injectOptions, ctx, checkDuplicateProperties = shared
                 });
             }
             else {
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 ctx[key] = injected;
             }
         }
         else {
             ctx[key] = injected;
         }
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
     }
 }
 function callHook(hook, instance, type) {
-    callWithAsyncErrorHandling(shared_esm_bundler_isArray(hook)
+    callWithAsyncErrorHandling(isArray(hook)
         ? hook.map(h => h.bind(instance.proxy))
         : hook.bind(instance.proxy), instance, type);
 }
@@ -24547,29 +26208,32 @@ function createWatcher(raw, ctx, publicThis, key) {
         : () => publicThis[key];
     if (isString(raw)) {
         const handler = ctx[raw];
-        if (shared_esm_bundler_isFunction(handler)) {
+        if (isFunction(handler)) {
             watch(getter, handler);
         }
-        else if ((false)) {}
+        else if ((false)) // removed by dead control flow
+{}
     }
-    else if (shared_esm_bundler_isFunction(raw)) {
+    else if (isFunction(raw)) {
         watch(getter, raw.bind(publicThis));
     }
-    else if (shared_esm_bundler_isObject(raw)) {
-        if (shared_esm_bundler_isArray(raw)) {
+    else if (isObject(raw)) {
+        if (isArray(raw)) {
             raw.forEach(r => createWatcher(r, ctx, publicThis, key));
         }
         else {
-            const handler = shared_esm_bundler_isFunction(raw.handler)
+            const handler = isFunction(raw.handler)
                 ? raw.handler.bind(publicThis)
                 : ctx[raw.handler];
-            if (shared_esm_bundler_isFunction(handler)) {
+            if (isFunction(handler)) {
                 watch(getter, handler, raw);
             }
-            else if ((false)) {}
+            else if ((false)) // removed by dead control flow
+{}
         }
     }
-    else if ((false)) {}
+    else if ((false)) // removed by dead control flow
+{}
 }
 /**
  * Resolve merged options and cache it on the component.
@@ -24597,7 +26261,7 @@ function resolveMergedOptions(instance) {
         }
         mergeOptions(resolved, base, optionMergeStrategies);
     }
-    if (shared_esm_bundler_isObject(base)) {
+    if (isObject(base)) {
         cache.set(base, resolved);
     }
     return resolved;
@@ -24661,14 +26325,14 @@ function mergeDataFn(to, from) {
         return from;
     }
     return function mergedDataFn() {
-        return (shared_esm_bundler_extend)(shared_esm_bundler_isFunction(to) ? to.call(this, this) : to, shared_esm_bundler_isFunction(from) ? from.call(this, this) : from);
+        return (extend)(isFunction(to) ? to.call(this, this) : to, isFunction(from) ? from.call(this, this) : from);
     };
 }
 function mergeInject(to, from) {
     return mergeObjectOptions(normalizeInject(to), normalizeInject(from));
 }
 function normalizeInject(raw) {
-    if (shared_esm_bundler_isArray(raw)) {
+    if (isArray(raw)) {
         const res = {};
         for (let i = 0; i < raw.length; i++) {
             res[raw[i]] = raw[i];
@@ -24681,14 +26345,14 @@ function mergeAsArray(to, from) {
     return to ? [...new Set([].concat(to, from))] : from;
 }
 function mergeObjectOptions(to, from) {
-    return to ? shared_esm_bundler_extend(shared_esm_bundler_extend(Object.create(null), to), from) : from;
+    return to ? extend(extend(Object.create(null), to), from) : from;
 }
 function mergeWatchOptions(to, from) {
     if (!to)
         return from;
     if (!from)
         return to;
-    const merged = shared_esm_bundler_extend(Object.create(null), to);
+    const merged = extend(Object.create(null), to);
     for (const key in from) {
         merged[key] = mergeAsArray(to[key], from[key]);
     }
@@ -24709,7 +26373,8 @@ isSSR = false) {
         }
     }
     // validation
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     if (isStateful) {
         // stateful
         instance.props = isSSR ? props : shallowReactive(props);
@@ -24735,7 +26400,7 @@ function isInHmrContext(instance) {
 }
 function updateProps(instance, rawProps, rawPrevProps, optimized) {
     const { props, attrs, vnode: { patchFlag } } = instance;
-    const rawCurrentProps = reactivity_esm_bundler_toRaw(props);
+    const rawCurrentProps = toRaw(props);
     const [options] = instance.propsOptions;
     let hasAttrsChanged = false;
     if (
@@ -24760,7 +26425,7 @@ function updateProps(instance, rawProps, rawPrevProps, optimized) {
                 if (options) {
                     // attr / props separation was done on init and will be consistent
                     // in this code path, so just check if attrs have it.
-                    if (shared_esm_bundler_hasOwn(attrs, key)) {
+                    if (hasOwn(attrs, key)) {
                         if (value !== attrs[key]) {
                             attrs[key] = value;
                             hasAttrsChanged = true;
@@ -24791,10 +26456,10 @@ function updateProps(instance, rawProps, rawPrevProps, optimized) {
         for (const key in rawCurrentProps) {
             if (!rawProps ||
                 // for camelCase
-                (!shared_esm_bundler_hasOwn(rawProps, key) &&
+                (!hasOwn(rawProps, key) &&
                     // it's possible the original props was passed in as kebab-case
                     // and converted to camelCase (#955)
-                    ((kebabKey = shared_esm_bundler_hyphenate(key)) === key || !shared_esm_bundler_hasOwn(rawProps, kebabKey)))) {
+                    ((kebabKey = hyphenate(key)) === key || !hasOwn(rawProps, kebabKey)))) {
                 if (options) {
                     if (rawPrevProps &&
                         // for camelCase
@@ -24814,7 +26479,7 @@ function updateProps(instance, rawProps, rawPrevProps, optimized) {
         if (attrs !== rawCurrentProps) {
             for (const key in attrs) {
                 if (!rawProps ||
-                    (!shared_esm_bundler_hasOwn(rawProps, key) &&
+                    (!hasOwn(rawProps, key) &&
                         (!false ))) {
                     delete attrs[key];
                     hasAttrsChanged = true;
@@ -24826,7 +26491,8 @@ function updateProps(instance, rawProps, rawPrevProps, optimized) {
     if (hasAttrsChanged) {
         trigger(instance, "set" /* TriggerOpTypes.SET */, '$attrs');
     }
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
 }
 function setFullProps(instance, rawProps, props, attrs) {
     const [options, needCastKeys] = instance.propsOptions;
@@ -24835,14 +26501,14 @@ function setFullProps(instance, rawProps, props, attrs) {
     if (rawProps) {
         for (let key in rawProps) {
             // key, ref are reserved and never passed down
-            if (shared_esm_bundler_isReservedProp(key)) {
+            if (isReservedProp(key)) {
                 continue;
             }
             const value = rawProps[key];
             // prop option names are camelized during normalization, so to support
             // kebab -> camel conversion here we need to camelize the key.
             let camelKey;
-            if (options && shared_esm_bundler_hasOwn(options, (camelKey = camelize(key)))) {
+            if (options && hasOwn(options, (camelKey = camelize(key)))) {
                 if (!needCastKeys || !needCastKeys.includes(camelKey)) {
                     props[camelKey] = value;
                 }
@@ -24859,11 +26525,11 @@ function setFullProps(instance, rawProps, props, attrs) {
         }
     }
     if (needCastKeys) {
-        const rawCurrentProps = reactivity_esm_bundler_toRaw(props);
-        const castValues = rawCastValues || shared_esm_bundler_EMPTY_OBJ;
+        const rawCurrentProps = toRaw(props);
+        const castValues = rawCastValues || EMPTY_OBJ;
         for (let i = 0; i < needCastKeys.length; i++) {
             const key = needCastKeys[i];
-            props[key] = resolvePropValue(options, rawCurrentProps, key, castValues[key], instance, !shared_esm_bundler_hasOwn(castValues, key));
+            props[key] = resolvePropValue(options, rawCurrentProps, key, castValues[key], instance, !hasOwn(castValues, key));
         }
     }
     return hasAttrsChanged;
@@ -24871,11 +26537,11 @@ function setFullProps(instance, rawProps, props, attrs) {
 function resolvePropValue(options, props, key, value, instance, isAbsent) {
     const opt = options[key];
     if (opt != null) {
-        const hasDefault = shared_esm_bundler_hasOwn(opt, 'default');
+        const hasDefault = hasOwn(opt, 'default');
         // default values
         if (hasDefault && value === undefined) {
             const defaultValue = opt.default;
-            if (opt.type !== Function && shared_esm_bundler_isFunction(defaultValue)) {
+            if (opt.type !== Function && isFunction(defaultValue)) {
                 const { propsDefaults } = instance;
                 if (key in propsDefaults) {
                     value = propsDefaults[key];
@@ -24896,7 +26562,7 @@ function resolvePropValue(options, props, key, value, instance, isAbsent) {
                 value = false;
             }
             else if (opt[1 /* BooleanFlags.shouldCastTrue */] &&
-                (value === '' || value === shared_esm_bundler_hyphenate(key))) {
+                (value === '' || value === hyphenate(key))) {
                 value = true;
             }
         }
@@ -24914,11 +26580,11 @@ function normalizePropsOptions(comp, appContext, asMixin = false) {
     const needCastKeys = [];
     // apply mixin/extends props
     let hasExtends = false;
-    if ( true && !shared_esm_bundler_isFunction(comp)) {
+    if ( true && !isFunction(comp)) {
         const extendProps = (raw) => {
             hasExtends = true;
             const [props, keys] = normalizePropsOptions(raw, appContext, true);
-            shared_esm_bundler_extend(normalized, props);
+            extend(normalized, props);
             if (keys)
                 needCastKeys.push(...keys);
         };
@@ -24933,28 +26599,30 @@ function normalizePropsOptions(comp, appContext, asMixin = false) {
         }
     }
     if (!raw && !hasExtends) {
-        if (shared_esm_bundler_isObject(comp)) {
+        if (isObject(comp)) {
             cache.set(comp, EMPTY_ARR);
         }
         return EMPTY_ARR;
     }
-    if (shared_esm_bundler_isArray(raw)) {
+    if (isArray(raw)) {
         for (let i = 0; i < raw.length; i++) {
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
             const normalizedKey = camelize(raw[i]);
             if (validatePropName(normalizedKey)) {
-                normalized[normalizedKey] = shared_esm_bundler_EMPTY_OBJ;
+                normalized[normalizedKey] = EMPTY_OBJ;
             }
         }
     }
     else if (raw) {
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         for (const key in raw) {
             const normalizedKey = camelize(key);
             if (validatePropName(normalizedKey)) {
                 const opt = raw[key];
                 const prop = (normalized[normalizedKey] =
-                    shared_esm_bundler_isArray(opt) || shared_esm_bundler_isFunction(opt) ? { type: opt } : Object.assign({}, opt));
+                    isArray(opt) || isFunction(opt) ? { type: opt } : Object.assign({}, opt));
                 if (prop) {
                     const booleanIndex = getTypeIndex(Boolean, prop.type);
                     const stringIndex = getTypeIndex(String, prop.type);
@@ -24962,7 +26630,7 @@ function normalizePropsOptions(comp, appContext, asMixin = false) {
                     prop[1 /* BooleanFlags.shouldCastTrue */] =
                         stringIndex < 0 || booleanIndex < stringIndex;
                     // if the prop needs boolean casting or default value
-                    if (booleanIndex > -1 || shared_esm_bundler_hasOwn(prop, 'default')) {
+                    if (booleanIndex > -1 || hasOwn(prop, 'default')) {
                         needCastKeys.push(normalizedKey);
                     }
                 }
@@ -24970,7 +26638,7 @@ function normalizePropsOptions(comp, appContext, asMixin = false) {
         }
     }
     const res = [normalized, needCastKeys];
-    if (shared_esm_bundler_isObject(comp)) {
+    if (isObject(comp)) {
         cache.set(comp, res);
     }
     return res;
@@ -24979,7 +26647,8 @@ function validatePropName(key) {
     if (key[0] !== '$') {
         return true;
     }
-    else if ((false)) {}
+    else if ((false)) // removed by dead control flow
+{}
     return false;
 }
 // use function string name to check type constructors
@@ -24992,10 +26661,10 @@ function isSameType(a, b) {
     return getType(a) === getType(b);
 }
 function getTypeIndex(type, expectedTypes) {
-    if (shared_esm_bundler_isArray(expectedTypes)) {
+    if (isArray(expectedTypes)) {
         return expectedTypes.findIndex(t => isSameType(t, type));
     }
-    else if (shared_esm_bundler_isFunction(expectedTypes)) {
+    else if (isFunction(expectedTypes)) {
         return isSameType(expectedTypes, type) ? 0 : -1;
     }
     return -1;
@@ -25004,13 +26673,13 @@ function getTypeIndex(type, expectedTypes) {
  * dev only
  */
 function validateProps(rawProps, props, instance) {
-    const resolvedValues = toRaw(props);
+    const resolvedValues = runtime_core_esm_bundler_toRaw(props);
     const options = instance.propsOptions[0];
     for (const key in options) {
         let opt = options[key];
         if (opt == null)
             continue;
-        validateProp(key, resolvedValues[key], opt, !hasOwn(rawProps, key) && !hasOwn(rawProps, hyphenate(key)));
+        validateProp(key, resolvedValues[key], opt, !runtime_core_esm_bundler_hasOwn(rawProps, key) && !runtime_core_esm_bundler_hasOwn(rawProps, runtime_core_esm_bundler_hyphenate(key)));
     }
 }
 /**
@@ -25030,7 +26699,7 @@ function validateProp(name, value, prop, isAbsent) {
     // type check
     if (type != null && type !== true) {
         let isValid = false;
-        const types = isArray(type) ? type : [type];
+        const types = runtime_core_esm_bundler_isArray(type) ? type : [type];
         const expectedTypes = [];
         // value is valid as long as one of the specified types match
         for (let i = 0; i < types.length && !isValid; i++) {
@@ -25048,7 +26717,7 @@ function validateProp(name, value, prop, isAbsent) {
         runtime_core_esm_bundler_warn('Invalid prop: custom validator check failed for prop "' + name + '".');
     }
 }
-const isSimpleType = /*#__PURE__*/ (/* unused pure expression or super */ null && (makeMap('String,Number,Boolean,Function,Symbol,BigInt')));
+const isSimpleType = /*#__PURE__*/ (/* unused pure expression or super */ null && (runtime_core_esm_bundler_makeMap('String,Number,Boolean,Function,Symbol,BigInt')));
 /**
  * dev only
  */
@@ -25064,10 +26733,10 @@ function assertType(value, type) {
         }
     }
     else if (expectedType === 'Object') {
-        valid = isObject(value);
+        valid = runtime_core_esm_bundler_isObject(value);
     }
     else if (expectedType === 'Array') {
-        valid = isArray(value);
+        valid = runtime_core_esm_bundler_isArray(value);
     }
     else if (expectedType === 'null') {
         valid = value === null;
@@ -25085,9 +26754,9 @@ function assertType(value, type) {
  */
 function getInvalidTypeMessage(name, value, expectedTypes) {
     let message = `Invalid prop: type check failed for prop "${name}".` +
-        ` Expected ${expectedTypes.map(capitalize).join(' | ')}`;
+        ` Expected ${expectedTypes.map(runtime_core_esm_bundler_capitalize).join(' | ')}`;
     const expectedType = expectedTypes[0];
-    const receivedType = toRawType(value);
+    const receivedType = runtime_core_esm_bundler_toRawType(value);
     const expectedValue = styleValue(value, expectedType);
     const receivedValue = styleValue(value, receivedType);
     // check if we need to specify expected value
@@ -25132,7 +26801,7 @@ function isBoolean(...args) {
 }
 
 const isInternalKey = (key) => key[0] === '_' || key === '$stable';
-const normalizeSlotValue = (value) => shared_esm_bundler_isArray(value)
+const normalizeSlotValue = (value) => isArray(value)
     ? value.map(normalizeVNode)
     : [normalizeVNode(value)];
 const normalizeSlot = (key, rawSlot, ctx) => {
@@ -25141,7 +26810,8 @@ const normalizeSlot = (key, rawSlot, ctx) => {
         return rawSlot;
     }
     const normalized = withCtx((...args) => {
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         return normalizeSlotValue(rawSlot(...args));
     }, ctx);
     normalized._c = false;
@@ -25153,18 +26823,20 @@ const normalizeObjectSlots = (rawSlots, slots, instance) => {
         if (isInternalKey(key))
             continue;
         const value = rawSlots[key];
-        if (shared_esm_bundler_isFunction(value)) {
+        if (isFunction(value)) {
             slots[key] = normalizeSlot(key, value, ctx);
         }
         else if (value != null) {
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
             const normalized = normalizeSlotValue(value);
             slots[key] = () => normalized;
         }
     }
 };
 const normalizeVNodeSlots = (instance, children) => {
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     const normalized = normalizeSlotValue(children);
     instance.slots.default = () => normalized;
 };
@@ -25174,7 +26846,7 @@ const initSlots = (instance, children) => {
         if (type) {
             // users can get the shallow readonly version of the slots object through `this.$slots`,
             // we should avoid the proxy object polluting the slots of the internal instance
-            instance.slots = reactivity_esm_bundler_toRaw(children);
+            instance.slots = toRaw(children);
             // make compiler marker non-enumerable
             def(children, '_', type);
         }
@@ -25193,12 +26865,13 @@ const initSlots = (instance, children) => {
 const updateSlots = (instance, children, optimized) => {
     const { vnode, slots } = instance;
     let needDeletionCheck = true;
-    let deletionComparisonTarget = shared_esm_bundler_EMPTY_OBJ;
+    let deletionComparisonTarget = EMPTY_OBJ;
     if (vnode.shapeFlag & 32 /* ShapeFlags.SLOTS_CHILDREN */) {
         const type = children._;
         if (type) {
             // compiled slots.
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
             else if (optimized && type === 1 /* SlotFlags.STABLE */) {
                 // compiled AND stable.
                 // no need to update, and skip stale slots removal.
@@ -25207,7 +26880,7 @@ const updateSlots = (instance, children, optimized) => {
             else {
                 // compiled but dynamic (v-if/v-for on slots) - update slots, but skip
                 // normalization.
-                shared_esm_bundler_extend(slots, children);
+                extend(slots, children);
                 // #2893
                 // when rendering the optimized slots by manually written render function,
                 // we need to delete the `slots._` flag if necessary to make subsequent updates reliable,
@@ -25242,7 +26915,7 @@ function createAppContext() {
     return {
         app: null,
         config: {
-            isNativeTag: shared_esm_bundler_NO,
+            isNativeTag: NO,
             performance: false,
             globalProperties: {},
             optionMergeStrategies: {},
@@ -25262,10 +26935,10 @@ function createAppContext() {
 let uid$1 = 0;
 function createAppAPI(render, hydrate) {
     return function createApp(rootComponent, rootProps = null) {
-        if (!shared_esm_bundler_isFunction(rootComponent)) {
+        if (!isFunction(rootComponent)) {
             rootComponent = Object.assign({}, rootComponent);
         }
-        if (rootProps != null && !shared_esm_bundler_isObject(rootProps)) {
+        if (rootProps != null && !isObject(rootProps)) {
             ( false) && 0;
             rootProps = null;
         }
@@ -25284,21 +26957,23 @@ function createAppAPI(render, hydrate) {
                 return context.config;
             },
             set config(v) {
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
             },
             use(plugin, ...options) {
                 if (installedPlugins.has(plugin)) {
                     ( false) && 0;
                 }
-                else if (plugin && shared_esm_bundler_isFunction(plugin.install)) {
+                else if (plugin && isFunction(plugin.install)) {
                     installedPlugins.add(plugin);
                     plugin.install(app, ...options);
                 }
-                else if (shared_esm_bundler_isFunction(plugin)) {
+                else if (isFunction(plugin)) {
                     installedPlugins.add(plugin);
                     plugin(app, ...options);
                 }
-                else if ((false)) {}
+                else if ((false)) // removed by dead control flow
+{}
                 return app;
             },
             mixin(mixin) {
@@ -25306,39 +26981,47 @@ function createAppAPI(render, hydrate) {
                     if (!context.mixins.includes(mixin)) {
                         context.mixins.push(mixin);
                     }
-                    else if ((false)) {}
+                    else if ((false)) // removed by dead control flow
+{}
                 }
-                else {}
+                else // removed by dead control flow
+{}
                 return app;
             },
             component(name, component) {
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 if (!component) {
                     return context.components[name];
                 }
-                if (false) {}
+                if (false) // removed by dead control flow
+{}
                 context.components[name] = component;
                 return app;
             },
             directive(name, directive) {
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 if (!directive) {
                     return context.directives[name];
                 }
-                if (false) {}
+                if (false) // removed by dead control flow
+{}
                 context.directives[name] = directive;
                 return app;
             },
             mount(rootContainer, isHydrate, isSVG) {
                 if (!isMounted) {
                     // #5571
-                    if (false) {}
-                    const vnode = runtime_core_esm_bundler_createVNode(rootComponent, rootProps);
+                    if (false) // removed by dead control flow
+{}
+                    const vnode = createVNode(rootComponent, rootProps);
                     // store app context on the root VNode.
                     // this will be set on the root instance on initial mount.
                     vnode.appContext = context;
                     // HMR root reload
-                    if ((false)) {}
+                    if ((false)) // removed by dead control flow
+{}
                     if (isHydrate && hydrate) {
                         hydrate(vnode, rootContainer);
                     }
@@ -25348,21 +27031,26 @@ function createAppAPI(render, hydrate) {
                     isMounted = true;
                     app._container = rootContainer;
                     rootContainer.__vue_app__ = app;
-                    if (false) {}
+                    if (false) // removed by dead control flow
+{}
                     return getExposeProxy(vnode.component) || vnode.component.proxy;
                 }
-                else if ((false)) {}
+                else if ((false)) // removed by dead control flow
+{}
             },
             unmount() {
                 if (isMounted) {
                     render(null, app._container);
-                    if (false) {}
+                    if (false) // removed by dead control flow
+{}
                     delete app._container.__vue_app__;
                 }
-                else if ((false)) {}
+                else if ((false)) // removed by dead control flow
+{}
             },
             provide(key, value) {
-                if (false) {}
+                if (false) // removed by dead control flow
+{}
                 context.provides[key] = value;
                 return app;
             }
@@ -25375,8 +27063,8 @@ function createAppAPI(render, hydrate) {
  * Function for handling a template ref
  */
 function setRef(rawRef, oldRawRef, parentSuspense, vnode, isUnmount = false) {
-    if (shared_esm_bundler_isArray(rawRef)) {
-        rawRef.forEach((r, i) => setRef(r, oldRawRef && (shared_esm_bundler_isArray(oldRawRef) ? oldRawRef[i] : oldRawRef), parentSuspense, vnode, isUnmount));
+    if (isArray(rawRef)) {
+        rawRef.forEach((r, i) => setRef(r, oldRawRef && (isArray(oldRawRef) ? oldRawRef[i] : oldRawRef), parentSuspense, vnode, isUnmount));
         return;
     }
     if (isAsyncWrapper(vnode) && !isUnmount) {
@@ -25389,44 +27077,45 @@ function setRef(rawRef, oldRawRef, parentSuspense, vnode, isUnmount = false) {
         : vnode.el;
     const value = isUnmount ? null : refValue;
     const { i: owner, r: ref } = rawRef;
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     const oldRef = oldRawRef && oldRawRef.r;
-    const refs = owner.refs === shared_esm_bundler_EMPTY_OBJ ? (owner.refs = {}) : owner.refs;
+    const refs = owner.refs === EMPTY_OBJ ? (owner.refs = {}) : owner.refs;
     const setupState = owner.setupState;
     // dynamic ref changed. unset old ref
     if (oldRef != null && oldRef !== ref) {
         if (isString(oldRef)) {
             refs[oldRef] = null;
-            if (shared_esm_bundler_hasOwn(setupState, oldRef)) {
+            if (hasOwn(setupState, oldRef)) {
                 setupState[oldRef] = null;
             }
         }
-        else if (reactivity_esm_bundler_isRef(oldRef)) {
+        else if (isRef(oldRef)) {
             oldRef.value = null;
         }
     }
-    if (shared_esm_bundler_isFunction(ref)) {
+    if (isFunction(ref)) {
         callWithErrorHandling(ref, owner, 12 /* ErrorCodes.FUNCTION_REF */, [value, refs]);
     }
     else {
         const _isString = isString(ref);
-        const _isRef = reactivity_esm_bundler_isRef(ref);
+        const _isRef = isRef(ref);
         if (_isString || _isRef) {
             const doSet = () => {
                 if (rawRef.f) {
                     const existing = _isString
-                        ? shared_esm_bundler_hasOwn(setupState, ref)
+                        ? hasOwn(setupState, ref)
                             ? setupState[ref]
                             : refs[ref]
                         : ref.value;
                     if (isUnmount) {
-                        shared_esm_bundler_isArray(existing) && remove(existing, refValue);
+                        isArray(existing) && remove(existing, refValue);
                     }
                     else {
-                        if (!shared_esm_bundler_isArray(existing)) {
+                        if (!isArray(existing)) {
                             if (_isString) {
                                 refs[ref] = [refValue];
-                                if (shared_esm_bundler_hasOwn(setupState, ref)) {
+                                if (hasOwn(setupState, ref)) {
                                     setupState[ref] = refs[ref];
                                 }
                             }
@@ -25443,7 +27132,7 @@ function setRef(rawRef, oldRawRef, parentSuspense, vnode, isUnmount = false) {
                 }
                 else if (_isString) {
                     refs[ref] = value;
-                    if (shared_esm_bundler_hasOwn(setupState, ref)) {
+                    if (hasOwn(setupState, ref)) {
                         setupState[ref] = value;
                     }
                 }
@@ -25452,7 +27141,8 @@ function setRef(rawRef, oldRawRef, parentSuspense, vnode, isUnmount = false) {
                     if (rawRef.k)
                         refs[rawRef.k] = value;
                 }
-                else if ((false)) {}
+                else if ((false)) // removed by dead control flow
+{}
             };
             if (value) {
                 doSet.id = -1;
@@ -25462,7 +27152,8 @@ function setRef(rawRef, oldRawRef, parentSuspense, vnode, isUnmount = false) {
                 doSet();
             }
         }
-        else if ((false)) {}
+        else if ((false)) // removed by dead control flow
+{}
     }
 }
 
@@ -25536,7 +27227,7 @@ function createHydrationFunctions(rendererInternals) {
                     nextNode = nextSibling(node);
                 }
                 break;
-            case runtime_core_esm_bundler_Static:
+            case Static:
                 if (isFragmentStart) {
                     // entire template is static but SSRed as a fragment
                     node = nextSibling(node);
@@ -25565,7 +27256,7 @@ function createHydrationFunctions(rendererInternals) {
                     onMismatch();
                 }
                 break;
-            case runtime_core_esm_bundler_Fragment:
+            case Fragment:
                 if (!isFragmentStart) {
                     nextNode = onMismatch();
                 }
@@ -25610,14 +27301,14 @@ function createHydrationFunctions(rendererInternals) {
                     if (isAsyncWrapper(vnode)) {
                         let subTree;
                         if (isFragmentStart) {
-                            subTree = runtime_core_esm_bundler_createVNode(runtime_core_esm_bundler_Fragment);
+                            subTree = createVNode(Fragment);
                             subTree.anchor = nextNode
                                 ? nextNode.previousSibling
                                 : container.lastChild;
                         }
                         else {
                             subTree =
-                                node.nodeType === 3 ? createTextVNode('') : runtime_core_esm_bundler_createVNode('div');
+                                node.nodeType === 3 ? createTextVNode('') : createVNode('div');
                         }
                         subTree.el = node;
                         vnode.component.subTree = subTree;
@@ -25634,7 +27325,8 @@ function createHydrationFunctions(rendererInternals) {
                 else if (shapeFlag & 128 /* ShapeFlags.SUSPENSE */) {
                     nextNode = vnode.type.hydrate(node, vnode, parentComponent, parentSuspense, isSVGContainer(parentNode(node)), slotScopeIds, optimized, rendererInternals, hydrateNode);
                 }
-                else if ((false)) {}
+                else if ((false)) // removed by dead control flow
+{}
         }
         if (ref != null) {
             setRef(ref, null, parentSuspense, vnode);
@@ -25660,7 +27352,7 @@ function createHydrationFunctions(rendererInternals) {
                     patchFlag & (16 /* PatchFlags.FULL_PROPS */ | 32 /* PatchFlags.HYDRATE_EVENTS */)) {
                     for (const key in props) {
                         if ((forcePatchValue && key.endsWith('value')) ||
-                            (isOn(key) && !isReservedProp(key))) {
+                            (runtime_core_esm_bundler_isOn(key) && !runtime_core_esm_bundler_isReservedProp(key))) {
                             patchProp(el, key, null, props[key], false, undefined, parentComponent);
                         }
                     }
@@ -25693,7 +27385,8 @@ function createHydrationFunctions(rendererInternals) {
                 let hasWarned = false;
                 while (next) {
                     hasMismatch = true;
-                    if (false) {}
+                    if (false) // removed by dead control flow
+{}
                     // The SSRed DOM contains more nodes than it should. Remove them.
                     const cur = next;
                     next = next.nextSibling;
@@ -25728,7 +27421,8 @@ function createHydrationFunctions(rendererInternals) {
             }
             else {
                 hasMismatch = true;
-                if (false) {}
+                if (false) // removed by dead control flow
+{}
                 // the SSRed DOM didn't contain enough nodes. Mount the missing ones.
                 patch(null, vnode, container, null, parentComponent, parentSuspense, isSVGContainer(container), slotScopeIds);
             }
@@ -25809,7 +27503,8 @@ function startMeasure(instance, type) {
     if (instance.appContext.config.performance && isSupported()) {
         perf.mark(`vue-${type}-${instance.uid}`);
     }
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
 }
 function endMeasure(instance, type) {
     if (instance.appContext.config.performance && isSupported()) {
@@ -25820,7 +27515,8 @@ function endMeasure(instance, type) {
         perf.clearMarks(startTag);
         perf.clearMarks(endTag);
     }
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
 }
 function isSupported() {
     if (supported !== undefined) {
@@ -25845,9 +27541,12 @@ function isSupported() {
  */
 function initFeatureFlags() {
     const needWarn = [];
-    if (false) {}
-    if (false) {}
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
+    if (false) // removed by dead control flow
+{}
+    if (false) // removed by dead control flow
+{}
 }
 
 const queuePostRenderEffect = queueEffectWithSuspense
@@ -25873,7 +27572,7 @@ function createRenderer(options) {
 // Separate API for creating hydration-enabled renderer.
 // Hydration logic is only used when calling this function, making it
 // tree-shakable.
-function runtime_core_esm_bundler_createHydrationRenderer(options) {
+function createHydrationRenderer(options) {
     return baseCreateRenderer(options, createHydrationFunctions);
 }
 // implementation
@@ -25884,8 +27583,9 @@ function baseCreateRenderer(options, createHydrationFns) {
     }
     const target = getGlobalThis();
     target.__VUE__ = true;
-    if (false) {}
-    const { insert: hostInsert, remove: hostRemove, patchProp: hostPatchProp, createElement: hostCreateElement, createText: hostCreateText, createComment: hostCreateComment, setText: hostSetText, setElementText: hostSetElementText, parentNode: hostParentNode, nextSibling: hostNextSibling, setScopeId: hostSetScopeId = shared_esm_bundler_NOOP, insertStaticContent: hostInsertStaticContent } = options;
+    if (false) // removed by dead control flow
+{}
+    const { insert: hostInsert, remove: hostRemove, patchProp: hostPatchProp, createElement: hostCreateElement, createText: hostCreateText, createComment: hostCreateComment, setText: hostSetText, setElementText: hostSetElementText, parentNode: hostParentNode, nextSibling: hostNextSibling, setScopeId: hostSetScopeId = NOOP, insertStaticContent: hostInsertStaticContent } = options;
     // Note: functions inside this closure should use `const xxx = () => {}`
     // style in order to prevent being inlined by minifiers.
     const patch = (n1, n2, container, anchor = null, parentComponent = null, parentSuspense = null, isSVG = false, slotScopeIds = null, optimized =  false ? 0 : !!n2.dynamicChildren) => {
@@ -25910,13 +27610,14 @@ function baseCreateRenderer(options, createHydrationFns) {
             case Comment:
                 processCommentNode(n1, n2, container, anchor);
                 break;
-            case runtime_core_esm_bundler_Static:
+            case Static:
                 if (n1 == null) {
                     mountStaticNode(n2, container, anchor, isSVG);
                 }
-                else if ((false)) {}
+                else if ((false)) // removed by dead control flow
+{}
                 break;
-            case runtime_core_esm_bundler_Fragment:
+            case Fragment:
                 processFragment(n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, slotScopeIds, optimized);
                 break;
             default:
@@ -25932,7 +27633,8 @@ function baseCreateRenderer(options, createHydrationFns) {
                 else if (shapeFlag & 128 /* ShapeFlags.SUSPENSE */) {
                     type.process(n1, n2, container, anchor, parentComponent, parentSuspense, isSVG, slotScopeIds, optimized, internals);
                 }
-                else if ((false)) {}
+                else if ((false)) // removed by dead control flow
+{}
         }
         // set ref
         if (ref != null && parentComponent) {
@@ -26026,7 +27728,7 @@ function baseCreateRenderer(options, createHydrationFns) {
         // props
         if (props) {
             for (const key in props) {
-                if (key !== 'value' && !shared_esm_bundler_isReservedProp(key)) {
+                if (key !== 'value' && !isReservedProp(key)) {
                     hostPatchProp(el, key, null, props[key], isSVG, vnode.children, parentComponent, parentSuspense, unmountChildren);
                 }
             }
@@ -26046,7 +27748,8 @@ function baseCreateRenderer(options, createHydrationFns) {
                 invokeVNodeHook(vnodeHook, parentComponent, vnode);
             }
         }
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         if (dirs) {
             invokeDirectiveHook(vnode, null, parentComponent, 'beforeMount');
         }
@@ -26080,7 +27783,8 @@ function baseCreateRenderer(options, createHydrationFns) {
         }
         if (parentComponent) {
             let subTree = parentComponent.subTree;
-            if (false /* PatchFlags.DEV_ROOT_FRAGMENT */) {}
+            if (false /* PatchFlags.DEV_ROOT_FRAGMENT */) // removed by dead control flow
+{}
             if (vnode === subTree) {
                 const parentVNode = parentComponent.vnode;
                 setScopeId(el, parentVNode, parentVNode.scopeId, parentVNode.slotScopeIds, parentComponent.parent);
@@ -26101,8 +27805,8 @@ function baseCreateRenderer(options, createHydrationFns) {
         // #1426 take the old vnode's patch flag into account since user may clone a
         // compiler-generated vnode, which de-opts to FULL_PROPS
         patchFlag |= n1.patchFlag & 16 /* PatchFlags.FULL_PROPS */;
-        const oldProps = n1.props || shared_esm_bundler_EMPTY_OBJ;
-        const newProps = n2.props || shared_esm_bundler_EMPTY_OBJ;
+        const oldProps = n1.props || EMPTY_OBJ;
+        const newProps = n2.props || EMPTY_OBJ;
         let vnodeHook;
         // disable recurse in beforeUpdate hooks
         parentComponent && toggleRecurse(parentComponent, false);
@@ -26113,11 +27817,13 @@ function baseCreateRenderer(options, createHydrationFns) {
             invokeDirectiveHook(n2, n1, parentComponent, 'beforeUpdate');
         }
         parentComponent && toggleRecurse(parentComponent, true);
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         const areChildrenSVG = isSVG && n2.type !== 'foreignObject';
         if (dynamicChildren) {
             patchBlockChildren(n1.dynamicChildren, dynamicChildren, el, parentComponent, parentSuspense, areChildrenSVG, slotScopeIds);
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
         }
         else if (!optimized) {
             // full diff
@@ -26196,7 +27902,7 @@ function baseCreateRenderer(options, createHydrationFns) {
             oldVNode.el &&
                 // - In the case of a Fragment, we need to provide the actual parent
                 // of the Fragment itself so it can move its children.
-                (oldVNode.type === runtime_core_esm_bundler_Fragment ||
+                (oldVNode.type === Fragment ||
                     // - In the case of different nodes, there is going to be a replacement
                     // which also requires the correct parent container
                     !isSameVNodeType(oldVNode, newVNode) ||
@@ -26211,16 +27917,16 @@ function baseCreateRenderer(options, createHydrationFns) {
     };
     const patchProps = (el, vnode, oldProps, newProps, parentComponent, parentSuspense, isSVG) => {
         if (oldProps !== newProps) {
-            if (oldProps !== shared_esm_bundler_EMPTY_OBJ) {
+            if (oldProps !== EMPTY_OBJ) {
                 for (const key in oldProps) {
-                    if (!shared_esm_bundler_isReservedProp(key) && !(key in newProps)) {
+                    if (!isReservedProp(key) && !(key in newProps)) {
                         hostPatchProp(el, key, oldProps[key], null, isSVG, vnode.children, parentComponent, parentSuspense, unmountChildren);
                     }
                 }
             }
             for (const key in newProps) {
                 // empty string is not valid prop
-                if (shared_esm_bundler_isReservedProp(key))
+                if (isReservedProp(key))
                     continue;
                 const next = newProps[key];
                 const prev = oldProps[key];
@@ -26238,7 +27944,8 @@ function baseCreateRenderer(options, createHydrationFns) {
         const fragmentStartAnchor = (n2.el = n1 ? n1.el : hostCreateText(''));
         const fragmentEndAnchor = (n2.anchor = n1 ? n1.anchor : hostCreateText(''));
         let { patchFlag, dynamicChildren, slotScopeIds: fragmentSlotScopeIds } = n2;
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         // check if this is a slot fragment with :slotted scope ids
         if (fragmentSlotScopeIds) {
             slotScopeIds = slotScopeIds
@@ -26263,7 +27970,8 @@ function baseCreateRenderer(options, createHydrationFns) {
                 // a stable fragment (template root or <template v-for>) doesn't need to
                 // patch children order, but it may contain dynamicChildren.
                 patchBlockChildren(n1.dynamicChildren, dynamicChildren, container, parentComponent, parentSuspense, isSVG, slotScopeIds);
-                if (false) {}
+                if (false) // removed by dead control flow
+{}
                 else if (
                 // #2080 if the stable fragment has a key, it's a <template v-for> that may
                 //  get moved around. Make sure all root level vnodes inherit el.
@@ -26299,17 +28007,21 @@ function baseCreateRenderer(options, createHydrationFns) {
     };
     const mountComponent = (initialVNode, container, anchor, parentComponent, parentSuspense, isSVG, optimized) => {
         const instance = (initialVNode.component = createComponentInstance(initialVNode, parentComponent, parentSuspense));
-        if (false) {}
-        if ((false)) {}
+        if (false) // removed by dead control flow
+{}
+        if ((false)) // removed by dead control flow
+{}
         // inject renderer internals for keepAlive
         if (isKeepAlive(initialVNode)) {
             instance.ctx.renderer = internals;
         }
         // resolve props and slots for setup context
         {
-            if ((false)) {}
+            if ((false)) // removed by dead control flow
+{}
             setupComponent(instance);
-            if ((false)) {}
+            if ((false)) // removed by dead control flow
+{}
         }
         // setup() is async. This component relies on async logic to be resolved
         // before proceeding
@@ -26318,13 +28030,14 @@ function baseCreateRenderer(options, createHydrationFns) {
             // Give it a placeholder if this is not hydration
             // TODO handle self-defined fallback
             if (!initialVNode.el) {
-                const placeholder = (instance.subTree = runtime_core_esm_bundler_createVNode(Comment));
+                const placeholder = (instance.subTree = createVNode(Comment));
                 processCommentNode(null, placeholder, container, anchor);
             }
             return;
         }
         setupRenderEffect(instance, initialVNode, container, anchor, parentSuspense, isSVG, optimized);
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
     };
     const updateComponent = (n1, n2, optimized) => {
         const instance = (n2.component = n1.component);
@@ -26333,9 +28046,11 @@ function baseCreateRenderer(options, createHydrationFns) {
                 !instance.asyncResolved) {
                 // async & still pending - just update props and slots
                 // since the component's reactive effect for render isn't set-up yet
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 updateComponentPreRender(instance, n2, optimized);
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 return;
             }
             else {
@@ -26375,12 +28090,16 @@ function baseCreateRenderer(options, createHydrationFns) {
                 if (el && hydrateNode) {
                     // vnode has adopted host node - perform hydration instead of mount.
                     const hydrateSubTree = () => {
-                        if ((false)) {}
+                        if ((false)) // removed by dead control flow
+{}
                         instance.subTree = renderComponentRoot(instance);
-                        if ((false)) {}
-                        if ((false)) {}
+                        if ((false)) // removed by dead control flow
+{}
+                        if ((false)) // removed by dead control flow
+{}
                         hydrateNode(el, instance.subTree, instance, parentSuspense, null);
-                        if ((false)) {}
+                        if ((false)) // removed by dead control flow
+{}
                     };
                     if (isAsyncWrapperVNode) {
                         initialVNode.type.__asyncLoader().then(
@@ -26395,12 +28114,16 @@ function baseCreateRenderer(options, createHydrationFns) {
                     }
                 }
                 else {
-                    if ((false)) {}
+                    if ((false)) // removed by dead control flow
+{}
                     const subTree = (instance.subTree = renderComponentRoot(instance));
-                    if ((false)) {}
-                    if ((false)) {}
+                    if ((false)) // removed by dead control flow
+{}
+                    if ((false)) // removed by dead control flow
+{}
                     patch(null, subTree, container, anchor, instance, parentSuspense, isSVG);
-                    if ((false)) {}
+                    if ((false)) // removed by dead control flow
+{}
                     initialVNode.el = subTree.el;
                 }
                 // mounted hook
@@ -26423,7 +28146,8 @@ function baseCreateRenderer(options, createHydrationFns) {
                     instance.a && queuePostRenderEffect(instance.a, parentSuspense);
                 }
                 instance.isMounted = true;
-                if (false) {}
+                if (false) // removed by dead control flow
+{}
                 // #2458: deference mount-only object parameters to prevent memleaks
                 initialVNode = container = anchor = null;
             }
@@ -26434,7 +28158,8 @@ function baseCreateRenderer(options, createHydrationFns) {
                 let { next, bu, u, parent, vnode } = instance;
                 let originNext = next;
                 let vnodeHook;
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 // Disallow component effect recursion during pre-lifecycle hooks.
                 toggleRecurse(instance, false);
                 if (next) {
@@ -26454,18 +28179,22 @@ function baseCreateRenderer(options, createHydrationFns) {
                 }
                 toggleRecurse(instance, true);
                 // render
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 const nextTree = renderComponentRoot(instance);
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 const prevTree = instance.subTree;
                 instance.subTree = nextTree;
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 patch(prevTree, nextTree, 
                 // parent may have changed if it's in a teleport
                 hostParentNode(prevTree.el), 
                 // anchor may have changed if it's in a fragment
                 getNextHostNode(prevTree), instance, parentSuspense, isSVG);
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 next.el = nextTree.el;
                 if (originNext === null) {
                     // self-triggered update. In case of HOC, update parent component
@@ -26481,8 +28210,10 @@ function baseCreateRenderer(options, createHydrationFns) {
                 if ((vnodeHook = next.props && next.props.onVnodeUpdated)) {
                     queuePostRenderEffect(() => invokeVNodeHook(vnodeHook, parent, next, vnode), parentSuspense);
                 }
-                if (false) {}
-                if ((false)) {}
+                if (false) // removed by dead control flow
+{}
+                if ((false)) // removed by dead control flow
+{}
             }
         };
         // create reactive effect for rendering
@@ -26493,7 +28224,8 @@ function baseCreateRenderer(options, createHydrationFns) {
         // allowRecurse
         // #1801, #2043 component render effects should allow recursive updates
         toggleRecurse(instance, true);
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
         update();
     };
     const updateComponentPreRender = (instance, nextVNode, optimized) => {
@@ -26670,7 +28402,8 @@ function baseCreateRenderer(options, createHydrationFns) {
                     ? cloneIfMounted(c2[i])
                     : normalizeVNode(c2[i]));
                 if (nextChild.key != null) {
-                    if (false) {}
+                    if (false) // removed by dead control flow
+{}
                     keyToNewIndexMap.set(nextChild.key, i);
                 }
             }
@@ -26769,7 +28502,7 @@ function baseCreateRenderer(options, createHydrationFns) {
             type.move(vnode, container, anchor, internals);
             return;
         }
-        if (type === runtime_core_esm_bundler_Fragment) {
+        if (type === Fragment) {
             hostInsert(el, container, anchor);
             for (let i = 0; i < children.length; i++) {
                 move(children[i], container, anchor, moveType);
@@ -26777,7 +28510,7 @@ function baseCreateRenderer(options, createHydrationFns) {
             hostInsert(vnode.anchor, container, anchor);
             return;
         }
-        if (type === runtime_core_esm_bundler_Static) {
+        if (type === Static) {
             moveStaticNode(vnode, container, anchor);
             return;
         }
@@ -26845,12 +28578,12 @@ function baseCreateRenderer(options, createHydrationFns) {
             }
             else if (dynamicChildren &&
                 // #1153: fast path should not be taken for non-stable (v-for) fragments
-                (type !== runtime_core_esm_bundler_Fragment ||
+                (type !== Fragment ||
                     (patchFlag > 0 && patchFlag & 64 /* PatchFlags.STABLE_FRAGMENT */))) {
                 // fast path for block nodes: only need to unmount dynamic children.
                 unmountChildren(dynamicChildren, parentComponent, parentSuspense, false, true);
             }
-            else if ((type === runtime_core_esm_bundler_Fragment &&
+            else if ((type === Fragment &&
                 patchFlag &
                     (128 /* PatchFlags.KEYED_FRAGMENT */ | 256 /* PatchFlags.UNKEYED_FRAGMENT */)) ||
                 (!optimized && shapeFlag & 16 /* ShapeFlags.ARRAY_CHILDREN */)) {
@@ -26872,14 +28605,15 @@ function baseCreateRenderer(options, createHydrationFns) {
     };
     const remove = vnode => {
         const { type, el, anchor, transition } = vnode;
-        if (type === runtime_core_esm_bundler_Fragment) {
-            if (false) {}
+        if (type === Fragment) {
+            if (false) // removed by dead control flow
+{}
             else {
                 removeFragment(el, anchor);
             }
             return;
         }
-        if (type === runtime_core_esm_bundler_Static) {
+        if (type === Static) {
             removeStaticNode(vnode);
             return;
         }
@@ -26917,7 +28651,8 @@ function baseCreateRenderer(options, createHydrationFns) {
         hostRemove(end);
     };
     const unmountComponent = (instance, parentSuspense, doRemove) => {
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         const { bum, scope, update, subTree, um } = instance;
         // beforeUnmount hook
         if (bum) {
@@ -26953,7 +28688,8 @@ function baseCreateRenderer(options, createHydrationFns) {
                 parentSuspense.resolve();
             }
         }
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
     };
     const unmountChildren = (children, parentComponent, parentSuspense, doRemove = false, optimized = false, start = 0) => {
         for (let i = start; i < children.length; i++) {
@@ -27022,7 +28758,7 @@ function toggleRecurse({ effect, update }, allowed) {
 function traverseStaticChildren(n1, n2, shallow = false) {
     const ch1 = n1.children;
     const ch2 = n2.children;
-    if (shared_esm_bundler_isArray(ch1) && shared_esm_bundler_isArray(ch2)) {
+    if (isArray(ch1) && isArray(ch2)) {
         for (let i = 0; i < ch1.length; i++) {
             // this is only called in the optimized path so array children are
             // guaranteed to be vnodes
@@ -27042,7 +28778,8 @@ function traverseStaticChildren(n1, n2, shallow = false) {
             }
             // also inherit for comment nodes, but not placeholders (e.g. v-if which
             // would have received .el during block patch)
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
         }
     }
 }
@@ -27110,7 +28847,8 @@ const resolveTarget = (props, select) => {
         }
     }
     else {
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         return targetSelector;
     }
 };
@@ -27122,7 +28860,8 @@ const TeleportImpl = {
         let { shapeFlag, children, dynamicChildren } = n2;
         // #3302
         // HMR updated, force full diff
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         if (n1 == null) {
             // insert anchors in the main view
             const placeholder = (n2.el = ( false)
@@ -27140,7 +28879,8 @@ const TeleportImpl = {
                 // #2652 we could be teleporting from a non-SVG tree into an SVG tree
                 isSVG = isSVG || isTargetSVG(target);
             }
-            else if (false) {}
+            else if (false) // removed by dead control flow
+{}
             const mount = (container, anchor) => {
                 // Teleport *always* has Array children. This is enforced in both the
                 // compiler and vnode children normalization.
@@ -27190,7 +28930,8 @@ const TeleportImpl = {
                     if (nextTarget) {
                         moveTeleport(n2, nextTarget, null, internals, 0 /* TeleportMoveTypes.TARGET_CHANGE */);
                     }
-                    else if ((false)) {}
+                    else if ((false)) // removed by dead control flow
+{}
                 }
                 else if (wasDisabled) {
                     // disabled -> enabled
@@ -27299,10 +29040,10 @@ function updateCssVars(vnode) {
     }
 }
 
-const runtime_core_esm_bundler_Fragment = Symbol(( false) ? 0 : undefined);
+const Fragment = Symbol(( false) ? 0 : undefined);
 const Text = Symbol(( false) ? 0 : undefined);
 const Comment = Symbol(( false) ? 0 : undefined);
-const runtime_core_esm_bundler_Static = Symbol(( false) ? 0 : undefined);
+const Static = Symbol(( false) ? 0 : undefined);
 // Since v-if and v-for are the two possible ways node structure can dynamically
 // change, once we consider v-if branches and each v-for fragment a block, we
 // can divide a template into nested blocks, and within each block the node
@@ -27384,13 +29125,14 @@ function createElementBlock(type, props, children, patchFlag, dynamicProps, shap
  * @private
  */
 function createBlock(type, props, children, patchFlag, dynamicProps) {
-    return setupBlock(runtime_core_esm_bundler_createVNode(type, props, children, patchFlag, dynamicProps, true /* isBlock: prevent a block from tracking itself */));
+    return setupBlock(createVNode(type, props, children, patchFlag, dynamicProps, true /* isBlock: prevent a block from tracking itself */));
 }
 function isVNode(value) {
     return value ? value.__v_isVNode === true : false;
 }
 function isSameVNodeType(n1, n2) {
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     return n1.type === n2.type && n1.key === n2.key;
 }
 let vnodeArgsTransformer;
@@ -27412,12 +29154,12 @@ const InternalObjectKey = `__vInternal`;
 const normalizeKey = ({ key }) => key != null ? key : null;
 const normalizeRef = ({ ref, ref_key, ref_for }) => {
     return (ref != null
-        ? isString(ref) || reactivity_esm_bundler_isRef(ref) || shared_esm_bundler_isFunction(ref)
+        ? isString(ref) || isRef(ref) || isFunction(ref)
             ? { i: currentRenderingInstance, r: ref, k: ref_key, f: !!ref_for }
             : ref
         : null);
 };
-function createBaseVNode(type, props = null, children = null, patchFlag = 0, dynamicProps = null, shapeFlag = type === runtime_core_esm_bundler_Fragment ? 0 : 1 /* ShapeFlags.ELEMENT */, isBlockNode = false, needFullChildrenNormalization = false) {
+function createBaseVNode(type, props = null, children = null, patchFlag = 0, dynamicProps = null, shapeFlag = type === Fragment ? 0 : 1 /* ShapeFlags.ELEMENT */, isBlockNode = false, needFullChildrenNormalization = false) {
     const vnode = {
         __v_isVNode: true,
         __v_skip: true,
@@ -27461,7 +29203,8 @@ function createBaseVNode(type, props = null, children = null, patchFlag = 0, dyn
             : 16 /* ShapeFlags.ARRAY_CHILDREN */;
     }
     // validate key
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     // track vnode for block tree
     if (isBlockTreeEnabled > 0 &&
         // avoid a block node from tracking itself
@@ -27480,10 +29223,11 @@ function createBaseVNode(type, props = null, children = null, patchFlag = 0, dyn
     }
     return vnode;
 }
-const runtime_core_esm_bundler_createVNode = (( false) ? 0 : _createVNode);
+const createVNode = (( false) ? 0 : _createVNode);
 function _createVNode(type, props = null, children = null, patchFlag = 0, dynamicProps = null, isBlockNode = false) {
     if (!type || type === NULL_DYNAMIC_COMPONENT) {
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         type = Comment;
     }
     if (isVNode(type)) {
@@ -27517,11 +29261,11 @@ function _createVNode(type, props = null, children = null, patchFlag = 0, dynami
         if (klass && !isString(klass)) {
             props.class = normalizeClass(klass);
         }
-        if (shared_esm_bundler_isObject(style)) {
+        if (isObject(style)) {
             // reactive state objects need to be cloned since they are likely to be
             // mutated
-            if (isProxy(style) && !shared_esm_bundler_isArray(style)) {
-                style = shared_esm_bundler_extend({}, style);
+            if (isProxy(style) && !isArray(style)) {
+                style = extend({}, style);
             }
             props.style = normalizeStyle(style);
         }
@@ -27533,19 +29277,20 @@ function _createVNode(type, props = null, children = null, patchFlag = 0, dynami
             ? 128 /* ShapeFlags.SUSPENSE */
             : isTeleport(type)
                 ? 64 /* ShapeFlags.TELEPORT */
-                : shared_esm_bundler_isObject(type)
+                : isObject(type)
                     ? 4 /* ShapeFlags.STATEFUL_COMPONENT */
-                    : shared_esm_bundler_isFunction(type)
+                    : isFunction(type)
                         ? 2 /* ShapeFlags.FUNCTIONAL_COMPONENT */
                         : 0;
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     return createBaseVNode(type, props, children, patchFlag, dynamicProps, shapeFlag, isBlockNode, true);
 }
 function guardReactiveProps(props) {
     if (!props)
         return null;
     return isProxy(props) || InternalObjectKey in props
-        ? shared_esm_bundler_extend({}, props)
+        ? extend({}, props)
         : props;
 }
 function cloneVNode(vnode, extraProps, mergeRef = false) {
@@ -27564,7 +29309,7 @@ function cloneVNode(vnode, extraProps, mergeRef = false) {
                 // if the vnode itself already has a ref, cloneVNode will need to merge
                 // the refs so the single vnode can be set on multiple refs
                 mergeRef && ref
-                    ? shared_esm_bundler_isArray(ref)
+                    ? isArray(ref)
                         ? ref.concat(normalizeRef(extraProps))
                         : [ref, normalizeRef(extraProps)]
                     : normalizeRef(extraProps)
@@ -27582,7 +29327,7 @@ function cloneVNode(vnode, extraProps, mergeRef = false) {
         // existing patch flag to be reliable and need to add the FULL_PROPS flag.
         // note: preserve flag for fragments since they use the flag for children
         // fast paths only.
-        patchFlag: extraProps && vnode.type !== runtime_core_esm_bundler_Fragment
+        patchFlag: extraProps && vnode.type !== Fragment
             ? patchFlag === -1 // hoisted node
                 ? 16 /* PatchFlags.FULL_PROPS */
                 : patchFlag | 16 /* PatchFlags.FULL_PROPS */
@@ -27613,7 +29358,7 @@ function cloneVNode(vnode, extraProps, mergeRef = false) {
  */
 function deepCloneVNode(vnode) {
     const cloned = cloneVNode(vnode);
-    if (isArray(vnode.children)) {
+    if (runtime_core_esm_bundler_isArray(vnode.children)) {
         cloned.children = vnode.children.map(deepCloneVNode);
     }
     return cloned;
@@ -27622,7 +29367,7 @@ function deepCloneVNode(vnode) {
  * @private
  */
 function createTextVNode(text = ' ', flag = 0) {
-    return runtime_core_esm_bundler_createVNode(Text, null, text, flag);
+    return createVNode(Text, null, text, flag);
 }
 /**
  * @private
@@ -27630,7 +29375,7 @@ function createTextVNode(text = ' ', flag = 0) {
 function createStaticVNode(content, numberOfNodes) {
     // A static vnode can contain multiple stringified elements, and the number
     // of elements is necessary for hydration.
-    const vnode = runtime_core_esm_bundler_createVNode(runtime_core_esm_bundler_Static, null, content);
+    const vnode = createVNode(Static, null, content);
     vnode.staticCount = numberOfNodes;
     return vnode;
 }
@@ -27643,16 +29388,16 @@ function createCommentVNode(text = '',
 asBlock = false) {
     return asBlock
         ? (openBlock(), createBlock(Comment, null, text))
-        : runtime_core_esm_bundler_createVNode(Comment, null, text);
+        : createVNode(Comment, null, text);
 }
 function normalizeVNode(child) {
     if (child == null || typeof child === 'boolean') {
         // empty placeholder
-        return runtime_core_esm_bundler_createVNode(Comment);
+        return createVNode(Comment);
     }
-    else if (shared_esm_bundler_isArray(child)) {
+    else if (isArray(child)) {
         // fragment
-        return runtime_core_esm_bundler_createVNode(runtime_core_esm_bundler_Fragment, null, 
+        return createVNode(Fragment, null, 
         // #3666, avoid reference pollution when reusing vnode
         child.slice());
     }
@@ -27663,7 +29408,7 @@ function normalizeVNode(child) {
     }
     else {
         // strings and numbers
-        return runtime_core_esm_bundler_createVNode(Text, null, String(child));
+        return createVNode(Text, null, String(child));
     }
 }
 // optimized normalization for template-compiled render fns
@@ -27679,7 +29424,7 @@ function normalizeChildren(vnode, children) {
     if (children == null) {
         children = null;
     }
-    else if (shared_esm_bundler_isArray(children)) {
+    else if (isArray(children)) {
         type = 16 /* ShapeFlags.ARRAY_CHILDREN */;
     }
     else if (typeof children === 'object') {
@@ -27713,7 +29458,7 @@ function normalizeChildren(vnode, children) {
             }
         }
     }
-    else if (shared_esm_bundler_isFunction(children)) {
+    else if (isFunction(children)) {
         children = { default: children, _ctx: currentRenderingInstance };
         type = 32 /* ShapeFlags.SLOTS_CHILDREN */;
     }
@@ -27744,12 +29489,12 @@ function mergeProps(...args) {
             else if (key === 'style') {
                 ret.style = normalizeStyle([ret.style, toMerge.style]);
             }
-            else if (shared_esm_bundler_isOn(key)) {
+            else if (isOn(key)) {
                 const existing = ret[key];
                 const incoming = toMerge[key];
                 if (incoming &&
                     existing !== incoming &&
-                    !(shared_esm_bundler_isArray(existing) && existing.includes(incoming))) {
+                    !(isArray(existing) && existing.includes(incoming))) {
                     ret[key] = existing
                         ? [].concat(existing, incoming)
                         : incoming;
@@ -27805,17 +29550,17 @@ function createComponentInstance(vnode, parent, suspense) {
         emit: null,
         emitted: null,
         // props default value
-        propsDefaults: shared_esm_bundler_EMPTY_OBJ,
+        propsDefaults: EMPTY_OBJ,
         // inheritAttrs
         inheritAttrs: type.inheritAttrs,
         // state
-        ctx: shared_esm_bundler_EMPTY_OBJ,
-        data: shared_esm_bundler_EMPTY_OBJ,
-        props: shared_esm_bundler_EMPTY_OBJ,
-        attrs: shared_esm_bundler_EMPTY_OBJ,
-        slots: shared_esm_bundler_EMPTY_OBJ,
-        refs: shared_esm_bundler_EMPTY_OBJ,
-        setupState: shared_esm_bundler_EMPTY_OBJ,
+        ctx: EMPTY_OBJ,
+        data: EMPTY_OBJ,
+        props: EMPTY_OBJ,
+        attrs: EMPTY_OBJ,
+        slots: EMPTY_OBJ,
+        refs: EMPTY_OBJ,
+        setupState: EMPTY_OBJ,
         setupContext: null,
         // suspense related
         suspense,
@@ -27842,7 +29587,8 @@ function createComponentInstance(vnode, parent, suspense) {
         ec: null,
         sp: null
     };
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     else {
         instance.ctx = { _: instance };
     }
@@ -27855,7 +29601,7 @@ function createComponentInstance(vnode, parent, suspense) {
     return instance;
 }
 let currentInstance = null;
-const runtime_core_esm_bundler_getCurrentInstance = () => currentInstance || currentRenderingInstance;
+const getCurrentInstance = () => currentInstance || currentRenderingInstance;
 const setCurrentInstance = (instance) => {
     currentInstance = instance;
     instance.scope.on();
@@ -27864,9 +29610,9 @@ const unsetCurrentInstance = () => {
     currentInstance && currentInstance.scope.off();
     currentInstance = null;
 };
-const isBuiltInTag = /*#__PURE__*/ (/* unused pure expression or super */ null && (makeMap('slot,component')));
+const isBuiltInTag = /*#__PURE__*/ (/* unused pure expression or super */ null && (runtime_core_esm_bundler_makeMap('slot,component')));
 function validateComponentName(name, config) {
-    const appIsNativeTag = config.isNativeTag || NO;
+    const appIsNativeTag = config.isNativeTag || runtime_core_esm_bundler_NO;
     if (isBuiltInTag(name) || appIsNativeTag(name)) {
         runtime_core_esm_bundler_warn('Do not use built-in or reserved HTML elements as component id: ' + name);
     }
@@ -27890,13 +29636,15 @@ function setupComponent(instance, isSSR = false) {
 function setupStatefulComponent(instance, isSSR) {
     var _a;
     const Component = instance.type;
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     // 0. create render proxy property access cache
     instance.accessCache = Object.create(null);
     // 1. create public instance / render proxy
     // also mark it raw so it's never observed
     instance.proxy = markRaw(new Proxy(instance.ctx, PublicInstanceProxyHandlers));
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     // 2. call setup()
     const { setup } = Component;
     if (setup) {
@@ -27907,7 +29655,7 @@ function setupStatefulComponent(instance, isSSR) {
         const setupResult = callWithErrorHandling(setup, instance, 0 /* ErrorCodes.SETUP_FUNCTION */, [( false) ? 0 : instance.props, setupContext]);
         resetTracking();
         unsetCurrentInstance();
-        if (shared_esm_bundler_isPromise(setupResult)) {
+        if (isPromise(setupResult)) {
             setupResult.then(unsetCurrentInstance, unsetCurrentInstance);
             if (isSSR) {
                 // return the promise so server-renderer can wait on it
@@ -27923,7 +29671,8 @@ function setupStatefulComponent(instance, isSSR) {
                 // async setup returned Promise.
                 // bail here and wait for re-entry.
                 instance.asyncDep = setupResult;
-                if (false) {}
+                if (false) // removed by dead control flow
+{}
             }
         }
         else {
@@ -27935,7 +29684,7 @@ function setupStatefulComponent(instance, isSSR) {
     }
 }
 function handleSetupResult(instance, setupResult, isSSR) {
-    if (shared_esm_bundler_isFunction(setupResult)) {
+    if (isFunction(setupResult)) {
         // setup returned an inline render function
         if (instance.type.__ssrInlineRender) {
             // when the function's name is `ssrRender` (compiled by SFC inline mode),
@@ -27946,15 +29695,19 @@ function handleSetupResult(instance, setupResult, isSSR) {
             instance.render = setupResult;
         }
     }
-    else if (shared_esm_bundler_isObject(setupResult)) {
-        if (false) {}
+    else if (isObject(setupResult)) {
+        if (false) // removed by dead control flow
+{}
         // setup returned bindings.
         // assuming a render function compiled from template is present.
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         instance.setupState = proxyRefs(setupResult);
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
     }
-    else if (false) {}
+    else if (false) // removed by dead control flow
+{}
     finishComponentSetup(instance, isSSR);
 }
 let compile;
@@ -27972,7 +29725,7 @@ function registerRuntimeCompiler(_compile) {
     };
 }
 // dev only
-const runtime_core_esm_bundler_isRuntimeOnly = () => !compile;
+const isRuntimeOnly = () => !compile;
 function finishComponentSetup(instance, isSSR, skipOptions) {
     const Component = instance.type;
     // template / render function normalization
@@ -27984,18 +29737,20 @@ function finishComponentSetup(instance, isSSR, skipOptions) {
             const template = Component.template ||
                 resolveMergedOptions(instance).template;
             if (template) {
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 const { isCustomElement, compilerOptions } = instance.appContext.config;
                 const { delimiters, compilerOptions: componentCompilerOptions } = Component;
-                const finalCompilerOptions = shared_esm_bundler_extend(shared_esm_bundler_extend({
+                const finalCompilerOptions = extend(extend({
                     isCustomElement,
                     delimiters
                 }, compilerOptions), componentCompilerOptions);
                 Component.render = compile(template, finalCompilerOptions);
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
             }
         }
-        instance.render = (Component.render || shared_esm_bundler_NOOP);
+        instance.render = (Component.render || NOOP);
         // for runtime-compiled render functions using `with` blocks, the render
         // proxy used needs a different `has` handler which is more performant and
         // also only allows a whitelist of globals to fallthrough.
@@ -28013,7 +29768,8 @@ function finishComponentSetup(instance, isSSR, skipOptions) {
     }
     // warn missing template/render
     // the runtime compilation of template in SSR is done by server-render
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
 }
 function createAttrsProxy(instance) {
     return new Proxy(instance.attrs, ( false)
@@ -28027,11 +29783,13 @@ function createAttrsProxy(instance) {
 }
 function createSetupContext(instance) {
     const expose = exposed => {
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
         instance.exposed = exposed || {};
     };
     let attrs;
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     else {
         return {
             get attrs() {
@@ -28064,7 +29822,7 @@ function getExposeProxy(instance) {
 const classifyRE = /(?:^|[-_])(\w)/g;
 const classify = (str) => str.replace(classifyRE, c => c.toUpperCase()).replace(/[-_]/g, '');
 function getComponentName(Component, includeInferred = true) {
-    return shared_esm_bundler_isFunction(Component)
+    return isFunction(Component)
         ? Component.displayName || Component.name
         : Component.name || (includeInferred && Component.__name);
 }
@@ -28093,7 +29851,7 @@ function formatComponentName(instance, Component, isRoot = false) {
     return name ? classify(name) : isRoot ? `App` : `Anonymous`;
 }
 function isClassComponent(value) {
-    return shared_esm_bundler_isFunction(value) && '__vccOpts' in value;
+    return isFunction(value) && '__vccOpts' in value;
 }
 
 const runtime_core_esm_bundler_computed = ((getterOrOptions, debugOptions) => {
@@ -28107,12 +29865,14 @@ const warnRuntimeUsage = (method) => runtime_core_esm_bundler_warn(`${method}() 
     `compiled away and passing it at runtime has no effect.`);
 // implementation
 function defineProps() {
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     return null;
 }
 // implementation
 function defineEmits() {
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     return null;
 }
 /**
@@ -28128,7 +29888,8 @@ function defineEmits() {
  * output and should **not** be actually called at runtime.
  */
 function defineExpose(exposed) {
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
 }
 /**
  * Vue `<script setup>` compiler macro for providing props default values when
@@ -28149,7 +29910,8 @@ function defineExpose(exposed) {
  * and should **not** be actually called at runtime.
  */
 function withDefaults(props, defaults) {
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     return null;
 }
 function useSlots() {
@@ -28159,8 +29921,9 @@ function useAttrs() {
     return getContext().attrs;
 }
 function getContext() {
-    const i = runtime_core_esm_bundler_getCurrentInstance();
-    if (false) {}
+    const i = getCurrentInstance();
+    if (false) // removed by dead control flow
+{}
     return i.setupContext || (i.setupContext = createSetupContext(i));
 }
 /**
@@ -28169,13 +29932,13 @@ function getContext() {
  * @internal
  */
 function mergeDefaults(raw, defaults) {
-    const props = isArray(raw)
+    const props = runtime_core_esm_bundler_isArray(raw)
         ? raw.reduce((normalized, p) => ((normalized[p] = {}), normalized), {})
         : raw;
     for (const key in defaults) {
         const opt = props[key];
         if (opt) {
-            if (isArray(opt) || isFunction(opt)) {
+            if (runtime_core_esm_bundler_isArray(opt) || runtime_core_esm_bundler_isFunction(opt)) {
                 props[key] = { type: opt, default: defaults[key] };
             }
             else {
@@ -28185,7 +29948,8 @@ function mergeDefaults(raw, defaults) {
         else if (opt === null) {
             props[key] = { default: defaults[key] };
         }
-        else if ((false)) {}
+        else if ((false)) // removed by dead control flow
+{}
     }
     return props;
 }
@@ -28225,11 +29989,12 @@ function createPropsRestProxy(props, excludedKeys) {
  * @internal
  */
 function withAsyncContext(getAwaitable) {
-    const ctx = runtime_core_esm_bundler_getCurrentInstance();
-    if (false) {}
+    const ctx = getCurrentInstance();
+    if (false) // removed by dead control flow
+{}
     let awaitable = getAwaitable();
     unsetCurrentInstance();
-    if (isPromise(awaitable)) {
+    if (runtime_core_esm_bundler_isPromise(awaitable)) {
         awaitable = awaitable.catch(e => {
             setCurrentInstance(ctx);
             throw e;
@@ -28242,17 +30007,17 @@ function withAsyncContext(getAwaitable) {
 function h(type, propsOrChildren, children) {
     const l = arguments.length;
     if (l === 2) {
-        if (shared_esm_bundler_isObject(propsOrChildren) && !shared_esm_bundler_isArray(propsOrChildren)) {
+        if (isObject(propsOrChildren) && !isArray(propsOrChildren)) {
             // single vnode without props
             if (isVNode(propsOrChildren)) {
-                return runtime_core_esm_bundler_createVNode(type, null, [propsOrChildren]);
+                return createVNode(type, null, [propsOrChildren]);
             }
             // props without children
-            return runtime_core_esm_bundler_createVNode(type, propsOrChildren);
+            return createVNode(type, propsOrChildren);
         }
         else {
             // omit props
-            return runtime_core_esm_bundler_createVNode(type, null, propsOrChildren);
+            return createVNode(type, null, propsOrChildren);
         }
     }
     else {
@@ -28262,7 +30027,7 @@ function h(type, propsOrChildren, children) {
         else if (l === 3 && isVNode(children)) {
             children = [children];
         }
-        return runtime_core_esm_bundler_createVNode(type, propsOrChildren, children);
+        return createVNode(type, propsOrChildren, children);
     }
 }
 
@@ -28287,76 +30052,28 @@ function initCustomFormatter() {
     if (true) {
         return;
     }
-    const vueStyle = { style: 'color:#3ba776' };
-    const numberStyle = { style: 'color:#0b1bc9' };
-    const stringStyle = { style: 'color:#b62e24' };
-    const keywordStyle = { style: 'color:#9d288c' };
+    // removed by dead control flow
+
+    // removed by dead control flow
+
+    // removed by dead control flow
+
+    // removed by dead control flow
+
     // custom formatter for Chrome
     // https://www.mattzeunert.com/2016/02/19/custom-chrome-devtools-object-formatters.html
-    const formatter = {
-        header(obj) {
-            // TODO also format ComponentPublicInstance & ctx.slots/attrs in setup
-            if (!isObject(obj)) {
-                return null;
-            }
-            if (obj.__isVue) {
-                return ['div', vueStyle, `VueInstance`];
-            }
-            else if (isRef(obj)) {
-                return [
-                    'div',
-                    {},
-                    ['span', vueStyle, genRefFlag(obj)],
-                    '<',
-                    formatValue(obj.value),
-                    `>`
-                ];
-            }
-            else if (isReactive(obj)) {
-                return [
-                    'div',
-                    {},
-                    ['span', vueStyle, runtime_core_esm_bundler_isShallow(obj) ? 'ShallowReactive' : 'Reactive'],
-                    '<',
-                    formatValue(obj),
-                    `>${isReadonly(obj) ? ` (readonly)` : ``}`
-                ];
-            }
-            else if (isReadonly(obj)) {
-                return [
-                    'div',
-                    {},
-                    ['span', vueStyle, runtime_core_esm_bundler_isShallow(obj) ? 'ShallowReadonly' : 'Readonly'],
-                    '<',
-                    formatValue(obj),
-                    '>'
-                ];
-            }
-            return null;
-        },
-        hasBody(obj) {
-            return obj && obj.__isVue;
-        },
-        body(obj) {
-            if (obj && obj.__isVue) {
-                return [
-                    'div',
-                    {},
-                    ...formatInstance(obj.$)
-                ];
-            }
-        }
-    };
+    // removed by dead control flow
+
     function formatInstance(instance) {
         const blocks = [];
         if (instance.type.props && instance.props) {
-            blocks.push(createInstanceBlock('props', toRaw(instance.props)));
+            blocks.push(createInstanceBlock('props', runtime_core_esm_bundler_toRaw(instance.props)));
         }
-        if (instance.setupState !== EMPTY_OBJ) {
+        if (instance.setupState !== runtime_core_esm_bundler_EMPTY_OBJ) {
             blocks.push(createInstanceBlock('setup', instance.setupState));
         }
-        if (instance.data !== EMPTY_OBJ) {
-            blocks.push(createInstanceBlock('data', toRaw(instance.data)));
+        if (instance.data !== runtime_core_esm_bundler_EMPTY_OBJ) {
+            blocks.push(createInstanceBlock('data', runtime_core_esm_bundler_toRaw(instance.data)));
         }
         const computed = extractKeys(instance, 'computed');
         if (computed) {
@@ -28381,7 +30098,7 @@ function initCustomFormatter() {
         return blocks;
     }
     function createInstanceBlock(type, target) {
-        target = extend({}, target);
+        target = runtime_core_esm_bundler_extend({}, target);
         if (!Object.keys(target).length) {
             return ['span', {}];
         }
@@ -28421,8 +30138,8 @@ function initCustomFormatter() {
         else if (typeof v === 'boolean') {
             return ['span', keywordStyle, v];
         }
-        else if (isObject(v)) {
-            return ['object', { object: asRaw ? toRaw(v) : v }];
+        else if (runtime_core_esm_bundler_isObject(v)) {
+            return ['object', { object: asRaw ? runtime_core_esm_bundler_toRaw(v) : v }];
         }
         else {
             return ['span', stringStyle, String(v)];
@@ -28430,7 +30147,7 @@ function initCustomFormatter() {
     }
     function extractKeys(instance, type) {
         const Comp = instance.type;
-        if (isFunction(Comp)) {
+        if (runtime_core_esm_bundler_isFunction(Comp)) {
             return;
         }
         const extracted = {};
@@ -28443,8 +30160,8 @@ function initCustomFormatter() {
     }
     function isKeyOfType(Comp, key, type) {
         const opts = Comp[type];
-        if ((isArray(opts) && opts.includes(key)) ||
-            (isObject(opts) && key in opts)) {
+        if ((runtime_core_esm_bundler_isArray(opts) && opts.includes(key)) ||
+            (runtime_core_esm_bundler_isObject(opts) && key in opts)) {
             return true;
         }
         if (Comp.extends && isKeyOfType(Comp.extends, key, type)) {
@@ -28463,12 +30180,8 @@ function initCustomFormatter() {
         }
         return `Ref`;
     }
-    if (window.devtoolsFormatters) {
-        window.devtoolsFormatters.push(formatter);
-    }
-    else {
-        window.devtoolsFormatters = [formatter];
-    }
+    // removed by dead control flow
+
 }
 
 function withMemo(memo, render, cache, index) {
@@ -28487,7 +30200,7 @@ function isMemoSame(cached, memo) {
         return false;
     }
     for (let i = 0; i < prev.length; i++) {
-        if (hasChanged(prev[i], memo[i])) {
+        if (runtime_core_esm_bundler_hasChanged(prev[i], memo[i])) {
             return false;
         }
     }
@@ -28524,7 +30237,25 @@ const compatUtils = (null);
 
 
 
-;// CONCATENATED MODULE: ./node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
+;// ./node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_defineComponent;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_getCurrentInstance;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_watchPostEffect;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_onMounted;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_onUnmounted;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_Fragment;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_Static;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_createHydrationRenderer;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_isRuntimeOnly;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_warn;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_EMPTY_OBJ;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_looseEqual;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_isArray;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_looseIndexOf;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_isSet;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_hyphenate;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_isHTMLTag;
+/* unused harmony import specifier */ var runtime_dom_esm_bundler_isSVGTag;
 
 
 
@@ -28663,13 +30394,14 @@ function patchStyle(el, prev, next) {
 const semicolonRE = /[^\\];\s*$/;
 const importantRE = /\s*!important$/;
 function setStyle(style, name, val) {
-    if (shared_esm_bundler_isArray(val)) {
+    if (isArray(val)) {
         val.forEach(v => setStyle(style, name, v));
     }
     else {
         if (val == null)
             val = '';
-        if ((false)) {}
+        if ((false)) // removed by dead control flow
+{}
         if (name.startsWith('--')) {
             // custom property definition
             style.setProperty(name, val);
@@ -28678,7 +30410,7 @@ function setStyle(style, name, val) {
             const prefixed = autoPrefix(style, name);
             if (importantRE.test(val)) {
                 // !important
-                style.setProperty(shared_esm_bundler_hyphenate(prefixed), val.replace(importantRE, ''), 'important');
+                style.setProperty(hyphenate(prefixed), val.replace(importantRE, ''), 'important');
             }
             else {
                 style[prefixed] = val;
@@ -28697,7 +30429,7 @@ function autoPrefix(style, rawName) {
     if (name !== 'filter' && name in style) {
         return (prefixCache[rawName] = name);
     }
-    name = shared_esm_bundler_capitalize(name);
+    name = capitalize(name);
     for (let i = 0; i < prefixes.length; i++) {
         const prefixed = prefixes[i] + name;
         if (prefixed in style) {
@@ -28790,7 +30522,8 @@ prevChildren, parentComponent, parentSuspense, unmountChildren) {
     }
     catch (e) {
         // do not warn if value is auto-coerced from nullish values
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
     }
     needRemove && el.removeAttribute(key);
 }
@@ -28834,7 +30567,7 @@ function parseName(name) {
             options[m[0].toLowerCase()] = true;
         }
     }
-    const event = name[2] === ':' ? name.slice(3) : shared_esm_bundler_hyphenate(name.slice(2));
+    const event = name[2] === ':' ? name.slice(3) : hyphenate(name.slice(2));
     return [event, options];
 }
 // To avoid the overhead of repeatedly calling Date.now(), we cache
@@ -28869,7 +30602,7 @@ function createInvoker(initialValue, instance) {
     return invoker;
 }
 function patchStopImmediatePropagation(e, value) {
-    if (shared_esm_bundler_isArray(value)) {
+    if (isArray(value)) {
         const originalStop = e.stopImmediatePropagation;
         e.stopImmediatePropagation = () => {
             originalStop.call(e);
@@ -28890,7 +30623,7 @@ const patchProp = (el, key, prevValue, nextValue, isSVG = false, prevChildren, p
     else if (key === 'style') {
         patchStyle(el, prevValue, nextValue);
     }
-    else if (shared_esm_bundler_isOn(key)) {
+    else if (isOn(key)) {
         // ignore v-model listeners
         if (!isModelListener(key)) {
             patchEvent(el, key, prevValue, nextValue, parentComponent);
@@ -28925,7 +30658,7 @@ function shouldSetAsProp(el, key, value, isSVG) {
             return true;
         }
         // or native onclick with function values
-        if (key in el && nativeOnRE.test(key) && shared_esm_bundler_isFunction(value)) {
+        if (key in el && nativeOnRE.test(key) && isFunction(value)) {
             return true;
         }
         return false;
@@ -28960,7 +30693,7 @@ function shouldSetAsProp(el, key, value, isSVG) {
 }
 
 function defineCustomElement(options, hydrate) {
-    const Comp = defineComponent(options);
+    const Comp = runtime_dom_esm_bundler_defineComponent(options);
     class VueCustomElement extends VueElement {
         constructor(initialProps) {
             super(Comp, initialProps, hydrate);
@@ -28975,7 +30708,7 @@ const defineSSRCustomElement = ((options) => {
 });
 const BaseClass = (typeof HTMLElement !== 'undefined' ? HTMLElement : class {
 });
-class VueElement extends (/* unused pure expression or super */ null && (BaseClass)) {
+class VueElement extends BaseClass {
     constructor(_def, _props = {}, hydrate) {
         super();
         this._def = _def;
@@ -28991,7 +30724,8 @@ class VueElement extends (/* unused pure expression or super */ null && (BaseCla
             hydrate(this._createVNode(), this.shadowRoot);
         }
         else {
-            if (false) {}
+            if (false) // removed by dead control flow
+{}
             this.attachShadow({ mode: 'open' });
             if (!this._def.__asyncLoader) {
                 // for sync component defs we can immediately resolve props
@@ -29045,7 +30779,7 @@ class VueElement extends (/* unused pure expression or super */ null && (BaseCla
                         if (key in this._props) {
                             this._props[key] = toNumber(this._props[key]);
                         }
-                        (numberProps || (numberProps = Object.create(null)))[camelize$1(key)] = true;
+                        (numberProps || (numberProps = Object.create(null)))[camelize(key)] = true;
                     }
                 }
             }
@@ -29078,7 +30812,7 @@ class VueElement extends (/* unused pure expression or super */ null && (BaseCla
             }
         }
         // defining getter/setters on prototype
-        for (const key of declaredPropKeys.map(camelize$1)) {
+        for (const key of declaredPropKeys.map(camelize)) {
             Object.defineProperty(this, key, {
                 get() {
                     return this._getProp(key);
@@ -29091,7 +30825,7 @@ class VueElement extends (/* unused pure expression or super */ null && (BaseCla
     }
     _setAttr(key) {
         let value = this.getAttribute(key);
-        const camelKey = camelize$1(key);
+        const camelKey = camelize(key);
         if (this._numberProps && this._numberProps[camelKey]) {
             value = toNumber(value);
         }
@@ -29136,7 +30870,8 @@ class VueElement extends (/* unused pure expression or super */ null && (BaseCla
                 this._instance = instance;
                 instance.isCE = true;
                 // HMR
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
                 const dispatch = (event, args) => {
                     this.dispatchEvent(new CustomEvent(event, {
                         detail: args
@@ -29172,7 +30907,8 @@ class VueElement extends (/* unused pure expression or super */ null && (BaseCla
                 s.textContent = css;
                 this.shadowRoot.appendChild(s);
                 // record for HMR
-                if ((false)) {}
+                if ((false)) // removed by dead control flow
+{}
             });
         }
     }
@@ -29181,21 +30917,21 @@ class VueElement extends (/* unused pure expression or super */ null && (BaseCla
 function useCssModule(name = '$style') {
     /* istanbul ignore else */
     {
-        const instance = getCurrentInstance();
+        const instance = runtime_dom_esm_bundler_getCurrentInstance();
         if (!instance) {
             ( false) && 0;
-            return EMPTY_OBJ;
+            return runtime_dom_esm_bundler_EMPTY_OBJ;
         }
         const modules = instance.type.__cssModules;
         if (!modules) {
             ( false) && 0;
-            return EMPTY_OBJ;
+            return runtime_dom_esm_bundler_EMPTY_OBJ;
         }
         const mod = modules[name];
         if (!mod) {
             ( false) &&
                 0;
-            return EMPTY_OBJ;
+            return runtime_dom_esm_bundler_EMPTY_OBJ;
         }
         return mod;
     }
@@ -29206,7 +30942,7 @@ function useCssModule(name = '$style') {
  * @private
  */
 function useCssVars(getter) {
-    const instance = getCurrentInstance();
+    const instance = runtime_dom_esm_bundler_getCurrentInstance();
     /* istanbul ignore next */
     if (!instance) {
         ( false) &&
@@ -29221,11 +30957,11 @@ function useCssVars(getter) {
         setVarsOnVNode(instance.subTree, vars);
         updateTeleports(vars);
     };
-    watchPostEffect(setVars);
-    onMounted(() => {
+    runtime_dom_esm_bundler_watchPostEffect(setVars);
+    runtime_dom_esm_bundler_onMounted(() => {
         const ob = new MutationObserver(setVars);
         ob.observe(instance.subTree.el.parentNode, { childList: true });
-        onUnmounted(() => ob.disconnect());
+        runtime_dom_esm_bundler_onUnmounted(() => ob.disconnect());
     });
 }
 function setVarsOnVNode(vnode, vars) {
@@ -29245,10 +30981,10 @@ function setVarsOnVNode(vnode, vars) {
     if (vnode.shapeFlag & 1 /* ShapeFlags.ELEMENT */ && vnode.el) {
         setVarsOnNode(vnode.el, vars);
     }
-    else if (vnode.type === Fragment) {
+    else if (vnode.type === runtime_dom_esm_bundler_Fragment) {
         vnode.children.forEach(c => setVarsOnVNode(c, vars));
     }
-    else if (vnode.type === Static) {
+    else if (vnode.type === runtime_dom_esm_bundler_Static) {
         let { el, anchor } = vnode;
         while (el) {
             setVarsOnNode(el, vars);
@@ -29292,13 +31028,13 @@ const DOMTransitionPropsValidators = {
     leaveToClass: String
 };
 const TransitionPropsValidators = (Transition.props =
-    /*#__PURE__*/ shared_esm_bundler_extend({}, BaseTransition.props, DOMTransitionPropsValidators));
+    /*#__PURE__*/ extend({}, BaseTransition.props, DOMTransitionPropsValidators));
 /**
  * #3227 Incoming hooks may be merged into arrays when wrapping Transition
  * with custom HOCs.
  */
 const runtime_dom_esm_bundler_callHook = (hook, args = []) => {
-    if (shared_esm_bundler_isArray(hook)) {
+    if (isArray(hook)) {
         hook.forEach(h => h(...args));
     }
     else if (hook) {
@@ -29311,7 +31047,7 @@ const runtime_dom_esm_bundler_callHook = (hook, args = []) => {
  */
 const hasExplicitCallback = (hook) => {
     return hook
-        ? shared_esm_bundler_isArray(hook)
+        ? isArray(hook)
             ? hook.some(h => h.length > 1)
             : hook.length > 1
         : false;
@@ -29357,7 +31093,7 @@ function resolveTransitionProps(rawProps) {
             });
         };
     };
-    return shared_esm_bundler_extend(baseProps, {
+    return extend(baseProps, {
         onBeforeEnter(el) {
             runtime_dom_esm_bundler_callHook(onBeforeEnter, [el]);
             addTransitionClass(el, enterFromClass);
@@ -29408,7 +31144,7 @@ function normalizeDuration(duration) {
     if (duration == null) {
         return null;
     }
-    else if (shared_esm_bundler_isObject(duration)) {
+    else if (isObject(duration)) {
         return [NumberOf(duration.enter), NumberOf(duration.leave)];
     }
     else {
@@ -29417,8 +31153,9 @@ function normalizeDuration(duration) {
     }
 }
 function NumberOf(val) {
-    const res = shared_esm_bundler_toNumber(val);
-    if ((false)) {}
+    const res = toNumber(val);
+    if ((false)) // removed by dead control flow
+{}
     return res;
 }
 function addTransitionClass(el, cls) {
@@ -29547,12 +31284,12 @@ const positionMap = new WeakMap();
 const newPositionMap = new WeakMap();
 const TransitionGroupImpl = {
     name: 'TransitionGroup',
-    props: /*#__PURE__*/ shared_esm_bundler_extend({}, TransitionPropsValidators, {
+    props: /*#__PURE__*/ extend({}, TransitionPropsValidators, {
         tag: String,
         moveClass: String
     }),
     setup(props, { slots }) {
-        const instance = runtime_core_esm_bundler_getCurrentInstance();
+        const instance = getCurrentInstance();
         const state = useTransitionState();
         let prevChildren;
         let children;
@@ -29591,9 +31328,9 @@ const TransitionGroupImpl = {
             });
         });
         return () => {
-            const rawProps = reactivity_esm_bundler_toRaw(props);
+            const rawProps = toRaw(props);
             const cssTransitionProps = resolveTransitionProps(rawProps);
-            let tag = rawProps.tag || runtime_core_esm_bundler_Fragment;
+            let tag = rawProps.tag || Fragment;
             prevChildren = children;
             children = slots.default ? getTransitionRawChildren(slots.default()) : [];
             for (let i = 0; i < children.length; i++) {
@@ -29601,7 +31338,8 @@ const TransitionGroupImpl = {
                 if (child.key != null) {
                     setTransitionHooks(child, resolveTransitionHooks(child, cssTransitionProps, state, instance));
                 }
-                else if ((false)) {}
+                else if ((false)) // removed by dead control flow
+{}
             }
             if (prevChildren) {
                 for (let i = 0; i < prevChildren.length; i++) {
@@ -29610,7 +31348,7 @@ const TransitionGroupImpl = {
                     positionMap.set(child, child.el.getBoundingClientRect());
                 }
             }
-            return runtime_core_esm_bundler_createVNode(tag, null, children);
+            return createVNode(tag, null, children);
         };
     }
 };
@@ -29671,7 +31409,7 @@ function hasCSSTransform(el, root, moveClass) {
 const getModelAssigner = (vnode) => {
     const fn = vnode.props['onUpdate:modelValue'] ||
         (false );
-    return shared_esm_bundler_isArray(fn) ? value => invokeArrayFns(fn, value) : fn;
+    return isArray(fn) ? value => invokeArrayFns(fn, value) : fn;
 };
 function onCompositionStart(e) {
     e.target.composing = true;
@@ -29753,8 +31491,8 @@ const vModelCheckbox = {
             const elementValue = getValue(el);
             const checked = el.checked;
             const assign = el._assign;
-            if (shared_esm_bundler_isArray(modelValue)) {
-                const index = shared_esm_bundler_looseIndexOf(modelValue, elementValue);
+            if (isArray(modelValue)) {
+                const index = looseIndexOf(modelValue, elementValue);
                 const found = index !== -1;
                 if (checked && !found) {
                     assign(modelValue.concat(elementValue));
@@ -29765,7 +31503,7 @@ const vModelCheckbox = {
                     assign(filtered);
                 }
             }
-            else if (shared_esm_bundler_isSet(modelValue)) {
+            else if (isSet(modelValue)) {
                 const cloned = new Set(modelValue);
                 if (checked) {
                     cloned.add(elementValue);
@@ -29789,19 +31527,19 @@ const vModelCheckbox = {
 };
 function setChecked(el, { value, oldValue }, vnode) {
     el._modelValue = value;
-    if (shared_esm_bundler_isArray(value)) {
-        el.checked = shared_esm_bundler_looseIndexOf(value, vnode.props.value) > -1;
+    if (isArray(value)) {
+        el.checked = looseIndexOf(value, vnode.props.value) > -1;
     }
-    else if (shared_esm_bundler_isSet(value)) {
+    else if (isSet(value)) {
         el.checked = value.has(vnode.props.value);
     }
     else if (value !== oldValue) {
-        el.checked = shared_esm_bundler_looseEqual(value, getCheckboxValue(el, true));
+        el.checked = looseEqual(value, getCheckboxValue(el, true));
     }
 }
 const vModelRadio = {
     created(el, { value }, vnode) {
-        el.checked = shared_esm_bundler_looseEqual(value, vnode.props.value);
+        el.checked = looseEqual(value, vnode.props.value);
         el._assign = getModelAssigner(vnode);
         addEventListener(el, 'change', () => {
             el._assign(getValue(el));
@@ -29810,7 +31548,7 @@ const vModelRadio = {
     beforeUpdate(el, { value, oldValue }, vnode) {
         el._assign = getModelAssigner(vnode);
         if (value !== oldValue) {
-            el.checked = shared_esm_bundler_looseEqual(value, vnode.props.value);
+            el.checked = looseEqual(value, vnode.props.value);
         }
     }
 };
@@ -29818,7 +31556,7 @@ const vModelSelect = {
     // <select multiple> value need to be deep traversed
     deep: true,
     created(el, { value, modifiers: { number } }, vnode) {
-        const isSetModel = shared_esm_bundler_isSet(value);
+        const isSetModel = isSet(value);
         addEventListener(el, 'change', () => {
             const selectedVal = Array.prototype.filter
                 .call(el.options, (o) => o.selected)
@@ -29845,7 +31583,7 @@ const vModelSelect = {
 };
 function setSelected(el, value) {
     const isMultiple = el.multiple;
-    if (isMultiple && !shared_esm_bundler_isArray(value) && !shared_esm_bundler_isSet(value)) {
+    if (isMultiple && !isArray(value) && !isSet(value)) {
         ( false) &&
             0;
         return;
@@ -29854,15 +31592,15 @@ function setSelected(el, value) {
         const option = el.options[i];
         const optionValue = getValue(option);
         if (isMultiple) {
-            if (shared_esm_bundler_isArray(value)) {
-                option.selected = shared_esm_bundler_looseIndexOf(value, optionValue) > -1;
+            if (isArray(value)) {
+                option.selected = looseIndexOf(value, optionValue) > -1;
             }
             else {
                 option.selected = value.has(optionValue);
             }
         }
         else {
-            if (shared_esm_bundler_looseEqual(getValue(option), value)) {
+            if (looseEqual(getValue(option), value)) {
                 if (el.selectedIndex !== i)
                     el.selectedIndex = i;
                 return;
@@ -29923,17 +31661,17 @@ function callModelHook(el, binding, vnode, prevVNode, hook) {
 function initVModelForSSR() {
     vModelText.getSSRProps = ({ value }) => ({ value });
     vModelRadio.getSSRProps = ({ value }, vnode) => {
-        if (vnode.props && looseEqual(vnode.props.value, value)) {
+        if (vnode.props && runtime_dom_esm_bundler_looseEqual(vnode.props.value, value)) {
             return { checked: true };
         }
     };
     vModelCheckbox.getSSRProps = ({ value }, vnode) => {
-        if (isArray(value)) {
-            if (vnode.props && looseIndexOf(value, vnode.props.value) > -1) {
+        if (runtime_dom_esm_bundler_isArray(value)) {
+            if (vnode.props && runtime_dom_esm_bundler_looseIndexOf(value, vnode.props.value) > -1) {
                 return { checked: true };
             }
         }
-        else if (isSet(value)) {
+        else if (runtime_dom_esm_bundler_isSet(value)) {
             if (vnode.props && value.has(vnode.props.value)) {
                 return { checked: true };
             }
@@ -30001,7 +31739,7 @@ const withKeys = (fn, modifiers) => {
         if (!('key' in event)) {
             return;
         }
-        const eventKey = hyphenate(event.key);
+        const eventKey = runtime_dom_esm_bundler_hyphenate(event.key);
         if (modifiers.some(k => k === eventKey || keyNames[k] === eventKey)) {
             return fn(event);
         }
@@ -30059,7 +31797,7 @@ function initVShowForSSR() {
     };
 }
 
-const rendererOptions = /*#__PURE__*/ shared_esm_bundler_extend({ patchProp }, nodeOps);
+const rendererOptions = /*#__PURE__*/ extend({ patchProp }, nodeOps);
 // lazy create the renderer - this makes core renderer logic tree-shakable
 // in case the user only imports reactivity utilities from Vue.
 let renderer;
@@ -30071,7 +31809,7 @@ function ensureRenderer() {
 function ensureHydrationRenderer() {
     renderer = enabledHydration
         ? renderer
-        : createHydrationRenderer(rendererOptions);
+        : runtime_dom_esm_bundler_createHydrationRenderer(rendererOptions);
     enabledHydration = true;
     return renderer;
 }
@@ -30084,14 +31822,15 @@ const hydrate = ((...args) => {
 });
 const createApp = ((...args) => {
     const app = ensureRenderer().createApp(...args);
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     const { mount } = app;
     app.mount = (containerOrSelector) => {
         const container = normalizeContainer(containerOrSelector);
         if (!container)
             return;
         const component = app._component;
-        if (!shared_esm_bundler_isFunction(component) && !component.render && !component.template) {
+        if (!isFunction(component) && !component.render && !component.template) {
             // __UNSAFE__
             // Reason: potential execution of JS expressions in in-DOM template.
             // The user must make sure the in-DOM template is trusted. If it's
@@ -30111,7 +31850,8 @@ const createApp = ((...args) => {
 });
 const createSSRApp = ((...args) => {
     const app = ensureHydrationRenderer().createApp(...args);
-    if ((false)) {}
+    if ((false)) // removed by dead control flow
+{}
     const { mount } = app;
     app.mount = (containerOrSelector) => {
         const container = normalizeContainer(containerOrSelector);
@@ -30125,20 +31865,20 @@ function injectNativeTagCheck(app) {
     // Inject `isNativeTag`
     // this is used for component name validation (dev only)
     Object.defineProperty(app.config, 'isNativeTag', {
-        value: (tag) => isHTMLTag(tag) || isSVGTag(tag),
+        value: (tag) => runtime_dom_esm_bundler_isHTMLTag(tag) || runtime_dom_esm_bundler_isSVGTag(tag),
         writable: false
     });
 }
 // dev only
 function injectCompilerOptionsCheck(app) {
-    if (isRuntimeOnly()) {
+    if (runtime_dom_esm_bundler_isRuntimeOnly()) {
         const isCustomElement = app.config.isCustomElement;
         Object.defineProperty(app.config, 'isCustomElement', {
             get() {
                 return isCustomElement;
             },
             set() {
-                warn(`The \`isCustomElement\` config option is deprecated. Use ` +
+                runtime_dom_esm_bundler_warn(`The \`isCustomElement\` config option is deprecated. Use ` +
                     `\`compilerOptions.isCustomElement\` instead.`);
             }
         });
@@ -30152,11 +31892,11 @@ function injectCompilerOptionsCheck(app) {
             `- For vite: pass it via @vitejs/plugin-vue options. See https://github.com/vitejs/vite/tree/main/packages/plugin-vue#example-for-passing-options-to-vuecompiler-dom`;
         Object.defineProperty(app.config, 'compilerOptions', {
             get() {
-                warn(msg);
+                runtime_dom_esm_bundler_warn(msg);
                 return compilerOptions;
             },
             set() {
-                warn(msg);
+                runtime_dom_esm_bundler_warn(msg);
             }
         });
     }
@@ -30164,10 +31904,12 @@ function injectCompilerOptionsCheck(app) {
 function normalizeContainer(container) {
     if (isString(container)) {
         const res = document.querySelector(container);
-        if (false) {}
+        if (false) // removed by dead control flow
+{}
         return res;
     }
-    if (false) {}
+    if (false) // removed by dead control flow
+{}
     return container;
 }
 let ssrDirectiveInitialized = false;
@@ -30185,7 +31927,7 @@ const initDirectivesForSSR = () => {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardEditor.vue?vue&type=template&id=129f0b6a
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardEditor.vue?vue&type=template&id=129f0b6a
 
 const _hoisted_1 = /*#__PURE__*/createBaseVNode("h1", null, "Dashboard Editor", -1);
 const _hoisted_2 = {
@@ -30196,12 +31938,12 @@ function DashboardEditorvue_type_template_id_129f0b6a_render(_ctx, _cache, $prop
   const _component_editor_table = resolveComponent("editor-table");
   const _component_saved_modal = resolveComponent("saved-modal");
   const _component_confirmation_modal = resolveComponent("confirmation-modal");
-  return openBlock(), createElementBlock(runtime_core_esm_bundler_Fragment, null, [createBaseVNode("div", null, [_hoisted_1, runtime_core_esm_bundler_createVNode(_component_DashboardOptions, {
+  return openBlock(), createElementBlock(Fragment, null, [createBaseVNode("div", null, [_hoisted_1, createVNode(_component_DashboardOptions, {
     title: $data.title,
     isPublic: $data.isPublic,
     onUpdateTitle: _cache[0] || (_cache[0] = $event => $options.updateTitle($event)),
     onUpdatePublic: _cache[1] || (_cache[1] = $event => $options.updatePublic($event))
-  }, null, 8, ["title", "isPublic"]), runtime_core_esm_bundler_createVNode(_component_editor_table, {
+  }, null, 8, ["title", "isPublic"]), createVNode(_component_editor_table, {
     rows: $data.body,
     onMoveRowUp: _cache[2] || (_cache[2] = $event => $options.moveRowUp($event)),
     onMoveRowDown: _cache[3] || (_cache[3] = $event => $options.moveRowDown($event)),
@@ -30220,15 +31962,21 @@ function DashboardEditorvue_type_template_id_129f0b6a_render(_ctx, _cache, $prop
     list_link: $data.savedModal.list_link,
     dash_link: $data.savedModal.dash_link,
     onClose: _cache[8] || (_cache[8] = $event => $data.savedModal = null)
-  }, null, 8, ["name", "list_link", "dash_link"])) : createCommentVNode("", true), runtime_core_esm_bundler_createVNode(_component_confirmation_modal, {
+  }, null, 8, ["name", "list_link", "dash_link"])) : createCommentVNode("", true), createVNode(_component_confirmation_modal, {
     ref: "confirmationModal"
   }, null, 512)], 64);
 }
-;// CONCATENATED MODULE: ./src/DashboardEditor.vue?vue&type=template&id=129f0b6a
+;// ./src/DashboardEditor.vue?vue&type=template&id=129f0b6a
 
+// EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.includes.js
+var es_array_includes = __webpack_require__(7746);
 // EXTERNAL MODULE: ./node_modules/core-js/modules/es.array.push.js
-var es_array_push = __webpack_require__(7658);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/DashboardOptions.vue?vue&type=template&id=da773836
+var es_array_push = __webpack_require__(8743);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.iterator.constructor.js
+var esnext_iterator_constructor = __webpack_require__(3725);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.iterator.map.js
+var esnext_iterator_map = __webpack_require__(1339);
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/DashboardOptions.vue?vue&type=template&id=da773836
 
 const DashboardOptionsvue_type_template_id_da773836_hoisted_1 = {
   id: "AG-dashboard-options"
@@ -30268,9 +32016,9 @@ function DashboardOptionsvue_type_template_id_da773836_render(_ctx, _cache, $pro
     "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.isPublicVal = $event)
   }, null, 512), [[vModelCheckbox, $data.isPublicVal]]), createBaseVNode("label", _hoisted_8, toDisplayString($options.module.tt('dbo_is_public_description')), 1)])])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/DashboardOptions.vue?vue&type=template&id=da773836
+;// ./src/components/DashboardOptions.vue?vue&type=template&id=da773836
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/DashboardOptions.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/DashboardOptions.vue?vue&type=script&lang=js
 /* harmony default export */ var DashboardOptionsvue_type_script_lang_js = ({
   name: 'DashboardOptions',
   inject: ['module', 'dashboard'],
@@ -30299,20 +32047,20 @@ function DashboardOptionsvue_type_template_id_da773836_render(_ctx, _cache, $pro
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/DashboardOptions.vue?vue&type=script&lang=js
+;// ./src/components/DashboardOptions.vue?vue&type=script&lang=js
  
 // EXTERNAL MODULE: ./node_modules/vue-loader/dist/exportHelper.js
-var exportHelper = __webpack_require__(3744);
-;// CONCATENATED MODULE: ./src/components/DashboardOptions.vue
+var exportHelper = __webpack_require__(6262);
+;// ./src/components/DashboardOptions.vue
 
 
 
 
 ;
-const __exports__ = /*#__PURE__*/(0,exportHelper/* default */.Z)(DashboardOptionsvue_type_script_lang_js, [['render',DashboardOptionsvue_type_template_id_da773836_render]])
+const __exports__ = /*#__PURE__*/(0,exportHelper/* default */.A)(DashboardOptionsvue_type_script_lang_js, [['render',DashboardOptionsvue_type_template_id_da773836_render]])
 
 /* harmony default export */ var DashboardOptions = (__exports__);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorTable.vue?vue&type=template&id=512b2a57
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorTable.vue?vue&type=template&id=512b2a57
 
 const EditorTablevue_type_template_id_512b2a57_hoisted_1 = {
   class: "AG-editor-table",
@@ -30326,7 +32074,7 @@ const EditorTablevue_type_template_id_512b2a57_hoisted_3 = {
 };
 function EditorTablevue_type_template_id_512b2a57_render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_editor_row = resolveComponent("editor-row");
-  return openBlock(), createElementBlock("div", EditorTablevue_type_template_id_512b2a57_hoisted_1, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($props.rows, (row, index) => {
+  return openBlock(), createElementBlock("div", EditorTablevue_type_template_id_512b2a57_hoisted_1, [(openBlock(true), createElementBlock(Fragment, null, renderList($props.rows, (row, index) => {
     return openBlock(), createBlock(_component_editor_row, {
       key: index,
       row: row,
@@ -30340,9 +32088,9 @@ function EditorTablevue_type_template_id_512b2a57_render(_ctx, _cache, $props, $
     onClick: _cache[0] || (_cache[0] = (...args) => $options.addRow && $options.addRow(...args))
   }, toDisplayString($options.module.tt('editor_table_add_row')), 1)])])], 512);
 }
-;// CONCATENATED MODULE: ./src/components/EditorTable.vue?vue&type=template&id=512b2a57
+;// ./src/components/EditorTable.vue?vue&type=template&id=512b2a57
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorRow.vue?vue&type=template&id=432f9633&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorRow.vue?vue&type=template&id=432f9633&scoped=true
 
 const _withScopeId = n => (pushScopeId("data-v-432f9633"), n = n(), popScopeId(), n);
 const EditorRowvue_type_template_id_432f9633_scoped_true_hoisted_1 = {
@@ -30377,7 +32125,7 @@ function EditorRowvue_type_template_id_432f9633_scoped_true_render(_ctx, _cache,
   return openBlock(), createElementBlock("div", EditorRowvue_type_template_id_432f9633_scoped_true_hoisted_1, [createBaseVNode("div", EditorRowvue_type_template_id_432f9633_scoped_true_hoisted_2, [createBaseVNode("button", {
     class: "btn btn-primary",
     onClick: _cache[0] || (_cache[0] = (...args) => $options.addCell && $options.addCell(...args))
-  }, "+")]), createBaseVNode("div", EditorRowvue_type_template_id_432f9633_scoped_true_hoisted_3, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($props.row, (cell, index) => {
+  }, "+")]), createBaseVNode("div", EditorRowvue_type_template_id_432f9633_scoped_true_hoisted_3, [(openBlock(true), createElementBlock(Fragment, null, renderList($props.row, (cell, index) => {
     return openBlock(), createBlock(_component_editor_cell, {
       cell: cell,
       key: cell.id,
@@ -30398,9 +32146,9 @@ function EditorRowvue_type_template_id_432f9633_scoped_true_render(_ctx, _cache,
     onClick: _cache[3] || (_cache[3] = $event => _ctx.$emit('removeRow'))
   }, _hoisted_10)])]);
 }
-;// CONCATENATED MODULE: ./src/components/EditorRow.vue?vue&type=template&id=432f9633&scoped=true
+;// ./src/components/EditorRow.vue?vue&type=template&id=432f9633&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorCell.vue?vue&type=template&id=a3b896f0&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorCell.vue?vue&type=template&id=a3b896f0&scoped=true
 
 const EditorCellvue_type_template_id_a3b896f0_scoped_true_withScopeId = n => (pushScopeId("data-v-a3b896f0"), n = n(), popScopeId(), n);
 const EditorCellvue_type_template_id_a3b896f0_scoped_true_hoisted_1 = {
@@ -30445,10 +32193,10 @@ const _hoisted_15 = ["disabled"];
 function EditorCellvue_type_template_id_a3b896f0_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_GraphTypeSelector = resolveComponent("GraphTypeSelector");
   const _component_confirmation_modal = resolveComponent("confirmation-modal");
-  return openBlock(), createElementBlock(runtime_core_esm_bundler_Fragment, null, [createBaseVNode("div", EditorCellvue_type_template_id_a3b896f0_scoped_true_hoisted_1, [createBaseVNode("div", EditorCellvue_type_template_id_a3b896f0_scoped_true_hoisted_2, [createBaseVNode("div", EditorCellvue_type_template_id_a3b896f0_scoped_true_hoisted_3, [createBaseVNode("button", {
+  return openBlock(), createElementBlock(Fragment, null, [createBaseVNode("div", EditorCellvue_type_template_id_a3b896f0_scoped_true_hoisted_1, [createBaseVNode("div", EditorCellvue_type_template_id_a3b896f0_scoped_true_hoisted_2, [createBaseVNode("div", EditorCellvue_type_template_id_a3b896f0_scoped_true_hoisted_3, [createBaseVNode("button", {
     class: "btn btn-primary",
     onClick: _cache[0] || (_cache[0] = $event => _ctx.$emit('moveCellLeft'))
-  }, EditorCellvue_type_template_id_a3b896f0_scoped_true_hoisted_5), runtime_core_esm_bundler_createVNode(_component_GraphTypeSelector, {
+  }, EditorCellvue_type_template_id_a3b896f0_scoped_true_hoisted_5), createVNode(_component_GraphTypeSelector, {
     currentGraphType: $data.currentGraphType,
     availableGraphTypes: $options.availableGraphTypes,
     onGraphTypeChange: $options.graphTypeChange
@@ -30474,13 +32222,17 @@ function EditorCellvue_type_template_id_a3b896f0_scoped_true_render(_ctx, _cache
     class: "btn btn-primary",
     disabled: !$data.formReady,
     onClick: _cache[4] || (_cache[4] = (...args) => $options.previewGraph && $options.previewGraph(...args))
-  }, toDisplayString($options.module.tt('editor_cell_preview')), 9, _hoisted_15)])])]), runtime_core_esm_bundler_createVNode(_component_confirmation_modal, {
+  }, toDisplayString($options.module.tt('editor_cell_preview')), 9, _hoisted_15)])])]), createVNode(_component_confirmation_modal, {
     ref: "confirmationModal"
   }, null, 512)], 64);
 }
-;// CONCATENATED MODULE: ./src/components/EditorCell.vue?vue&type=template&id=a3b896f0&scoped=true
+;// ./src/components/EditorCell.vue?vue&type=template&id=a3b896f0&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GraphTypeSelector.vue?vue&type=template&id=4991acf4&scoped=true
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.iterator.filter.js
+var esnext_iterator_filter = __webpack_require__(5019);
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GraphTypeSelector.vue?vue&type=template&id=4991acf4&scoped=true
+/* unused harmony import specifier */ var _pushScopeId;
+/* unused harmony import specifier */ var _popScopeId;
 
 const GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_withScopeId = n => (_pushScopeId("data-v-4991acf4"), n = n(), _popScopeId(), n);
 const GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_hoisted_1 = {
@@ -30491,7 +32243,7 @@ const GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_hoisted_2 = ["v
 function GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", null, [withDirectives(createBaseVNode("select", {
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.selectedGraphType = $event)
-  }, [createBaseVNode("option", GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_hoisted_1, " -- " + toDisplayString($options.module.tt('gts_select_a_graph_type')) + " --", 1), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($props.availableGraphTypes, (graphType, index) => {
+  }, [createBaseVNode("option", GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_hoisted_1, " -- " + toDisplayString($options.module.tt('gts_select_a_graph_type')) + " --", 1), (openBlock(true), createElementBlock(Fragment, null, renderList($props.availableGraphTypes, (graphType, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: graphType,
@@ -30499,9 +32251,9 @@ function GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_render(_ctx,
     }, toDisplayString($options.module.tt(graphType)), 9, GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_hoisted_2);
   }), 128))], 512), [[vModelSelect, $data.selectedGraphType]])]);
 }
-;// CONCATENATED MODULE: ./src/components/GraphTypeSelector.vue?vue&type=template&id=4991acf4&scoped=true
+;// ./src/components/GraphTypeSelector.vue?vue&type=template&id=4991acf4&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GraphTypeSelector.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GraphTypeSelector.vue?vue&type=script&lang=js
 /* harmony default export */ var GraphTypeSelectorvue_type_script_lang_js = ({
   name: 'GraphTypeSelector',
   inject: ['module'],
@@ -30526,7 +32278,6 @@ function GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_render(_ctx,
       // console.log(newVal);
     }
   },
-
   methods: {
     onGraphTypeChange() {
       console.log(this.selectedGraphType);
@@ -30534,14 +32285,14 @@ function GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_render(_ctx,
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/GraphTypeSelector.vue?vue&type=script&lang=js
+;// ./src/components/GraphTypeSelector.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GraphTypeSelector.vue?vue&type=style&index=0&id=4991acf4&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GraphTypeSelector.vue?vue&type=style&index=0&id=4991acf4&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/GraphTypeSelector.vue?vue&type=style&index=0&id=4991acf4&scoped=true&lang=css
+;// ./src/components/GraphTypeSelector.vue?vue&type=style&index=0&id=4991acf4&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/GraphTypeSelector.vue
+;// ./src/components/GraphTypeSelector.vue
 
 
 
@@ -30549,12 +32300,14 @@ function GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_render(_ctx,
 ;
 
 
-const GraphTypeSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(GraphTypeSelectorvue_type_script_lang_js, [['render',GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_render],['__scopeId',"data-v-4991acf4"]])
+const GraphTypeSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(GraphTypeSelectorvue_type_script_lang_js, [['render',GraphTypeSelectorvue_type_template_id_4991acf4_scoped_true_render],['__scopeId',"data-v-4991acf4"]])
 
 /* harmony default export */ var GraphTypeSelector = (GraphTypeSelector_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphForm.vue?vue&type=template&id=5d0fdc88&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphForm.vue?vue&type=template&id=5d0fdc88&scoped=true
+/* unused harmony import specifier */ var BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_popScopeId;
 
-const BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_withScopeId = n => (_pushScopeId("data-v-5d0fdc88"), n = n(), _popScopeId(), n);
+const BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_withScopeId = n => (BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_pushScopeId("data-v-5d0fdc88"), n = n(), BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_popScopeId(), n);
 const BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_hoisted_1 = {
   key: 0
 };
@@ -30574,11 +32327,11 @@ function BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render(_ctx, _cac
   const _component_categorical_field_selector = resolveComponent("categorical-field-selector");
   const _component_numeric_field_selector = resolveComponent("numeric-field-selector");
   const _component_palette_selector = resolveComponent("palette-selector");
-  return openBlock(), createElementBlock("form", null, [runtime_core_esm_bundler_createVNode(_component_instrument_selector, {
+  return openBlock(), createElementBlock("form", null, [createVNode(_component_instrument_selector, {
     modelValue: $data.formData.instrument,
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.formData.instrument = $event),
     availableInstruments: $options.availableInstruments
-  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_hoisted_1, [createBaseVNode("div", BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_hoisted_2, [createBaseVNode("div", BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_hoisted_3, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_hoisted_1, [createBaseVNode("div", BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_hoisted_2, [createBaseVNode("div", BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_hoisted_3, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('title'),
     "help-text": $options.module.tt('title_help')
   }, {
@@ -30587,7 +32340,7 @@ function BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render(_ctx, _cac
       "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.formData.title = $event)
     }, null, 512), [[vModelText, $data.formData.title]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('description'),
     "help-text": $options.module.tt('description_help')
   }, {
@@ -30596,11 +32349,11 @@ function BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render(_ctx, _cac
       "onUpdate:modelValue": _cache[2] || (_cache[2] = $event => $data.formData.description = $event)
     }, null, 512), [[vModelText, $data.formData.description]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('bar_graph_type'),
     "help-text": $options.module.tt('bar_graph_type_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.graph_type,
       "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => $data.formData.graph_type = $event),
       name: 'graph_type',
@@ -30609,21 +32362,21 @@ function BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render(_ctx, _cac
       labels: [$options.module.tt('bar_bar'), $options.module.tt('bar_bar_pie'), $options.module.tt('bar_donut')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('bar_categorical_field'),
     "help-text": $options.module.tt('bar_categorical_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_categorical_field_selector, {
+    default: withCtx(() => [createVNode(_component_categorical_field_selector, {
       modelValue: $data.formData.categorical_field,
       "onUpdate:modelValue": _cache[4] || (_cache[4] = $event => $data.formData.categorical_field = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
     }, null, 8, ["modelValue", "fields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('bar_na_category'),
     "help-text": $options.module.tt('bar_na_category_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_category,
       "onUpdate:modelValue": _cache[5] || (_cache[5] = $event => $data.formData.na_category = $event),
       name: 'na_category',
@@ -30632,11 +32385,11 @@ function BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render(_ctx, _cac
       labels: [$options.module.tt('bar_keep'), $options.module.tt('bar_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('bar_unused_categories'),
     "help-text": $options.module.tt('bar_unused_categories_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.unused_categories,
       "onUpdate:modelValue": _cache[6] || (_cache[6] = $event => $data.formData.unused_categories = $event),
       name: 'unused_categories',
@@ -30645,11 +32398,11 @@ function BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render(_ctx, _cac
       labels: [$options.module.tt('bar_keep'), $options.module.tt('bar_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_hoisted_4, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_hoisted_4, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('bar_numeric_field'),
     "help-text": $options.module.tt('bar_numeric_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_numeric_field_selector, {
+    default: withCtx(() => [createVNode(_component_numeric_field_selector, {
       modelValue: $data.formData.numeric_field,
       "onUpdate:modelValue": _cache[7] || (_cache[7] = $event => $data.formData.numeric_field = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
@@ -30660,7 +32413,7 @@ function BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render(_ctx, _cac
     "label-text": $options.module.tt('bar_na_numeric'),
     "help-text": $options.module.tt('bar_na_numeric_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_numeric,
       "onUpdate:modelValue": _cache[8] || (_cache[8] = $event => $data.formData.na_numeric = $event),
       name: 'na_numeric',
@@ -30678,7 +32431,7 @@ function BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render(_ctx, _cac
     "label-text": $options.module.tt('bar_aggregation_function'),
     "help-text": $options.module.tt('bar_aggregation_function_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.aggregation_function,
       "onUpdate:modelValue": _cache[10] || (_cache[10] = $event => $data.formData.aggregation_function = $event),
       name: 'aggregation_function',
@@ -30687,20 +32440,22 @@ function BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render(_ctx, _cac
       labels: [$options.module.tt('count'), $options.module.tt('sum'), $options.module.tt('mean'), $options.module.tt('min'), $options.module.tt('max')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('palette'),
     "help-text": $options.module.tt('palette_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_palette_selector, {
+    default: withCtx(() => [createVNode(_component_palette_selector, {
       modelValue: $data.formData.palette_brewer,
       "onUpdate:modelValue": _cache[11] || (_cache[11] = $event => $data.formData.palette_brewer = $event)
     }, null, 8, ["modelValue"])]),
     _: 1
   }, 8, ["label-text", "help-text"])])])])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraphForm.vue?vue&type=template&id=5d0fdc88&scoped=true
+;// ./src/components/BarGraph/BarGraphForm.vue?vue&type=template&id=5d0fdc88&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpfulParameter.vue?vue&type=template&id=180c88b2&scoped=true
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.iterator.some.js
+var esnext_iterator_some = __webpack_require__(9229);
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpfulParameter.vue?vue&type=template&id=180c88b2&scoped=true
 
 const HelpfulParametervue_type_template_id_180c88b2_scoped_true_withScopeId = n => (pushScopeId("data-v-180c88b2"), n = n(), popScopeId(), n);
 const HelpfulParametervue_type_template_id_180c88b2_scoped_true_hoisted_1 = {
@@ -30727,9 +32482,9 @@ function HelpfulParametervue_type_template_id_180c88b2_scoped_true_render(_ctx, 
     _: 1
   })) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/HelpfulParameter.vue?vue&type=template&id=180c88b2&scoped=true
+;// ./src/components/HelpfulParameter.vue?vue&type=template&id=180c88b2&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpModal.vue?vue&type=template&id=44a5619d&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpModal.vue?vue&type=template&id=44a5619d&scoped=true
 
 const HelpModalvue_type_template_id_44a5619d_scoped_true_withScopeId = n => (pushScopeId("data-v-44a5619d"), n = n(), popScopeId(), n);
 const HelpModalvue_type_template_id_44a5619d_scoped_true_hoisted_1 = {
@@ -30753,20 +32508,20 @@ function HelpModalvue_type_template_id_44a5619d_scoped_true_render(_ctx, _cache,
     onClick: _cache[0] || (_cache[0] = $event => _ctx.$emit('close'))
   }, HelpModalvue_type_template_id_44a5619d_scoped_true_hoisted_5)])])]);
 }
-;// CONCATENATED MODULE: ./src/components/HelpModal.vue?vue&type=template&id=44a5619d&scoped=true
+;// ./src/components/HelpModal.vue?vue&type=template&id=44a5619d&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpModal.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpModal.vue?vue&type=script&lang=js
 /* harmony default export */ var HelpModalvue_type_script_lang_js = ({
   name: 'HelpModal'
 });
-;// CONCATENATED MODULE: ./src/components/HelpModal.vue?vue&type=script&lang=js
+;// ./src/components/HelpModal.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpModal.vue?vue&type=style&index=0&id=44a5619d&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpModal.vue?vue&type=style&index=0&id=44a5619d&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/HelpModal.vue?vue&type=style&index=0&id=44a5619d&scoped=true&lang=css
+;// ./src/components/HelpModal.vue?vue&type=style&index=0&id=44a5619d&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/HelpModal.vue
+;// ./src/components/HelpModal.vue
 
 
 
@@ -30774,10 +32529,10 @@ function HelpModalvue_type_template_id_44a5619d_scoped_true_render(_ctx, _cache,
 ;
 
 
-const HelpModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(HelpModalvue_type_script_lang_js, [['render',HelpModalvue_type_template_id_44a5619d_scoped_true_render],['__scopeId',"data-v-44a5619d"]])
+const HelpModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(HelpModalvue_type_script_lang_js, [['render',HelpModalvue_type_template_id_44a5619d_scoped_true_render],['__scopeId',"data-v-44a5619d"]])
 
 /* harmony default export */ var HelpModal = (HelpModal_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpfulParameter.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpfulParameter.vue?vue&type=script&lang=js
 
 /* harmony default export */ var HelpfulParametervue_type_script_lang_js = ({
   name: 'HelpfulParameter',
@@ -30800,14 +32555,14 @@ const HelpModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(HelpModa
     };
   }
 });
-;// CONCATENATED MODULE: ./src/components/HelpfulParameter.vue?vue&type=script&lang=js
+;// ./src/components/HelpfulParameter.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpfulParameter.vue?vue&type=style&index=0&id=180c88b2&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/HelpfulParameter.vue?vue&type=style&index=0&id=180c88b2&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/HelpfulParameter.vue?vue&type=style&index=0&id=180c88b2&scoped=true&lang=css
+;// ./src/components/HelpfulParameter.vue?vue&type=style&index=0&id=180c88b2&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/HelpfulParameter.vue
+;// ./src/components/HelpfulParameter.vue
 
 
 
@@ -30815,10 +32570,10 @@ const HelpModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(HelpModa
 ;
 
 
-const HelpfulParameter_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(HelpfulParametervue_type_script_lang_js, [['render',HelpfulParametervue_type_template_id_180c88b2_scoped_true_render],['__scopeId',"data-v-180c88b2"]])
+const HelpfulParameter_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(HelpfulParametervue_type_script_lang_js, [['render',HelpfulParametervue_type_template_id_180c88b2_scoped_true_render],['__scopeId',"data-v-180c88b2"]])
 
 /* harmony default export */ var HelpfulParameter = (HelpfulParameter_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/InstrumentSelector.vue?vue&type=template&id=948824a4&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/InstrumentSelector.vue?vue&type=template&id=948824a4&scoped=true
 
 const InstrumentSelectorvue_type_template_id_948824a4_scoped_true_withScopeId = n => (pushScopeId("data-v-948824a4"), n = n(), popScopeId(), n);
 const InstrumentSelectorvue_type_template_id_948824a4_scoped_true_hoisted_1 = {
@@ -30835,7 +32590,7 @@ function InstrumentSelectorvue_type_template_id_948824a4_scoped_true_render(_ctx
     name: "instrument",
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.selectedInstrument = $event),
     onChange: _cache[1] || (_cache[1] = (...args) => $options.onInstrumentChange && $options.onInstrumentChange(...args))
-  }, [createBaseVNode("option", InstrumentSelectorvue_type_template_id_948824a4_scoped_true_hoisted_3, "--" + toDisplayString($options.module.tt('instrument_selector_select_an_instrument')) + " --", 1), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($props.availableInstruments, (instrument, instrument_name) => {
+  }, [createBaseVNode("option", InstrumentSelectorvue_type_template_id_948824a4_scoped_true_hoisted_3, "--" + toDisplayString($options.module.tt('instrument_selector_select_an_instrument')) + " --", 1), (openBlock(true), createElementBlock(Fragment, null, renderList($props.availableInstruments, (instrument, instrument_name) => {
     return openBlock(), createElementBlock("option", {
       key: instrument_name,
       value: instrument_name,
@@ -30843,9 +32598,9 @@ function InstrumentSelectorvue_type_template_id_948824a4_scoped_true_render(_ctx
     }, toDisplayString(instrument.label), 9, InstrumentSelectorvue_type_template_id_948824a4_scoped_true_hoisted_4);
   }), 128))], 544), [[vModelSelect, $data.selectedInstrument]])]);
 }
-;// CONCATENATED MODULE: ./src/components/InstrumentSelector.vue?vue&type=template&id=948824a4&scoped=true
+;// ./src/components/InstrumentSelector.vue?vue&type=template&id=948824a4&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/InstrumentSelector.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/InstrumentSelector.vue?vue&type=script&lang=js
 /* harmony default export */ var InstrumentSelectorvue_type_script_lang_js = ({
   name: "InstrumentSelector",
   inject: ["module"],
@@ -30870,14 +32625,14 @@ function InstrumentSelectorvue_type_template_id_948824a4_scoped_true_render(_ctx
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/InstrumentSelector.vue?vue&type=script&lang=js
+;// ./src/components/InstrumentSelector.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/InstrumentSelector.vue?vue&type=style&index=0&id=948824a4&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/InstrumentSelector.vue?vue&type=style&index=0&id=948824a4&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/InstrumentSelector.vue?vue&type=style&index=0&id=948824a4&scoped=true&lang=css
+;// ./src/components/InstrumentSelector.vue?vue&type=style&index=0&id=948824a4&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/InstrumentSelector.vue
+;// ./src/components/InstrumentSelector.vue
 
 
 
@@ -30885,10 +32640,10 @@ function InstrumentSelectorvue_type_template_id_948824a4_scoped_true_render(_ctx
 ;
 
 
-const InstrumentSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(InstrumentSelectorvue_type_script_lang_js, [['render',InstrumentSelectorvue_type_template_id_948824a4_scoped_true_render],['__scopeId',"data-v-948824a4"]])
+const InstrumentSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(InstrumentSelectorvue_type_script_lang_js, [['render',InstrumentSelectorvue_type_template_id_948824a4_scoped_true_render],['__scopeId',"data-v-948824a4"]])
 
 /* harmony default export */ var InstrumentSelector = (InstrumentSelector_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/RadioComponent.vue?vue&type=template&id=7cce720e&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/RadioComponent.vue?vue&type=template&id=7cce720e&scoped=true
 
 const RadioComponentvue_type_template_id_7cce720e_scoped_true_withScopeId = n => (pushScopeId("data-v-7cce720e"), n = n(), popScopeId(), n);
 const RadioComponentvue_type_template_id_7cce720e_scoped_true_hoisted_1 = {
@@ -30902,7 +32657,7 @@ const RadioComponentvue_type_template_id_7cce720e_scoped_true_hoisted_4 = {
   class: "label-text"
 };
 function RadioComponentvue_type_template_id_7cce720e_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock("div", RadioComponentvue_type_template_id_7cce720e_scoped_true_hoisted_1, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($props.values, (value, index) => {
+  return openBlock(), createElementBlock("div", RadioComponentvue_type_template_id_7cce720e_scoped_true_hoisted_1, [(openBlock(true), createElementBlock(Fragment, null, renderList($props.values, (value, index) => {
     return openBlock(), createElementBlock("label", {
       class: "radio-option",
       key: index
@@ -30915,9 +32670,9 @@ function RadioComponentvue_type_template_id_7cce720e_scoped_true_render(_ctx, _c
     }, null, 40, RadioComponentvue_type_template_id_7cce720e_scoped_true_hoisted_2), RadioComponentvue_type_template_id_7cce720e_scoped_true_hoisted_3, createBaseVNode("span", RadioComponentvue_type_template_id_7cce720e_scoped_true_hoisted_4, toDisplayString($props.labels ? $props.labels[index] : value), 1)]);
   }), 128))]);
 }
-;// CONCATENATED MODULE: ./src/components/RadioComponent.vue?vue&type=template&id=7cce720e&scoped=true
+;// ./src/components/RadioComponent.vue?vue&type=template&id=7cce720e&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/RadioComponent.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/RadioComponent.vue?vue&type=script&lang=js
 /* harmony default export */ var RadioComponentvue_type_script_lang_js = ({
   name: "RadioComponent",
   props: {
@@ -30957,14 +32712,14 @@ function RadioComponentvue_type_template_id_7cce720e_scoped_true_render(_ctx, _c
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/RadioComponent.vue?vue&type=script&lang=js
+;// ./src/components/RadioComponent.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/RadioComponent.vue?vue&type=style&index=0&id=7cce720e&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/RadioComponent.vue?vue&type=style&index=0&id=7cce720e&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/RadioComponent.vue?vue&type=style&index=0&id=7cce720e&scoped=true&lang=css
+;// ./src/components/RadioComponent.vue?vue&type=style&index=0&id=7cce720e&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/RadioComponent.vue
+;// ./src/components/RadioComponent.vue
 
 
 
@@ -30972,12 +32727,14 @@ function RadioComponentvue_type_template_id_7cce720e_scoped_true_render(_ctx, _c
 ;
 
 
-const RadioComponent_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(RadioComponentvue_type_script_lang_js, [['render',RadioComponentvue_type_template_id_7cce720e_scoped_true_render],['__scopeId',"data-v-7cce720e"]])
+const RadioComponent_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(RadioComponentvue_type_script_lang_js, [['render',RadioComponentvue_type_template_id_7cce720e_scoped_true_render],['__scopeId',"data-v-7cce720e"]])
 
 /* harmony default export */ var RadioComponent = (RadioComponent_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/CategoricalFieldSelector.vue?vue&type=template&id=bc12b1ba&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/CategoricalFieldSelector.vue?vue&type=template&id=bc12b1ba&scoped=true
+/* unused harmony import specifier */ var CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_popScopeId;
 
-const CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_withScopeId = n => (_pushScopeId("data-v-bc12b1ba"), n = n(), _popScopeId(), n);
+const CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_withScopeId = n => (CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_pushScopeId("data-v-bc12b1ba"), n = n(), CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_popScopeId(), n);
 const CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_hoisted_1 = {
   value: null,
   selected: true
@@ -30988,7 +32745,7 @@ const CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_hoisted_
 function CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", null, [withDirectives(createBaseVNode("select", {
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.currentField = $event)
-  }, [createBaseVNode("option", CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_hoisted_1, " -- " + toDisplayString($options.module.tt('cfs_select_a_field')) + " -- ", 1), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.radioFields, (field, index) => {
+  }, [createBaseVNode("option", CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_hoisted_1, " -- " + toDisplayString($options.module.tt('cfs_select_a_field')) + " -- ", 1), (openBlock(true), createElementBlock(Fragment, null, renderList($options.radioFields, (field, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: field.field_name,
@@ -30997,7 +32754,7 @@ function CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_rende
   }), 128)), $options.checkboxFields.length ? (openBlock(), createElementBlock("optgroup", {
     key: 0,
     label: $options.module.tt('csf_checkbox')
-  }, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.checkboxFields, (field, index) => {
+  }, [(openBlock(true), createElementBlock(Fragment, null, renderList($options.checkboxFields, (field, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: field.field_name,
@@ -31005,9 +32762,39 @@ function CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_rende
     }, toDisplayString($data.stripHtml(field.field_label)), 9, CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_hoisted_4);
   }), 128))], 8, CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_hoisted_3)) : createCommentVNode("", true)], 512), [[vModelSelect, $data.currentField]])]);
 }
-;// CONCATENATED MODULE: ./src/components/CategoricalFieldSelector.vue?vue&type=template&id=bc12b1ba&scoped=true
+;// ./src/components/CategoricalFieldSelector.vue?vue&type=template&id=bc12b1ba&scoped=true
 
-;// CONCATENATED MODULE: ./src/utils.js
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.iterator.find.js
+var esnext_iterator_find = __webpack_require__(2598);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.iterator.flat-map.js
+var esnext_iterator_flat_map = __webpack_require__(5337);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.set.difference.v2.js
+var esnext_set_difference_v2 = __webpack_require__(292);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.set.intersection.v2.js
+var esnext_set_intersection_v2 = __webpack_require__(9074);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.set.is-disjoint-from.v2.js
+var esnext_set_is_disjoint_from_v2 = __webpack_require__(11);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.set.is-subset-of.v2.js
+var esnext_set_is_subset_of_v2 = __webpack_require__(2818);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.set.is-superset-of.v2.js
+var esnext_set_is_superset_of_v2 = __webpack_require__(2289);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.set.symmetric-difference.v2.js
+var esnext_set_symmetric_difference_v2 = __webpack_require__(4694);
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.set.union.v2.js
+var esnext_set_union_v2 = __webpack_require__(1784);
+;// ./src/utils.js
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Utils.js
 
@@ -31245,7 +33032,7 @@ function sortSetByArrayOrder(inputSet, orderArray) {
   const sortedSet = new Set(inputArray);
   return sortedSet;
 }
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/CategoricalFieldSelector.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/CategoricalFieldSelector.vue?vue&type=script&lang=js
 
 /* harmony default export */ var CategoricalFieldSelectorvue_type_script_lang_js = ({
   name: 'CategoricalFieldSelector',
@@ -31280,14 +33067,14 @@ function sortSetByArrayOrder(inputSet, orderArray) {
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/CategoricalFieldSelector.vue?vue&type=script&lang=js
+;// ./src/components/CategoricalFieldSelector.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/CategoricalFieldSelector.vue?vue&type=style&index=0&id=bc12b1ba&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/CategoricalFieldSelector.vue?vue&type=style&index=0&id=bc12b1ba&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/CategoricalFieldSelector.vue?vue&type=style&index=0&id=bc12b1ba&scoped=true&lang=css
+;// ./src/components/CategoricalFieldSelector.vue?vue&type=style&index=0&id=bc12b1ba&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/CategoricalFieldSelector.vue
+;// ./src/components/CategoricalFieldSelector.vue
 
 
 
@@ -31295,12 +33082,14 @@ function sortSetByArrayOrder(inputSet, orderArray) {
 ;
 
 
-const CategoricalFieldSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(CategoricalFieldSelectorvue_type_script_lang_js, [['render',CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_render],['__scopeId',"data-v-bc12b1ba"]])
+const CategoricalFieldSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(CategoricalFieldSelectorvue_type_script_lang_js, [['render',CategoricalFieldSelectorvue_type_template_id_bc12b1ba_scoped_true_render],['__scopeId',"data-v-bc12b1ba"]])
 
 /* harmony default export */ var CategoricalFieldSelector = (CategoricalFieldSelector_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/NumericFieldSelector.vue?vue&type=template&id=31d96034&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/NumericFieldSelector.vue?vue&type=template&id=31d96034&scoped=true
+/* unused harmony import specifier */ var NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_popScopeId;
 
-const NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_withScopeId = n => (_pushScopeId("data-v-31d96034"), n = n(), _popScopeId(), n);
+const NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_withScopeId = n => (NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_pushScopeId("data-v-31d96034"), n = n(), NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_popScopeId(), n);
 const NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_hoisted_1 = {
   value: null,
   selected: true
@@ -31311,7 +33100,7 @@ const NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_hoisted_4 = 
 function NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", null, [withDirectives(createBaseVNode("select", {
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.currentField = $event)
-  }, [createBaseVNode("option", NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_hoisted_1, toDisplayString($options.module.tt('nfs_select_a_field')), 1), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.numericFields, (field, index) => {
+  }, [createBaseVNode("option", NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_hoisted_1, toDisplayString($options.module.tt('nfs_select_a_field')), 1), (openBlock(true), createElementBlock(Fragment, null, renderList($options.numericFields, (field, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: field.field_name,
@@ -31324,9 +33113,9 @@ function NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_render(_c
     selected: $data.currentField == ''
   }, toDisplayString($options.module.tt('count')), 9, NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_hoisted_4)], 8, NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_hoisted_3)], 512), [[vModelSelect, $data.currentField]])]);
 }
-;// CONCATENATED MODULE: ./src/components/NumericFieldSelector.vue?vue&type=template&id=31d96034&scoped=true
+;// ./src/components/NumericFieldSelector.vue?vue&type=template&id=31d96034&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/NumericFieldSelector.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/NumericFieldSelector.vue?vue&type=script&lang=js
 
 /* harmony default export */ var NumericFieldSelectorvue_type_script_lang_js = ({
   name: 'CategoricalFieldSelector',
@@ -31358,14 +33147,14 @@ function NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_render(_c
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/NumericFieldSelector.vue?vue&type=script&lang=js
+;// ./src/components/NumericFieldSelector.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/NumericFieldSelector.vue?vue&type=style&index=0&id=31d96034&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/NumericFieldSelector.vue?vue&type=style&index=0&id=31d96034&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/NumericFieldSelector.vue?vue&type=style&index=0&id=31d96034&scoped=true&lang=css
+;// ./src/components/NumericFieldSelector.vue?vue&type=style&index=0&id=31d96034&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/NumericFieldSelector.vue
+;// ./src/components/NumericFieldSelector.vue
 
 
 
@@ -31373,10 +33162,10 @@ function NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_render(_c
 ;
 
 
-const NumericFieldSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(NumericFieldSelectorvue_type_script_lang_js, [['render',NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_render],['__scopeId',"data-v-31d96034"]])
+const NumericFieldSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(NumericFieldSelectorvue_type_script_lang_js, [['render',NumericFieldSelectorvue_type_template_id_31d96034_scoped_true_render],['__scopeId',"data-v-31d96034"]])
 
 /* harmony default export */ var NumericFieldSelector = (NumericFieldSelector_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/PaletteSelector.vue?vue&type=template&id=2077da49&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/PaletteSelector.vue?vue&type=template&id=2077da49&scoped=true
 
 const PaletteSelectorvue_type_template_id_2077da49_scoped_true_withScopeId = n => (pushScopeId("data-v-2077da49"), n = n(), popScopeId(), n);
 const PaletteSelectorvue_type_template_id_2077da49_scoped_true_hoisted_1 = {
@@ -31412,7 +33201,7 @@ function PaletteSelectorvue_type_template_id_2077da49_scoped_true_render(_ctx, _
     default: withCtx(() => [createBaseVNode("h3", null, toDisplayString($options.module.tt("palette_palette_selector")), 1), createBaseVNode("div", PaletteSelectorvue_type_template_id_2077da49_scoped_true_hoisted_1, [createBaseVNode("button", {
       type: "button",
       onClick: _cache[1] || (_cache[1] = $event => $data.colors.splice(0, 0, '#000000'))
-    }, PaletteSelectorvue_type_template_id_2077da49_scoped_true_hoisted_3), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($data.colors, (color, index) => {
+    }, PaletteSelectorvue_type_template_id_2077da49_scoped_true_hoisted_3), (openBlock(true), createElementBlock(Fragment, null, renderList($data.colors, (color, index) => {
       return openBlock(), createElementBlock("div", {
         class: "color-container",
         key: index
@@ -31430,9 +33219,9 @@ function PaletteSelectorvue_type_template_id_2077da49_scoped_true_render(_ctx, _
     _: 1
   })) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/PaletteSelector.vue?vue&type=template&id=2077da49&scoped=true
+;// ./src/components/PaletteSelector.vue?vue&type=template&id=2077da49&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/PaletteSelector.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/PaletteSelector.vue?vue&type=script&lang=js
 
 /* harmony default export */ var PaletteSelectorvue_type_script_lang_js = ({
   name: 'PaletteSelector',
@@ -31461,14 +33250,14 @@ function PaletteSelectorvue_type_template_id_2077da49_scoped_true_render(_ctx, _
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/PaletteSelector.vue?vue&type=script&lang=js
+;// ./src/components/PaletteSelector.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/PaletteSelector.vue?vue&type=style&index=0&id=2077da49&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/PaletteSelector.vue?vue&type=style&index=0&id=2077da49&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/PaletteSelector.vue?vue&type=style&index=0&id=2077da49&scoped=true&lang=css
+;// ./src/components/PaletteSelector.vue?vue&type=style&index=0&id=2077da49&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/PaletteSelector.vue
+;// ./src/components/PaletteSelector.vue
 
 
 
@@ -31476,10 +33265,12 @@ function PaletteSelectorvue_type_template_id_2077da49_scoped_true_render(_ctx, _
 ;
 
 
-const PaletteSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(PaletteSelectorvue_type_script_lang_js, [['render',PaletteSelectorvue_type_template_id_2077da49_scoped_true_render],['__scopeId',"data-v-2077da49"]])
+const PaletteSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(PaletteSelectorvue_type_script_lang_js, [['render',PaletteSelectorvue_type_template_id_2077da49_scoped_true_render],['__scopeId',"data-v-2077da49"]])
 
 /* harmony default export */ var PaletteSelector = (PaletteSelector_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphForm.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphForm.vue?vue&type=script&lang=js
+
+
 
 
 
@@ -31557,7 +33348,6 @@ const PaletteSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(Pa
       this.$emit("isReady", newVal);
       // console.log('isReady', newVal);
     },
-
     formData: {
       handler(newVal) {
         newVal.is_count = newVal.numeric_field === "";
@@ -31589,14 +33379,14 @@ const PaletteSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(Pa
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraphForm.vue?vue&type=script&lang=js
+;// ./src/components/BarGraph/BarGraphForm.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphForm.vue?vue&type=style&index=0&id=5d0fdc88&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphForm.vue?vue&type=style&index=0&id=5d0fdc88&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraphForm.vue?vue&type=style&index=0&id=5d0fdc88&scoped=true&lang=css
+;// ./src/components/BarGraph/BarGraphForm.vue?vue&type=style&index=0&id=5d0fdc88&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraphForm.vue
+;// ./src/components/BarGraph/BarGraphForm.vue
 
 
 
@@ -31604,12 +33394,14 @@ const PaletteSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(Pa
 ;
 
 
-const BarGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(BarGraphFormvue_type_script_lang_js, [['render',BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render],['__scopeId',"data-v-5d0fdc88"]])
+const BarGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(BarGraphFormvue_type_script_lang_js, [['render',BarGraphFormvue_type_template_id_5d0fdc88_scoped_true_render],['__scopeId',"data-v-5d0fdc88"]])
 
 /* harmony default export */ var BarGraphForm = (BarGraphForm_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraph.vue?vue&type=template&id=4239eb62&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraph.vue?vue&type=template&id=4239eb62&scoped=true
+/* unused harmony import specifier */ var BarGraphvue_type_template_id_4239eb62_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var BarGraphvue_type_template_id_4239eb62_scoped_true_popScopeId;
 
-const BarGraphvue_type_template_id_4239eb62_scoped_true_withScopeId = n => (_pushScopeId("data-v-4239eb62"), n = n(), _popScopeId(), n);
+const BarGraphvue_type_template_id_4239eb62_scoped_true_withScopeId = n => (BarGraphvue_type_template_id_4239eb62_scoped_true_pushScopeId("data-v-4239eb62"), n = n(), BarGraphvue_type_template_id_4239eb62_scoped_true_popScopeId(), n);
 const BarGraphvue_type_template_id_4239eb62_scoped_true_hoisted_1 = {
   class: "AG-graph-container"
 };
@@ -31630,14 +33422,14 @@ function BarGraphvue_type_template_id_4239eb62_scoped_true_render(_ctx, _cache, 
     onUpdateParameters: _cache[0] || (_cache[0] = $event => $options.updateParameters($event))
   }, null, 40, ["parameters"])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraph.vue?vue&type=template&id=4239eb62&scoped=true
+;// ./src/components/BarGraph/BarGraph.vue?vue&type=template&id=4239eb62&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/ascending.js
+;// ./node_modules/d3-array/src/ascending.js
 function ascending(a, b) {
   return a == null || b == null ? NaN : a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/descending.js
+;// ./node_modules/d3-array/src/descending.js
 function descending(a, b) {
   return a == null || b == null ? NaN
     : b < a ? -1
@@ -31646,7 +33438,7 @@ function descending(a, b) {
     : NaN;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/bisector.js
+;// ./node_modules/d3-array/src/bisector.js
 
 
 
@@ -31704,7 +33496,7 @@ function zero() {
   return 0;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/number.js
+;// ./node_modules/d3-array/src/number.js
 function number(x) {
   return x === null ? NaN : +x;
 }
@@ -31726,7 +33518,7 @@ function* numbers(values, valueof) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/bisect.js
+;// ./node_modules/d3-array/src/bisect.js
 
 
 
@@ -31737,7 +33529,7 @@ const bisectLeft = ascendingBisect.left;
 const bisectCenter = bisector(number).center;
 /* harmony default export */ var bisect = (bisectRight);
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/blur.js
+;// ./node_modules/d3-array/src/blur.js
 function blur_blur(values, r) {
   if (!((r = +r) >= 0)) throw new RangeError("invalid r");
   let length = values.length;
@@ -31854,7 +33646,7 @@ function bluri(radius) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/count.js
+;// ./node_modules/d3-array/src/count.js
 function count(values, valueof) {
   let count = 0;
   if (valueof === undefined) {
@@ -31874,7 +33666,7 @@ function count(values, valueof) {
   return count;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/cross.js
+;// ./node_modules/d3-array/src/cross.js
 function cross_length(array) {
   return array.length | 0;
 }
@@ -31909,14 +33701,14 @@ function cross(...values) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/cumsum.js
+;// ./node_modules/d3-array/src/cumsum.js
 function cumsum(values, valueof) {
   var sum = 0, index = 0;
   return Float64Array.from(values, valueof === undefined
     ? v => (sum += +v || 0)
     : v => (sum += +valueof(v, index++, values) || 0));
 }
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/variance.js
+;// ./node_modules/d3-array/src/variance.js
 function variance(values, valueof) {
   let count = 0;
   let delta;
@@ -31943,7 +33735,7 @@ function variance(values, valueof) {
   if (count > 1) return sum / (count - 1);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/deviation.js
+;// ./node_modules/d3-array/src/deviation.js
 
 
 function deviation(values, valueof) {
@@ -31951,7 +33743,7 @@ function deviation(values, valueof) {
   return v ? Math.sqrt(v) : v;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/extent.js
+;// ./node_modules/d3-array/src/extent.js
 function extent(values, valueof) {
   let min;
   let max;
@@ -31982,7 +33774,7 @@ function extent(values, valueof) {
   return [min, max];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/fsum.js
+;// ./node_modules/d3-array/src/fsum.js
 // https://github.com/python/cpython/blob/a74eea238f5baba15797e2e8b570d153bc8690a7/Modules/mathmodule.c#L1423
 class Adder {
   constructor() {
@@ -32053,7 +33845,7 @@ function fcumsum(values, valueof) {
   );
 }
 
-;// CONCATENATED MODULE: ./node_modules/internmap/src/index.js
+;// ./node_modules/internmap/src/index.js
 class InternMap extends Map {
   constructor(entries, key = keyof) {
     super();
@@ -32116,21 +33908,21 @@ function keyof(value) {
   return value !== null && typeof value === "object" ? value.valueOf() : value;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/identity.js
-function identity_identity(x) {
+;// ./node_modules/d3-array/src/identity.js
+function identity(x) {
   return x;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/group.js
+;// ./node_modules/d3-array/src/group.js
 
 
 
 function group(values, ...keys) {
-  return nest(values, identity_identity, identity_identity, keys);
+  return nest(values, identity, identity, keys);
 }
 
 function groups(values, ...keys) {
-  return nest(values, Array.from, identity_identity, keys);
+  return nest(values, Array.from, identity, keys);
 }
 
 function flatten(groups, keys) {
@@ -32149,7 +33941,7 @@ function flatRollup(values, reduce, ...keys) {
 }
 
 function rollup(values, reduce, ...keys) {
-  return nest(values, identity_identity, reduce, keys);
+  return nest(values, identity, reduce, keys);
 }
 
 function rollups(values, reduce, ...keys) {
@@ -32157,7 +33949,7 @@ function rollups(values, reduce, ...keys) {
 }
 
 function index(values, ...keys) {
-  return nest(values, identity_identity, unique, keys);
+  return nest(values, identity, unique, keys);
 }
 
 function indexes(values, ...keys) {
@@ -32188,16 +33980,16 @@ function nest(values, map, reduce, keys) {
   })(values, 0);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/permute.js
+;// ./node_modules/d3-array/src/permute.js
 function permute(source, keys) {
   return Array.from(keys, key => source[key]);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/sort.js
+;// ./node_modules/d3-array/src/sort.js
 
 
 
-function sort_sort(values, ...F) {
+function sort(values, ...F) {
   if (typeof values[Symbol.iterator] !== "function") throw new TypeError("values is not iterable");
   values = Array.from(values);
   let [f] = F;
@@ -32207,13 +33999,13 @@ function sort_sort(values, ...F) {
       F = F.map(f => values.map(f));
       index.sort((i, j) => {
         for (const f of F) {
-          const c = sort_ascendingDefined(f[i], f[j]);
+          const c = ascendingDefined(f[i], f[j]);
           if (c) return c;
         }
       });
     } else {
       f = values.map(f);
-      index.sort((i, j) => sort_ascendingDefined(f[i], f[j]));
+      index.sort((i, j) => ascendingDefined(f[i], f[j]));
     }
     return permute(values, index);
   }
@@ -32221,7 +34013,7 @@ function sort_sort(values, ...F) {
 }
 
 function compareDefined(compare = ascending) {
-  if (compare === ascending) return sort_ascendingDefined;
+  if (compare === ascending) return ascendingDefined;
   if (typeof compare !== "function") throw new TypeError("compare is not a function");
   return (a, b) => {
     const x = compare(a, b);
@@ -32230,34 +34022,34 @@ function compareDefined(compare = ascending) {
   };
 }
 
-function sort_ascendingDefined(a, b) {
+function ascendingDefined(a, b) {
   return (a == null || !(a >= a)) - (b == null || !(b >= b)) || (a < b ? -1 : a > b ? 1 : 0);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/groupSort.js
+;// ./node_modules/d3-array/src/groupSort.js
 
 
 
 
 function groupSort(values, reduce, key) {
   return (reduce.length !== 2
-    ? sort_sort(rollup(values, reduce, key), (([ak, av], [bk, bv]) => ascending(av, bv) || ascending(ak, bk)))
-    : sort_sort(group(values, key), (([ak, av], [bk, bv]) => reduce(av, bv) || ascending(ak, bk))))
+    ? sort(rollup(values, reduce, key), (([ak, av], [bk, bv]) => ascending(av, bv) || ascending(ak, bk)))
+    : sort(group(values, key), (([ak, av], [bk, bv]) => reduce(av, bv) || ascending(ak, bk))))
     .map(([key]) => key);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/array.js
+;// ./node_modules/d3-array/src/array.js
 var array = Array.prototype;
 
 var slice = array.slice;
 var array_map = array.map;
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/constant.js
+;// ./node_modules/d3-array/src/constant.js
 function constant(x) {
   return () => x;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/ticks.js
+;// ./node_modules/d3-array/src/ticks.js
 const e10 = Math.sqrt(50),
     e5 = Math.sqrt(10),
     e2 = Math.sqrt(2);
@@ -32314,7 +34106,7 @@ function tickStep(start, stop, count) {
   return (reverse ? -1 : 1) * (inc < 0 ? 1 / -inc : inc);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/nice.js
+;// ./node_modules/d3-array/src/nice.js
 
 
 function nice(start, stop, count) {
@@ -32334,14 +34126,14 @@ function nice(start, stop, count) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/threshold/sturges.js
+;// ./node_modules/d3-array/src/threshold/sturges.js
 
 
 function thresholdSturges(values) {
   return Math.max(1, Math.ceil(Math.log(count(values)) / Math.LN2) + 1);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/bin.js
+;// ./node_modules/d3-array/src/bin.js
 
 
 
@@ -32352,7 +34144,7 @@ function thresholdSturges(values) {
 
 
 function bin() {
-  var value = identity_identity,
+  var value = identity,
       domain = extent,
       threshold = thresholdSturges;
 
@@ -32468,7 +34260,7 @@ function bin() {
   return histogram;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/max.js
+;// ./node_modules/d3-array/src/max.js
 function max(values, valueof) {
   let max;
   if (valueof === undefined) {
@@ -32490,7 +34282,7 @@ function max(values, valueof) {
   return max;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/maxIndex.js
+;// ./node_modules/d3-array/src/maxIndex.js
 function maxIndex(values, valueof) {
   let max;
   let maxIndex = -1;
@@ -32514,7 +34306,7 @@ function maxIndex(values, valueof) {
   return maxIndex;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/min.js
+;// ./node_modules/d3-array/src/min.js
 function min(values, valueof) {
   let min;
   if (valueof === undefined) {
@@ -32536,7 +34328,7 @@ function min(values, valueof) {
   return min;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/minIndex.js
+;// ./node_modules/d3-array/src/minIndex.js
 function minIndex(values, valueof) {
   let min;
   let minIndex = -1;
@@ -32560,7 +34352,7 @@ function minIndex(values, valueof) {
   return minIndex;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/quickselect.js
+;// ./node_modules/d3-array/src/quickselect.js
 
 
 // Based on https://github.com/mourner/quickselect
@@ -32572,7 +34364,7 @@ function quickselect(array, k, left = 0, right = Infinity, compare) {
 
   if (!(left <= k && k <= right)) return array;
 
-  compare = compare === undefined ? sort_ascendingDefined : compareDefined(compare);
+  compare = compare === undefined ? ascendingDefined : compareDefined(compare);
 
   while (right > left) {
     if (right - left > 600) {
@@ -32615,7 +34407,7 @@ function swap(array, i, j) {
   array[j] = t;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/greatest.js
+;// ./node_modules/d3-array/src/greatest.js
 
 
 function greatest(values, compare = ascending) {
@@ -32646,7 +34438,7 @@ function greatest(values, compare = ascending) {
   return max;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/quantile.js
+;// ./node_modules/d3-array/src/quantile.js
 
 
 
@@ -32688,12 +34480,12 @@ function quantileIndex(values, p, valueof) {
   if (p >= 1) return maxIndex(values);
   var n,
       i = Math.floor((n - 1) * p),
-      order = (i, j) => sort_ascendingDefined(values[i], values[j]),
+      order = (i, j) => ascendingDefined(values[i], values[j]),
       index = quickselect(Uint32Array.from(values, (_, i) => i), i, 0, n - 1, order);
   return greatest(index.subarray(0, i + 1), i => values[i]);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/threshold/freedmanDiaconis.js
+;// ./node_modules/d3-array/src/threshold/freedmanDiaconis.js
 
 
 
@@ -32702,7 +34494,7 @@ function thresholdFreedmanDiaconis(values, min, max) {
   return c && d ? Math.ceil((max - min) / (2 * d * Math.pow(c, -1 / 3))) : 1;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/threshold/scott.js
+;// ./node_modules/d3-array/src/threshold/scott.js
 
 
 
@@ -32711,7 +34503,7 @@ function thresholdScott(values, min, max) {
   return c && d ? Math.ceil((max - min) * Math.cbrt(c) / (3.49 * d)) : 1;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/mean.js
+;// ./node_modules/d3-array/src/mean.js
 function mean(values, valueof) {
   let count = 0;
   let sum = 0;
@@ -32732,7 +34524,7 @@ function mean(values, valueof) {
   if (count) return sum / count;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/median.js
+;// ./node_modules/d3-array/src/median.js
 
 
 function median(values, valueof) {
@@ -32743,7 +34535,7 @@ function medianIndex(values, valueof) {
   return quantileIndex(values, 0.5, valueof);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/merge.js
+;// ./node_modules/d3-array/src/merge.js
 function* merge_flatten(arrays) {
   for (const array of arrays) {
     yield* array;
@@ -32754,7 +34546,7 @@ function merge(arrays) {
   return Array.from(merge_flatten(arrays));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/mode.js
+;// ./node_modules/d3-array/src/mode.js
 
 
 function mode(values, valueof) {
@@ -32784,7 +34576,7 @@ function mode(values, valueof) {
   return modeValue;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/pairs.js
+;// ./node_modules/d3-array/src/pairs.js
 function pairs(values, pairof = pair) {
   const pairs = [];
   let previous;
@@ -32801,7 +34593,7 @@ function pair(a, b) {
   return [a, b];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/range.js
+;// ./node_modules/d3-array/src/range.js
 function range_range(start, stop, step) {
   start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;
 
@@ -32816,7 +34608,7 @@ function range_range(start, stop, step) {
   return range;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/rank.js
+;// ./node_modules/d3-array/src/rank.js
 
 
 
@@ -32829,7 +34621,7 @@ function rank(values, valueof = ascending) {
   let k, r;
   values = Uint32Array.from(V, (_, i) => i);
   // Risky chaining due to Safari 14 https://github.com/d3/d3-array/issues/123
-  values.sort(valueof === ascending ? (i, j) => sort_ascendingDefined(V[i], V[j]) : compareDefined(compareIndex));
+  values.sort(valueof === ascending ? (i, j) => ascendingDefined(V[i], V[j]) : compareDefined(compareIndex));
   values.forEach((j, i) => {
       const c = compareIndex(j, k === undefined ? j : k);
       if (c >= 0) {
@@ -32842,7 +34634,7 @@ function rank(values, valueof = ascending) {
   return R;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/least.js
+;// ./node_modules/d3-array/src/least.js
 
 
 function least(values, compare = ascending) {
@@ -32873,7 +34665,7 @@ function least(values, compare = ascending) {
   return min;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/leastIndex.js
+;// ./node_modules/d3-array/src/leastIndex.js
 
 
 
@@ -32894,7 +34686,7 @@ function leastIndex(values, compare = ascending) {
   return min;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/greatestIndex.js
+;// ./node_modules/d3-array/src/greatestIndex.js
 
 
 
@@ -32915,7 +34707,7 @@ function greatestIndex(values, compare = ascending) {
   return max;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/scan.js
+;// ./node_modules/d3-array/src/scan.js
 
 
 function scan(values, compare) {
@@ -32923,7 +34715,7 @@ function scan(values, compare) {
   return index < 0 ? undefined : index;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/shuffle.js
+;// ./node_modules/d3-array/src/shuffle.js
 /* harmony default export */ var shuffle = (shuffler(Math.random));
 
 function shuffler(random) {
@@ -32938,8 +34730,8 @@ function shuffler(random) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/sum.js
-function sum_sum(values, valueof) {
+;// ./node_modules/d3-array/src/sum.js
+function sum(values, valueof) {
   let sum = 0;
   if (valueof === undefined) {
     for (let value of values) {
@@ -32958,7 +34750,7 @@ function sum_sum(values, valueof) {
   return sum;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/transpose.js
+;// ./node_modules/d3-array/src/transpose.js
 
 
 function transpose(matrix) {
@@ -32975,14 +34767,14 @@ function transpose_length(d) {
   return d.length;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/zip.js
+;// ./node_modules/d3-array/src/zip.js
 
 
 function zip() {
   return transpose(arguments);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/every.js
+;// ./node_modules/d3-array/src/every.js
 function every(values, test) {
   if (typeof test !== "function") throw new TypeError("test is not a function");
   let index = -1;
@@ -32994,7 +34786,7 @@ function every(values, test) {
   return true;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/some.js
+;// ./node_modules/d3-array/src/some.js
 function some(values, test) {
   if (typeof test !== "function") throw new TypeError("test is not a function");
   let index = -1;
@@ -33006,7 +34798,7 @@ function some(values, test) {
   return false;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/filter.js
+;// ./node_modules/d3-array/src/filter.js
 function filter(values, test) {
   if (typeof test !== "function") throw new TypeError("test is not a function");
   const array = [];
@@ -33019,14 +34811,14 @@ function filter(values, test) {
   return array;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/map.js
+;// ./node_modules/d3-array/src/map.js
 function map_map(values, mapper) {
   if (typeof values[Symbol.iterator] !== "function") throw new TypeError("values is not iterable");
   if (typeof mapper !== "function") throw new TypeError("mapper is not a function");
   return Array.from(values, (value, index) => mapper(value, index, values));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/reduce.js
+;// ./node_modules/d3-array/src/reduce.js
 function reduce(values, reducer, value) {
   if (typeof reducer !== "function") throw new TypeError("reducer is not a function");
   const iterator = values[Symbol.iterator]();
@@ -33042,13 +34834,13 @@ function reduce(values, reducer, value) {
   return value;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/reverse.js
+;// ./node_modules/d3-array/src/reverse.js
 function reverse_reverse(values) {
   if (typeof values[Symbol.iterator] !== "function") throw new TypeError("values is not iterable");
   return Array.from(values).reverse();
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/difference.js
+;// ./node_modules/d3-array/src/difference.js
 
 
 function difference(values, ...others) {
@@ -33061,7 +34853,7 @@ function difference(values, ...others) {
   return values;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/disjoint.js
+;// ./node_modules/d3-array/src/disjoint.js
 
 
 function disjoint(values, other) {
@@ -33078,7 +34870,7 @@ function disjoint(values, other) {
   return true;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/intersection.js
+;// ./node_modules/d3-array/src/intersection.js
 
 
 function intersection(values, ...others) {
@@ -33099,7 +34891,7 @@ function intersection_set(values) {
   return values instanceof InternSet ? values : new InternSet(values);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/superset.js
+;// ./node_modules/d3-array/src/superset.js
 function superset(values, other) {
   const iterator = values[Symbol.iterator](), set = new Set();
   for (const o of other) {
@@ -33120,14 +34912,14 @@ function intern(value) {
   return value !== null && typeof value === "object" ? value.valueOf() : value;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/subset.js
+;// ./node_modules/d3-array/src/subset.js
 
 
 function subset(values, other) {
   return superset(other, values);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/union.js
+;// ./node_modules/d3-array/src/union.js
 
 
 function union(...others) {
@@ -33140,7 +34932,7 @@ function union(...others) {
   return set;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-array/src/index.js
+;// ./node_modules/d3-array/src/index.js
 
 
 
@@ -33199,12 +34991,13 @@ function union(...others) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-axis/src/identity.js
+;// ./node_modules/d3-axis/src/identity.js
+Object.defineProperty(src_identity, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_identity(x) {
   return x;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-axis/src/axis.js
+;// ./node_modules/d3-axis/src/axis.js
 
 
 var axis_top = 1,
@@ -33380,10 +35173,10 @@ function axisLeft(scale) {
   return axis(left, scale);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-axis/src/index.js
+;// ./node_modules/d3-axis/src/index.js
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-dispatch/src/dispatch.js
+;// ./node_modules/d3-dispatch/src/dispatch.js
 var noop = {value: () => {}};
 
 function dispatch() {
@@ -33469,7 +35262,8 @@ function dispatch_set(type, name, callback) {
 
 /* harmony default export */ var src_dispatch = (dispatch);
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selector.js
+;// ./node_modules/d3-selection/src/selector.js
+Object.defineProperty(selector, "name", { value: "default", configurable: true });
 function none() {}
 
 /* harmony default export */ function selector(selector) {
@@ -33478,7 +35272,8 @@ function none() {}
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/select.js
+;// ./node_modules/d3-selection/src/selection/select.js
+Object.defineProperty(selection_select, "name", { value: "default", configurable: true });
 
 
 
@@ -33497,7 +35292,7 @@ function none() {}
   return new Selection(subgroups, this._parents);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/array.js
+;// ./node_modules/d3-selection/src/array.js
 // Given something array like (or null), returns something that is strictly an
 // array. This is used to ensure that array-like objects passed to d3.selectAll
 // or selection.selectAll are converted into proper arrays when creating a
@@ -33508,7 +35303,8 @@ function array_array(x) {
   return x == null ? [] : Array.isArray(x) ? x : Array.from(x);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selectorAll.js
+;// ./node_modules/d3-selection/src/selectorAll.js
+Object.defineProperty(selectorAll, "name", { value: "default", configurable: true });
 function selectorAll_empty() {
   return [];
 }
@@ -33519,7 +35315,8 @@ function selectorAll_empty() {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/selectAll.js
+;// ./node_modules/d3-selection/src/selection/selectAll.js
+Object.defineProperty(selectAll, "name", { value: "default", configurable: true });
 
 
 
@@ -33546,7 +35343,8 @@ function arrayAll(select) {
   return new Selection(subgroups, parents);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/matcher.js
+;// ./node_modules/d3-selection/src/matcher.js
+Object.defineProperty(matcher, "name", { value: "default", configurable: true });
 /* harmony default export */ function matcher(selector) {
   return function() {
     return this.matches(selector);
@@ -33560,7 +35358,8 @@ function childMatcher(selector) {
 }
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/selectChild.js
+;// ./node_modules/d3-selection/src/selection/selectChild.js
+Object.defineProperty(selectChild, "name", { value: "default", configurable: true });
 
 
 var find = Array.prototype.find;
@@ -33580,7 +35379,8 @@ function childFirst() {
       : childFind(typeof match === "function" ? match : childMatcher(match)));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/selectChildren.js
+;// ./node_modules/d3-selection/src/selection/selectChildren.js
+Object.defineProperty(selectChildren, "name", { value: "default", configurable: true });
 
 
 var selectChildren_filter = Array.prototype.filter;
@@ -33600,7 +35400,8 @@ function childrenFilter(match) {
       : childrenFilter(typeof match === "function" ? match : childMatcher(match)));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/filter.js
+;// ./node_modules/d3-selection/src/selection/filter.js
+Object.defineProperty(selection_filter, "name", { value: "default", configurable: true });
 
 
 
@@ -33618,12 +35419,14 @@ function childrenFilter(match) {
   return new Selection(subgroups, this._parents);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/sparse.js
+;// ./node_modules/d3-selection/src/selection/sparse.js
+Object.defineProperty(sparse, "name", { value: "default", configurable: true });
 /* harmony default export */ function sparse(update) {
   return new Array(update.length);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/enter.js
+;// ./node_modules/d3-selection/src/selection/enter.js
+Object.defineProperty(enter, "name", { value: "default", configurable: true });
 
 
 
@@ -33647,14 +35450,16 @@ EnterNode.prototype = {
   querySelectorAll: function(selector) { return this._parent.querySelectorAll(selector); }
 };
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/constant.js
+;// ./node_modules/d3-selection/src/constant.js
+Object.defineProperty(src_constant, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_constant(x) {
   return function() {
     return x;
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/data.js
+;// ./node_modules/d3-selection/src/selection/data.js
+Object.defineProperty(data, "name", { value: "default", configurable: true });
 
 
 
@@ -33784,7 +35589,8 @@ function arraylike(data) {
     : Array.from(data); // Map, Set, iterable, string, or anything else
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/exit.js
+;// ./node_modules/d3-selection/src/selection/exit.js
+Object.defineProperty(exit, "name", { value: "default", configurable: true });
 
 
 
@@ -33792,7 +35598,8 @@ function arraylike(data) {
   return new Selection(this._exit || this._groups.map(sparse), this._parents);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/join.js
+;// ./node_modules/d3-selection/src/selection/join.js
+Object.defineProperty(join, "name", { value: "default", configurable: true });
 /* harmony default export */ function join(onenter, onupdate, onexit) {
   var enter = this.enter(), update = this, exit = this.exit();
   if (typeof onenter === "function") {
@@ -33809,7 +35616,8 @@ function arraylike(data) {
   return enter && update ? enter.merge(update).order() : update;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/merge.js
+;// ./node_modules/d3-selection/src/selection/merge.js
+Object.defineProperty(selection_merge, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function selection_merge(context) {
@@ -33830,7 +35638,8 @@ function arraylike(data) {
   return new Selection(merges, this._parents);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/order.js
+;// ./node_modules/d3-selection/src/selection/order.js
+Object.defineProperty(order, "name", { value: "default", configurable: true });
 /* harmony default export */ function order() {
 
   for (var groups = this._groups, j = -1, m = groups.length; ++j < m;) {
@@ -33845,7 +35654,8 @@ function arraylike(data) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/sort.js
+;// ./node_modules/d3-selection/src/selection/sort.js
+Object.defineProperty(selection_sort, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function selection_sort(compare) {
@@ -33871,7 +35681,8 @@ function sort_ascending(a, b) {
   return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/call.js
+;// ./node_modules/d3-selection/src/selection/call.js
+Object.defineProperty(call, "name", { value: "default", configurable: true });
 /* harmony default export */ function call() {
   var callback = arguments[0];
   arguments[0] = this;
@@ -33879,12 +35690,14 @@ function sort_ascending(a, b) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/nodes.js
+;// ./node_modules/d3-selection/src/selection/nodes.js
+Object.defineProperty(nodes, "name", { value: "default", configurable: true });
 /* harmony default export */ function nodes() {
   return Array.from(this);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/node.js
+;// ./node_modules/d3-selection/src/selection/node.js
+Object.defineProperty(node, "name", { value: "default", configurable: true });
 /* harmony default export */ function node() {
 
   for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
@@ -33897,19 +35710,22 @@ function sort_ascending(a, b) {
   return null;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/size.js
+;// ./node_modules/d3-selection/src/selection/size.js
+Object.defineProperty(selection_size, "name", { value: "default", configurable: true });
 /* harmony default export */ function selection_size() {
   let size = 0;
   for (const node of this) ++size; // eslint-disable-line no-unused-vars
   return size;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/empty.js
+;// ./node_modules/d3-selection/src/selection/empty.js
+Object.defineProperty(selection_empty, "name", { value: "default", configurable: true });
 /* harmony default export */ function selection_empty() {
   return !this.node();
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/each.js
+;// ./node_modules/d3-selection/src/selection/each.js
+Object.defineProperty(each, "name", { value: "default", configurable: true });
 /* harmony default export */ function each(callback) {
 
   for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
@@ -33921,7 +35737,7 @@ function sort_ascending(a, b) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/namespaces.js
+;// ./node_modules/d3-selection/src/namespaces.js
 var xhtml = "http://www.w3.org/1999/xhtml";
 
 /* harmony default export */ var namespaces = ({
@@ -33932,7 +35748,8 @@ var xhtml = "http://www.w3.org/1999/xhtml";
   xmlns: "http://www.w3.org/2000/xmlns/"
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/namespace.js
+;// ./node_modules/d3-selection/src/namespace.js
+Object.defineProperty(namespace, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function namespace(name) {
@@ -33941,7 +35758,8 @@ var xhtml = "http://www.w3.org/1999/xhtml";
   return namespaces.hasOwnProperty(prefix) ? {space: namespaces[prefix], local: name} : name; // eslint-disable-line no-prototype-builtins
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/attr.js
+;// ./node_modules/d3-selection/src/selection/attr.js
+Object.defineProperty(attr, "name", { value: "default", configurable: true });
 
 
 function attrRemove(name) {
@@ -34000,14 +35818,16 @@ function attrFunctionNS(fullname, value) {
       : (fullname.local ? attrConstantNS : attrConstant)))(fullname, value));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/window.js
+;// ./node_modules/d3-selection/src/window.js
+Object.defineProperty(src_window, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_window(node) {
   return (node.ownerDocument && node.ownerDocument.defaultView) // node is a Node
       || (node.document && node) // node is a Window
       || node.defaultView; // node is a Document
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/style.js
+;// ./node_modules/d3-selection/src/selection/style.js
+Object.defineProperty(style, "name", { value: "default", configurable: true });
 
 
 function styleRemove(name) {
@@ -34044,7 +35864,8 @@ function style_styleValue(node, name) {
       || src_window(node).getComputedStyle(node, null).getPropertyValue(name);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/property.js
+;// ./node_modules/d3-selection/src/selection/property.js
+Object.defineProperty(property, "name", { value: "default", configurable: true });
 function propertyRemove(name) {
   return function() {
     delete this[name];
@@ -34074,7 +35895,8 @@ function propertyFunction(name, value) {
       : this.node()[name];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/classed.js
+;// ./node_modules/d3-selection/src/selection/classed.js
+Object.defineProperty(classed, "name", { value: "default", configurable: true });
 function classArray(string) {
   return string.trim().split(/^|\s+/);
 }
@@ -34151,7 +35973,8 @@ function classedFunction(names, value) {
       : classedFalse)(names, value));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/text.js
+;// ./node_modules/d3-selection/src/selection/text.js
+Object.defineProperty(selection_text, "name", { value: "default", configurable: true });
 function textRemove() {
   this.textContent = "";
 }
@@ -34178,7 +36001,8 @@ function textFunction(value) {
       : this.node().textContent;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/html.js
+;// ./node_modules/d3-selection/src/selection/html.js
+Object.defineProperty(html, "name", { value: "default", configurable: true });
 function htmlRemove() {
   this.innerHTML = "";
 }
@@ -34205,7 +36029,8 @@ function htmlFunction(value) {
       : this.node().innerHTML;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/raise.js
+;// ./node_modules/d3-selection/src/selection/raise.js
+Object.defineProperty(selection_raise, "name", { value: "default", configurable: true });
 function raise() {
   if (this.nextSibling) this.parentNode.appendChild(this);
 }
@@ -34214,7 +36039,8 @@ function raise() {
   return this.each(raise);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/lower.js
+;// ./node_modules/d3-selection/src/selection/lower.js
+Object.defineProperty(selection_lower, "name", { value: "default", configurable: true });
 function lower() {
   if (this.previousSibling) this.parentNode.insertBefore(this, this.parentNode.firstChild);
 }
@@ -34223,7 +36049,8 @@ function lower() {
   return this.each(lower);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/creator.js
+;// ./node_modules/d3-selection/src/creator.js
+Object.defineProperty(creator, "name", { value: "default", configurable: true });
 
 
 
@@ -34250,7 +36077,8 @@ function creatorFixed(fullname) {
       : creatorInherit)(fullname);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/append.js
+;// ./node_modules/d3-selection/src/selection/append.js
+Object.defineProperty(append, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function append(name) {
@@ -34260,7 +36088,8 @@ function creatorFixed(fullname) {
   });
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/insert.js
+;// ./node_modules/d3-selection/src/selection/insert.js
+Object.defineProperty(insert, "name", { value: "default", configurable: true });
 
 
 
@@ -34276,7 +36105,8 @@ function constantNull() {
   });
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/remove.js
+;// ./node_modules/d3-selection/src/selection/remove.js
+Object.defineProperty(selection_remove, "name", { value: "default", configurable: true });
 function remove_remove() {
   var parent = this.parentNode;
   if (parent) parent.removeChild(this);
@@ -34286,7 +36116,8 @@ function remove_remove() {
   return this.each(remove_remove);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/clone.js
+;// ./node_modules/d3-selection/src/selection/clone.js
+Object.defineProperty(clone, "name", { value: "default", configurable: true });
 function selection_cloneShallow() {
   var clone = this.cloneNode(false), parent = this.parentNode;
   return parent ? parent.insertBefore(clone, this.nextSibling) : clone;
@@ -34301,14 +36132,16 @@ function selection_cloneDeep() {
   return this.select(deep ? selection_cloneDeep : selection_cloneShallow);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/datum.js
+;// ./node_modules/d3-selection/src/selection/datum.js
+Object.defineProperty(selection_datum, "name", { value: "default", configurable: true });
 /* harmony default export */ function selection_datum(value) {
   return arguments.length
       ? this.property("__data__", value)
       : this.node().__data__;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/on.js
+;// ./node_modules/d3-selection/src/selection/on.js
+Object.defineProperty(on, "name", { value: "default", configurable: true });
 function contextListener(listener) {
   return function(event) {
     listener.call(this, event, this.__data__);
@@ -34377,7 +36210,8 @@ function onAdd(typename, value, options) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/dispatch.js
+;// ./node_modules/d3-selection/src/selection/dispatch.js
+Object.defineProperty(selection_dispatch, "name", { value: "default", configurable: true });
 
 
 function dispatchEvent(node, type, params) {
@@ -34413,7 +36247,8 @@ function dispatchFunction(type, params) {
       : dispatchConstant)(type, params));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/iterator.js
+;// ./node_modules/d3-selection/src/selection/iterator.js
+Object.defineProperty(iterator, "name", { value: "default", configurable: true });
 /* harmony default export */ function* iterator() {
   for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
     for (var group = groups[j], i = 0, n = group.length, node; i < n; ++i) {
@@ -34422,7 +36257,7 @@ function dispatchFunction(type, params) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selection/index.js
+;// ./node_modules/d3-selection/src/selection/index.js
 
 
 
@@ -34514,7 +36349,8 @@ Selection.prototype = selection.prototype = {
 
 /* harmony default export */ var src_selection = (selection);
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/select.js
+;// ./node_modules/d3-selection/src/select.js
+Object.defineProperty(src_select, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function src_select(selector) {
@@ -34523,7 +36359,8 @@ Selection.prototype = selection.prototype = {
       : new Selection([[selector]], root);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-drag/src/noevent.js
+;// ./node_modules/d3-drag/src/noevent.js
+Object.defineProperty(noevent, "name", { value: "default", configurable: true });
 // These are typically used in conjunction with noevent to ensure that we can
 // preventDefault on the event.
 const nonpassive = {passive: false};
@@ -34538,7 +36375,8 @@ function nopropagation(event) {
   event.stopImmediatePropagation();
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-drag/src/nodrag.js
+;// ./node_modules/d3-drag/src/nodrag.js
+Object.defineProperty(nodrag, "name", { value: "default", configurable: true });
 
 
 
@@ -34568,7 +36406,8 @@ function yesdrag(view, noclick) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-color/src/define.js
+;// ./node_modules/d3-color/src/define.js
+Object.defineProperty(src_define, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_define(constructor, factory, prototype) {
   constructor.prototype = factory.prototype = prototype;
   prototype.constructor = constructor;
@@ -34580,7 +36419,7 @@ function define_extend(parent, definition) {
   return prototype;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-color/src/color.js
+;// ./node_modules/d3-color/src/color.js
 
 
 function Color() {}
@@ -34978,7 +36817,8 @@ function hsl2rgb(h, m1, m2) {
       : m1) * 255;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/basis.js
+;// ./node_modules/d3-interpolate/src/basis.js
+Object.defineProperty(src_basis, "name", { value: "default", configurable: true });
 function basis(t1, v0, v1, v2, v3) {
   var t2 = t1 * t1, t3 = t2 * t1;
   return ((1 - 3 * t1 + 3 * t2 - t3) * v0
@@ -34999,7 +36839,8 @@ function basis(t1, v0, v1, v2, v3) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/basisClosed.js
+;// ./node_modules/d3-interpolate/src/basisClosed.js
+Object.defineProperty(basisClosed, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function basisClosed(values) {
@@ -35014,10 +36855,11 @@ function basis(t1, v0, v1, v2, v3) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/constant.js
+;// ./node_modules/d3-interpolate/src/constant.js
 /* harmony default export */ var d3_interpolate_src_constant = (x => () => x);
+(Object.getOwnPropertyDescriptor(d3_interpolate_src_constant, "name") || {}).writable || Object.defineProperty(d3_interpolate_src_constant, "name", { value: "default", configurable: true });
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/color.js
+;// ./node_modules/d3-interpolate/src/color.js
 
 
 function linear(a, d) {
@@ -35048,7 +36890,7 @@ function nogamma(a, b) {
   return d ? linear(a, d) : d3_interpolate_src_constant(isNaN(a) ? b : a);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/rgb.js
+;// ./node_modules/d3-interpolate/src/rgb.js
 
 
 
@@ -35105,7 +36947,8 @@ function rgbSpline(spline) {
 var rgbBasis = rgbSpline(src_basis);
 var rgbBasisClosed = rgbSpline(basisClosed);
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/numberArray.js
+;// ./node_modules/d3-interpolate/src/numberArray.js
+Object.defineProperty(numberArray, "name", { value: "default", configurable: true });
 /* harmony default export */ function numberArray(a, b) {
   if (!b) b = [];
   var n = a ? Math.min(b.length, a.length) : 0,
@@ -35121,7 +36964,8 @@ function isNumberArray(x) {
   return ArrayBuffer.isView(x) && !(x instanceof DataView);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/array.js
+;// ./node_modules/d3-interpolate/src/array.js
+Object.defineProperty(src_array, "name", { value: "default", configurable: true });
 
 
 
@@ -35145,7 +36989,8 @@ function genericArray(a, b) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/date.js
+;// ./node_modules/d3-interpolate/src/date.js
+Object.defineProperty(date, "name", { value: "default", configurable: true });
 /* harmony default export */ function date(a, b) {
   var d = new Date;
   return a = +a, b = +b, function(t) {
@@ -35153,14 +36998,16 @@ function genericArray(a, b) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/number.js
+;// ./node_modules/d3-interpolate/src/number.js
+Object.defineProperty(src_number, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_number(a, b) {
   return a = +a, b = +b, function(t) {
     return a * (1 - t) + b * t;
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/object.js
+;// ./node_modules/d3-interpolate/src/object.js
+Object.defineProperty(object, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function object(a, b) {
@@ -35185,7 +37032,8 @@ function genericArray(a, b) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/string.js
+;// ./node_modules/d3-interpolate/src/string.js
+Object.defineProperty(string, "name", { value: "default", configurable: true });
 
 
 var reA = /[-+]?(?:\d+\.?\d*|\.?\d+)(?:[eE][-+]?\d+)?/g,
@@ -35251,7 +37099,8 @@ function one(b) {
         });
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/value.js
+;// ./node_modules/d3-interpolate/src/value.js
+Object.defineProperty(value, "name", { value: "default", configurable: true });
 
 
 
@@ -35275,14 +37124,16 @@ function one(b) {
       : src_number)(a, b);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/sourceEvent.js
+;// ./node_modules/d3-selection/src/sourceEvent.js
+Object.defineProperty(sourceEvent, "name", { value: "default", configurable: true });
 /* harmony default export */ function sourceEvent(event) {
   let sourceEvent;
   while (sourceEvent = event.sourceEvent) event = sourceEvent;
   return event;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/pointer.js
+;// ./node_modules/d3-selection/src/pointer.js
+Object.defineProperty(pointer, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function pointer(event, node) {
@@ -35304,7 +37155,7 @@ function one(b) {
   return [event.pageX, event.pageY];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-timer/src/timer.js
+;// ./node_modules/d3-timer/src/timer.js
 var timer_frame = 0, // is an animation frame pending?
     timeout = 0, // is a timeout pending?
     interval = 0, // are any timers active?
@@ -35416,7 +37267,8 @@ function sleep(time) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-timer/src/timeout.js
+;// ./node_modules/d3-timer/src/timeout.js
+Object.defineProperty(src_timeout, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function src_timeout(callback, delay, time) {
@@ -35429,7 +37281,8 @@ function sleep(time) {
   return t;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/schedule.js
+;// ./node_modules/d3-transition/src/transition/schedule.js
+Object.defineProperty(schedule, "name", { value: "default", configurable: true });
 
 
 
@@ -35584,7 +37437,8 @@ function create(node, id, self) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/interrupt.js
+;// ./node_modules/d3-transition/src/interrupt.js
+Object.defineProperty(interrupt, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function interrupt(node, name) {
@@ -35610,7 +37464,8 @@ function create(node, id, self) {
   if (empty) delete node.__transition;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/selection/interrupt.js
+;// ./node_modules/d3-transition/src/selection/interrupt.js
+Object.defineProperty(selection_interrupt, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function selection_interrupt(name) {
@@ -35619,7 +37474,8 @@ function create(node, id, self) {
   });
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/transform/decompose.js
+;// ./node_modules/d3-interpolate/src/transform/decompose.js
+Object.defineProperty(decompose, "name", { value: "default", configurable: true });
 var degrees = 180 / Math.PI;
 
 var decompose_identity = {
@@ -35647,7 +37503,7 @@ var decompose_identity = {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/transform/parse.js
+;// ./node_modules/d3-interpolate/src/transform/parse.js
 
 
 var svgNode;
@@ -35667,7 +37523,7 @@ function parseSvg(value) {
   return decompose(value.a, value.b, value.c, value.d, value.e, value.f);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/transform/index.js
+;// ./node_modules/d3-interpolate/src/transform/index.js
 
 
 
@@ -35732,7 +37588,8 @@ function interpolateTransform(parse, pxComma, pxParen, degParen) {
 var interpolateTransformCss = interpolateTransform(parseCss, "px, ", "px)", "deg)");
 var interpolateTransformSvg = interpolateTransform(parseSvg, ", ", ")", ")");
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/tween.js
+;// ./node_modules/d3-transition/src/transition/tween.js
+Object.defineProperty(tween, "name", { value: "default", configurable: true });
 
 
 function tweenRemove(id, name) {
@@ -35815,7 +37672,8 @@ function tweenValue(transition, name, value) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/interpolate.js
+;// ./node_modules/d3-transition/src/transition/interpolate.js
+Object.defineProperty(interpolate, "name", { value: "default", configurable: true });
 
 
 
@@ -35827,7 +37685,8 @@ function tweenValue(transition, name, value) {
       : string)(a, b);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/attr.js
+;// ./node_modules/d3-transition/src/transition/attr.js
+Object.defineProperty(transition_attr, "name", { value: "default", configurable: true });
 
 
 
@@ -35907,7 +37766,8 @@ function attr_attrFunctionNS(fullname, interpolate, value) {
       : (fullname.local ? attr_attrConstantNS : attr_attrConstant)(fullname, i, value));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/attrTween.js
+;// ./node_modules/d3-transition/src/transition/attrTween.js
+Object.defineProperty(transition_attrTween, "name", { value: "default", configurable: true });
 
 
 function attrInterpolate(name, i) {
@@ -35953,7 +37813,8 @@ function attrTween(name, value) {
   return this.tween(key, (fullname.local ? attrTweenNS : attrTween)(fullname, value));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/delay.js
+;// ./node_modules/d3-transition/src/transition/delay.js
+Object.defineProperty(delay, "name", { value: "default", configurable: true });
 
 
 function delayFunction(id, value) {
@@ -35978,7 +37839,8 @@ function delayConstant(id, value) {
       : schedule_get(this.node(), id).delay;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/duration.js
+;// ./node_modules/d3-transition/src/transition/duration.js
+Object.defineProperty(duration, "name", { value: "default", configurable: true });
 
 
 function durationFunction(id, value) {
@@ -36003,7 +37865,8 @@ function durationConstant(id, value) {
       : schedule_get(this.node(), id).duration;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/ease.js
+;// ./node_modules/d3-transition/src/transition/ease.js
+Object.defineProperty(ease, "name", { value: "default", configurable: true });
 
 
 function easeConstant(id, value) {
@@ -36021,7 +37884,8 @@ function easeConstant(id, value) {
       : schedule_get(this.node(), id).ease;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/easeVarying.js
+;// ./node_modules/d3-transition/src/transition/easeVarying.js
+Object.defineProperty(transition_easeVarying, "name", { value: "default", configurable: true });
 
 
 function easeVarying(id, value) {
@@ -36037,7 +37901,8 @@ function easeVarying(id, value) {
   return this.each(easeVarying(this._id, value));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/filter.js
+;// ./node_modules/d3-transition/src/transition/filter.js
+Object.defineProperty(transition_filter, "name", { value: "default", configurable: true });
 
 
 
@@ -36055,7 +37920,8 @@ function easeVarying(id, value) {
   return new transition_Transition(subgroups, this._parents, this._name, this._id);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/merge.js
+;// ./node_modules/d3-transition/src/transition/merge.js
+Object.defineProperty(transition_merge, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function transition_merge(transition) {
@@ -36076,7 +37942,8 @@ function easeVarying(id, value) {
   return new transition_Transition(merges, this._parents, this._name, this._id);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/on.js
+;// ./node_modules/d3-transition/src/transition/on.js
+Object.defineProperty(transition_on, "name", { value: "default", configurable: true });
 
 
 function start(name) {
@@ -36110,7 +37977,8 @@ function onFunction(id, name, listener) {
       : this.each(onFunction(id, name, listener));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/remove.js
+;// ./node_modules/d3-transition/src/transition/remove.js
+Object.defineProperty(transition_remove, "name", { value: "default", configurable: true });
 function removeFunction(id) {
   return function() {
     var parent = this.parentNode;
@@ -36123,7 +37991,8 @@ function removeFunction(id) {
   return this.on("end.remove", removeFunction(this._id));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/select.js
+;// ./node_modules/d3-transition/src/transition/select.js
+Object.defineProperty(transition_select, "name", { value: "default", configurable: true });
 
 
 
@@ -36147,7 +38016,8 @@ function removeFunction(id) {
   return new transition_Transition(subgroups, this._parents, name, id);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/selectAll.js
+;// ./node_modules/d3-transition/src/transition/selectAll.js
+Object.defineProperty(transition_selectAll, "name", { value: "default", configurable: true });
 
 
 
@@ -36175,7 +38045,8 @@ function removeFunction(id) {
   return new transition_Transition(subgroups, parents, name, id);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/selection.js
+;// ./node_modules/d3-transition/src/transition/selection.js
+Object.defineProperty(transition_selection, "name", { value: "default", configurable: true });
 
 
 var selection_Selection = src_selection.prototype.constructor;
@@ -36184,7 +38055,8 @@ var selection_Selection = src_selection.prototype.constructor;
   return new selection_Selection(this._groups, this._parents);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/style.js
+;// ./node_modules/d3-transition/src/transition/style.js
+Object.defineProperty(transition_style, "name", { value: "default", configurable: true });
 
 
 
@@ -36266,7 +38138,8 @@ function styleMaybeRemove(id, name) {
       .on("end.style." + name, null);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/styleTween.js
+;// ./node_modules/d3-transition/src/transition/styleTween.js
+Object.defineProperty(transition_styleTween, "name", { value: "default", configurable: true });
 function styleInterpolate(name, i, priority) {
   return function(t) {
     this.style.setProperty(name, i.call(this, t), priority);
@@ -36292,7 +38165,8 @@ function styleTween(name, value, priority) {
   return this.tween(key, styleTween(name, value, priority == null ? "" : priority));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/text.js
+;// ./node_modules/d3-transition/src/transition/text.js
+Object.defineProperty(transition_text, "name", { value: "default", configurable: true });
 
 
 function text_textConstant(value) {
@@ -36314,7 +38188,8 @@ function text_textFunction(value) {
       : text_textConstant(value == null ? "" : value + ""));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/textTween.js
+;// ./node_modules/d3-transition/src/transition/textTween.js
+Object.defineProperty(transition_textTween, "name", { value: "default", configurable: true });
 function textInterpolate(i) {
   return function(t) {
     this.textContent = i.call(this, t);
@@ -36340,7 +38215,8 @@ function textTween(value) {
   return this.tween(key, textTween(value));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/transition.js
+;// ./node_modules/d3-transition/src/transition/transition.js
+Object.defineProperty(transition, "name", { value: "default", configurable: true });
 
 
 
@@ -36366,7 +38242,8 @@ function textTween(value) {
   return new transition_Transition(groups, this._parents, name, id1);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/end.js
+;// ./node_modules/d3-transition/src/transition/end.js
+Object.defineProperty(end, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function end() {
@@ -36397,7 +38274,7 @@ function textTween(value) {
   });
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/transition/index.js
+;// ./node_modules/d3-transition/src/transition/index.js
 
 
 
@@ -36472,7 +38349,7 @@ transition_Transition.prototype = transition_transition.prototype = {
   [Symbol.iterator]: selection_prototype[Symbol.iterator]
 };
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/cubic.js
+;// ./node_modules/d3-ease/src/cubic.js
 function cubicIn(t) {
   return t * t * t;
 }
@@ -36485,7 +38362,8 @@ function cubicInOut(t) {
   return ((t *= 2) <= 1 ? t * t * t : (t -= 2) * t * t + 2) / 2;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/selection/transition.js
+;// ./node_modules/d3-transition/src/selection/transition.js
+Object.defineProperty(selection_transition, "name", { value: "default", configurable: true });
 
 
 
@@ -36529,7 +38407,7 @@ function inherit(node, id) {
   return new transition_Transition(groups, this._parents, name, id);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/selection/index.js
+;// ./node_modules/d3-transition/src/selection/index.js
 
 
 
@@ -36537,7 +38415,8 @@ function inherit(node, id) {
 src_selection.prototype.interrupt = selection_interrupt;
 src_selection.prototype.transition = selection_transition;
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/active.js
+;// ./node_modules/d3-transition/src/active.js
+Object.defineProperty(active, "name", { value: "default", configurable: true });
 
 
 
@@ -36560,16 +38439,17 @@ var active_root = [null];
   return null;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-transition/src/index.js
+;// ./node_modules/d3-transition/src/index.js
 
 
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-brush/src/constant.js
+;// ./node_modules/d3-brush/src/constant.js
 /* harmony default export */ var d3_brush_src_constant = (x => () => x);
+(Object.getOwnPropertyDescriptor(d3_brush_src_constant, "name") || {}).writable || Object.defineProperty(d3_brush_src_constant, "name", { value: "default", configurable: true });
 
-;// CONCATENATED MODULE: ./node_modules/d3-brush/src/event.js
+;// ./node_modules/d3-brush/src/event.js
 function BrushEvent(type, {
   sourceEvent,
   target,
@@ -36587,7 +38467,8 @@ function BrushEvent(type, {
   });
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-brush/src/noevent.js
+;// ./node_modules/d3-brush/src/noevent.js
+Object.defineProperty(src_noevent, "name", { value: "default", configurable: true });
 function noevent_nopropagation(event) {
   event.stopImmediatePropagation();
 }
@@ -36597,7 +38478,8 @@ function noevent_nopropagation(event) {
   event.stopImmediatePropagation();
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-brush/src/brush.js
+;// ./node_modules/d3-brush/src/brush.js
+Object.defineProperty(brush, "name", { value: "default", configurable: true });
 
 
 
@@ -37220,10 +39102,10 @@ function brush_brush(dim) {
   return brush;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-brush/src/index.js
+;// ./node_modules/d3-brush/src/index.js
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-chord/src/math.js
+;// ./node_modules/d3-chord/src/math.js
 var math_abs = Math.abs;
 var cos = Math.cos;
 var sin = Math.sin;
@@ -37233,7 +39115,8 @@ var tau = pi * 2;
 var math_max = Math.max;
 var math_epsilon = 1e-12;
 
-;// CONCATENATED MODULE: ./node_modules/d3-chord/src/chord.js
+;// ./node_modules/d3-chord/src/chord.js
+Object.defineProperty(chord, "name", { value: "default", configurable: true });
 
 
 function chord_range(i, j) {
@@ -37357,7 +39240,7 @@ function chord_chord(directed, transpose) {
   return chord;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-path/src/path.js
+;// ./node_modules/d3-path/src/path.js
 const path_pi = Math.PI,
     path_tau = 2 * path_pi,
     path_epsilon = 1e-6,
@@ -37515,17 +39398,19 @@ function pathRound(digits = 3) {
   return new Path(+digits);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-chord/src/array.js
+;// ./node_modules/d3-chord/src/array.js
 var array_slice = Array.prototype.slice;
 
-;// CONCATENATED MODULE: ./node_modules/d3-chord/src/constant.js
+;// ./node_modules/d3-chord/src/constant.js
+Object.defineProperty(d3_chord_src_constant, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_chord_src_constant(x) {
   return function() {
     return x;
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-chord/src/ribbon.js
+;// ./node_modules/d3-chord/src/ribbon.js
+Object.defineProperty(src_ribbon, "name", { value: "default", configurable: true });
 
 
 
@@ -37661,15 +39546,15 @@ function ribbonArrow() {
   return ribbon(defaultArrowheadRadius);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-chord/src/index.js
+;// ./node_modules/d3-chord/src/index.js
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-color/src/math.js
+;// ./node_modules/d3-color/src/math.js
 const radians = Math.PI / 180;
 const math_degrees = 180 / Math.PI;
 
-;// CONCATENATED MODULE: ./node_modules/d3-color/src/lab.js
+;// ./node_modules/d3-color/src/lab.js
 
 
 
@@ -37794,7 +39679,7 @@ src_define(Hcl, hcl, define_extend(Color, {
   }
 }));
 
-;// CONCATENATED MODULE: ./node_modules/d3-color/src/cubehelix.js
+;// ./node_modules/d3-color/src/cubehelix.js
 
 
 
@@ -37857,32 +39742,36 @@ src_define(Cubehelix, cubehelix_cubehelix, define_extend(Color, {
   }
 }));
 
-;// CONCATENATED MODULE: ./node_modules/d3-color/src/index.js
+;// ./node_modules/d3-color/src/index.js
 
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-contour/src/array.js
+;// ./node_modules/d3-contour/src/array.js
 var src_array_array = Array.prototype;
 
 var src_array_slice = src_array_array.slice;
 
-;// CONCATENATED MODULE: ./node_modules/d3-contour/src/ascending.js
+;// ./node_modules/d3-contour/src/ascending.js
+Object.defineProperty(src_ascending, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_ascending(a, b) {
   return a - b;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-contour/src/area.js
+;// ./node_modules/d3-contour/src/area.js
+Object.defineProperty(src_area, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_area(ring) {
   var i = 0, n = ring.length, area = ring[n - 1][1] * ring[0][0] - ring[n - 1][0] * ring[0][1];
   while (++i < n) area += ring[i - 1][1] * ring[i][0] - ring[i - 1][0] * ring[i][1];
   return area;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-contour/src/constant.js
+;// ./node_modules/d3-contour/src/constant.js
 /* harmony default export */ var d3_contour_src_constant = (x => () => x);
+(Object.getOwnPropertyDescriptor(d3_contour_src_constant, "name") || {}).writable || Object.defineProperty(d3_contour_src_constant, "name", { value: "default", configurable: true });
 
-;// CONCATENATED MODULE: ./node_modules/d3-contour/src/contains.js
+;// ./node_modules/d3-contour/src/contains.js
+Object.defineProperty(contains, "name", { value: "default", configurable: true });
 /* harmony default export */ function contains(ring, hole) {
   var i = -1, n = hole.length, c;
   while (++i < n) if (c = ringContains(ring, hole[i])) return c;
@@ -37911,10 +39800,12 @@ function within(p, q, r) {
   return p <= q && q <= r || r <= q && q <= p;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-contour/src/noop.js
+;// ./node_modules/d3-contour/src/noop.js
+Object.defineProperty(src_noop, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_noop() {}
 
-;// CONCATENATED MODULE: ./node_modules/d3-contour/src/contours.js
+;// ./node_modules/d3-contour/src/contours.js
+Object.defineProperty(src_contours, "name", { value: "default", configurable: true });
 
 
 
@@ -38141,7 +40032,8 @@ function smooth1(x, v0, v1, value) {
   return isNaN(d) ? x : x + d - 0.5;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-contour/src/density.js
+;// ./node_modules/d3-contour/src/density.js
+Object.defineProperty(density, "name", { value: "default", configurable: true });
 
 
 
@@ -38292,14 +40184,14 @@ function defaultWeight() {
   return density;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-contour/src/index.js
+;// ./node_modules/d3-contour/src/index.js
 
 
 
-;// CONCATENATED MODULE: ./node_modules/robust-predicates/esm/util.js
+;// ./node_modules/robust-predicates/esm/util.js
 const util_epsilon = 1.1102230246251565e-16;
-const util_splitter = 134217729;
-const util_resulterrbound = (3 + 8 * util_epsilon) * util_epsilon;
+const splitter = 134217729;
+const resulterrbound = (3 + 8 * util_epsilon) * util_epsilon;
 
 // fast_expansion_sum_zeroelim routine from oritinal code
 function util_sum(elen, e, flen, f, h) {
@@ -38374,21 +40266,21 @@ function util_sum(elen, e, flen, f, h) {
     return hindex;
 }
 
-function util_sum_three(alen, a, blen, b, clen, c, tmp, out) {
+function sum_three(alen, a, blen, b, clen, c, tmp, out) {
     return util_sum(util_sum(alen, a, blen, b, tmp), tmp, clen, c, out);
 }
 
 // scale_expansion_zeroelim routine from oritinal code
-function util_scale(elen, e, b, h) {
+function scale(elen, e, b, h) {
     let Q, sum, hh, product1, product0;
     let bvirt, c, ahi, alo, bhi, blo;
 
-    c = util_splitter * b;
+    c = splitter * b;
     bhi = c - (c - b);
     blo = b - bhi;
     let enow = e[0];
     Q = enow * b;
-    c = util_splitter * enow;
+    c = splitter * enow;
     ahi = c - (c - enow);
     alo = enow - ahi;
     hh = alo * blo - (Q - ahi * bhi - alo * bhi - ahi * blo);
@@ -38399,7 +40291,7 @@ function util_scale(elen, e, b, h) {
     for (let i = 1; i < elen; i++) {
         enow = e[i];
         product1 = enow * b;
-        c = util_splitter * enow;
+        c = splitter * enow;
         ahi = c - (c - enow);
         alo = enow - ahi;
         product0 = alo * blo - (product1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38421,12 +40313,12 @@ function util_scale(elen, e, b, h) {
     return hindex;
 }
 
-function util_negate(elen, e) {
+function negate(elen, e) {
     for (let i = 0; i < elen; i++) e[i] = -e[i];
     return elen;
 }
 
-function util_estimate(elen, e) {
+function estimate(elen, e) {
     let Q = e[0];
     for (let i = 1; i < elen; i++) Q += e[i];
     return Q;
@@ -38436,7 +40328,7 @@ function vec(n) {
     return new Float64Array(n);
 }
 
-;// CONCATENATED MODULE: ./node_modules/robust-predicates/esm/orient2d.js
+;// ./node_modules/robust-predicates/esm/orient2d.js
 
 
 const ccwerrboundA = (3 + 16 * util_epsilon) * util_epsilon;
@@ -38459,18 +40351,18 @@ function orient2dadapt(ax, ay, bx, by, cx, cy, detsum) {
     const bcy = by - cy;
 
     s1 = acx * bcy;
-    c = util_splitter * acx;
+    c = splitter * acx;
     ahi = c - (c - acx);
     alo = acx - ahi;
-    c = util_splitter * bcy;
+    c = splitter * bcy;
     bhi = c - (c - bcy);
     blo = bcy - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = acy * bcx;
-    c = util_splitter * acy;
+    c = splitter * acy;
     ahi = c - (c - acy);
     alo = acy - ahi;
-    c = util_splitter * bcx;
+    c = splitter * bcx;
     bhi = c - (c - bcx);
     blo = bcx - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38488,7 +40380,7 @@ function orient2dadapt(ax, ay, bx, by, cx, cy, detsum) {
     orient2d_B[2] = _j - (u3 - bvirt) + (_i - bvirt);
     orient2d_B[3] = u3;
 
-    let det = util_estimate(4, orient2d_B);
+    let det = estimate(4, orient2d_B);
     let errbound = ccwerrboundB * detsum;
     if (det >= errbound || -det >= errbound) {
         return det;
@@ -38507,23 +40399,23 @@ function orient2dadapt(ax, ay, bx, by, cx, cy, detsum) {
         return det;
     }
 
-    errbound = ccwerrboundC * detsum + util_resulterrbound * Math.abs(det);
+    errbound = ccwerrboundC * detsum + resulterrbound * Math.abs(det);
     det += (acx * bcytail + bcy * acxtail) - (acy * bcxtail + bcx * acytail);
     if (det >= errbound || -det >= errbound) return det;
 
     s1 = acxtail * bcy;
-    c = util_splitter * acxtail;
+    c = splitter * acxtail;
     ahi = c - (c - acxtail);
     alo = acxtail - ahi;
-    c = util_splitter * bcy;
+    c = splitter * bcy;
     bhi = c - (c - bcy);
     blo = bcy - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = acytail * bcx;
-    c = util_splitter * acytail;
+    c = splitter * acytail;
     ahi = c - (c - acytail);
     alo = acytail - ahi;
-    c = util_splitter * bcx;
+    c = splitter * bcx;
     bhi = c - (c - bcx);
     blo = bcx - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38543,18 +40435,18 @@ function orient2dadapt(ax, ay, bx, by, cx, cy, detsum) {
     const C1len = util_sum(4, orient2d_B, 4, u, C1);
 
     s1 = acx * bcytail;
-    c = util_splitter * acx;
+    c = splitter * acx;
     ahi = c - (c - acx);
     alo = acx - ahi;
-    c = util_splitter * bcytail;
+    c = splitter * bcytail;
     bhi = c - (c - bcytail);
     blo = bcytail - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = acy * bcxtail;
-    c = util_splitter * acy;
+    c = splitter * acy;
     ahi = c - (c - acy);
     alo = acy - ahi;
-    c = util_splitter * bcxtail;
+    c = splitter * bcxtail;
     bhi = c - (c - bcxtail);
     blo = bcxtail - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38574,18 +40466,18 @@ function orient2dadapt(ax, ay, bx, by, cx, cy, detsum) {
     const C2len = util_sum(C1len, C1, 4, u, C2);
 
     s1 = acxtail * bcytail;
-    c = util_splitter * acxtail;
+    c = splitter * acxtail;
     ahi = c - (c - acxtail);
     alo = acxtail - ahi;
-    c = util_splitter * bcytail;
+    c = splitter * bcytail;
     bhi = c - (c - bcytail);
     blo = bcytail - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = acytail * bcxtail;
-    c = util_splitter * acytail;
+    c = splitter * acytail;
     ahi = c - (c - acytail);
     alo = acytail - ahi;
-    c = util_splitter * bcxtail;
+    c = splitter * bcxtail;
     bhi = c - (c - bcxtail);
     blo = bcxtail - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38624,7 +40516,12 @@ function orient2dfast(ax, ay, bx, by, cx, cy) {
     return (ay - cy) * (bx - cx) - (ax - cx) * (by - cy);
 }
 
-;// CONCATENATED MODULE: ./node_modules/robust-predicates/esm/orient3d.js
+;// ./node_modules/robust-predicates/esm/orient3d.js
+/* unused harmony import specifier */ var orient3d_sum;
+/* unused harmony import specifier */ var orient3d_splitter;
+/* unused harmony import specifier */ var orient3d_scale;
+/* unused harmony import specifier */ var orient3d_estimate;
+/* unused harmony import specifier */ var orient3d_resulterrbound;
 
 
 const o3derrboundA = (7 + 56 * util_epsilon) * util_epsilon;
@@ -38654,7 +40551,7 @@ let fin = vec(192);
 let fin2 = vec(192);
 
 function finadd(finlen, alen, a) {
-    finlen = sum(finlen, fin, alen, a, fin2);
+    finlen = orient3d_sum(finlen, fin, alen, a, fin2);
     const tmp = fin; fin = fin2; fin2 = tmp;
     return finlen;
 }
@@ -38669,19 +40566,19 @@ function tailinit(xtail, ytail, ax, ay, bx, by, a, b) {
         } else {
             negate = -ytail;
             s1 = negate * ax;
-            c = splitter * negate;
+            c = orient3d_splitter * negate;
             ahi = c - (c - negate);
             alo = negate - ahi;
-            c = splitter * ax;
+            c = orient3d_splitter * ax;
             bhi = c - (c - ax);
             blo = ax - bhi;
             a[0] = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             a[1] = s1;
             s1 = ytail * bx;
-            c = splitter * ytail;
+            c = orient3d_splitter * ytail;
             ahi = c - (c - ytail);
             alo = ytail - ahi;
-            c = splitter * bx;
+            c = orient3d_splitter * bx;
             bhi = c - (c - bx);
             blo = bx - bhi;
             b[0] = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38691,20 +40588,20 @@ function tailinit(xtail, ytail, ax, ay, bx, by, a, b) {
     } else {
         if (ytail === 0) {
             s1 = xtail * ay;
-            c = splitter * xtail;
+            c = orient3d_splitter * xtail;
             ahi = c - (c - xtail);
             alo = xtail - ahi;
-            c = splitter * ay;
+            c = orient3d_splitter * ay;
             bhi = c - (c - ay);
             blo = ay - bhi;
             a[0] = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             a[1] = s1;
             negate = -xtail;
             s1 = negate * by;
-            c = splitter * negate;
+            c = orient3d_splitter * negate;
             ahi = c - (c - negate);
             alo = negate - ahi;
-            c = splitter * by;
+            c = orient3d_splitter * by;
             bhi = c - (c - by);
             blo = by - bhi;
             b[0] = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38712,18 +40609,18 @@ function tailinit(xtail, ytail, ax, ay, bx, by, a, b) {
             return 2;
         } else {
             s1 = xtail * ay;
-            c = splitter * xtail;
+            c = orient3d_splitter * xtail;
             ahi = c - (c - xtail);
             alo = xtail - ahi;
-            c = splitter * ay;
+            c = orient3d_splitter * ay;
             bhi = c - (c - ay);
             blo = ay - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = ytail * ax;
-            c = splitter * ytail;
+            c = orient3d_splitter * ytail;
             ahi = c - (c - ytail);
             alo = ytail - ahi;
-            c = splitter * ax;
+            c = orient3d_splitter * ax;
             bhi = c - (c - ax);
             blo = ax - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38741,18 +40638,18 @@ function tailinit(xtail, ytail, ax, ay, bx, by, a, b) {
             a[2] = _j - (u3 - bvirt) + (_i - bvirt);
             a[3] = u3;
             s1 = ytail * bx;
-            c = splitter * ytail;
+            c = orient3d_splitter * ytail;
             ahi = c - (c - ytail);
             alo = ytail - ahi;
-            c = splitter * bx;
+            c = orient3d_splitter * bx;
             bhi = c - (c - bx);
             blo = bx - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = xtail * by;
-            c = splitter * xtail;
+            c = orient3d_splitter * xtail;
             ahi = c - (c - xtail);
             alo = xtail - ahi;
-            c = splitter * by;
+            c = orient3d_splitter * by;
             bhi = c - (c - by);
             blo = by - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38777,23 +40674,23 @@ function tailinit(xtail, ytail, ax, ay, bx, by, a, b) {
 function tailadd(finlen, a, b, k, z) {
     let bvirt, c, ahi, alo, bhi, blo, _i, _j, _k, _0, s1, s0, u3;
     s1 = a * b;
-    c = splitter * a;
+    c = orient3d_splitter * a;
     ahi = c - (c - a);
     alo = a - ahi;
-    c = splitter * b;
+    c = orient3d_splitter * b;
     bhi = c - (c - b);
     blo = b - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
-    c = splitter * k;
+    c = orient3d_splitter * k;
     bhi = c - (c - k);
     blo = k - bhi;
     _i = s0 * k;
-    c = splitter * s0;
+    c = orient3d_splitter * s0;
     ahi = c - (c - s0);
     alo = s0 - ahi;
     orient3d_u[0] = alo * blo - (_i - ahi * bhi - alo * bhi - ahi * blo);
     _j = s1 * k;
-    c = splitter * s1;
+    c = orient3d_splitter * s1;
     ahi = c - (c - s1);
     alo = s1 - ahi;
     _0 = alo * blo - (_j - ahi * bhi - alo * bhi - ahi * blo);
@@ -38805,16 +40702,16 @@ function tailadd(finlen, a, b, k, z) {
     orient3d_u[3] = u3;
     finlen = finadd(finlen, 4, orient3d_u);
     if (z !== 0) {
-        c = splitter * z;
+        c = orient3d_splitter * z;
         bhi = c - (c - z);
         blo = z - bhi;
         _i = s0 * z;
-        c = splitter * s0;
+        c = orient3d_splitter * s0;
         ahi = c - (c - s0);
         alo = s0 - ahi;
         orient3d_u[0] = alo * blo - (_i - ahi * bhi - alo * bhi - ahi * blo);
         _j = s1 * z;
-        c = splitter * s1;
+        c = orient3d_splitter * s1;
         ahi = c - (c - s1);
         alo = s1 - ahi;
         _0 = alo * blo - (_j - ahi * bhi - alo * bhi - ahi * blo);
@@ -38847,18 +40744,18 @@ function orient3dadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, permanent
     const cdz = cz - dz;
 
     s1 = bdx * cdy;
-    c = splitter * bdx;
+    c = orient3d_splitter * bdx;
     ahi = c - (c - bdx);
     alo = bdx - ahi;
-    c = splitter * cdy;
+    c = orient3d_splitter * cdy;
     bhi = c - (c - cdy);
     blo = cdy - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = cdx * bdy;
-    c = splitter * cdx;
+    c = orient3d_splitter * cdx;
     ahi = c - (c - cdx);
     alo = cdx - ahi;
-    c = splitter * bdy;
+    c = orient3d_splitter * bdy;
     bhi = c - (c - bdy);
     blo = bdy - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38876,18 +40773,18 @@ function orient3dadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, permanent
     bc[2] = _j - (u3 - bvirt) + (_i - bvirt);
     bc[3] = u3;
     s1 = cdx * ady;
-    c = splitter * cdx;
+    c = orient3d_splitter * cdx;
     ahi = c - (c - cdx);
     alo = cdx - ahi;
-    c = splitter * ady;
+    c = orient3d_splitter * ady;
     bhi = c - (c - ady);
     blo = ady - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = adx * cdy;
-    c = splitter * adx;
+    c = orient3d_splitter * adx;
     ahi = c - (c - adx);
     alo = adx - ahi;
-    c = splitter * cdy;
+    c = orient3d_splitter * cdy;
     bhi = c - (c - cdy);
     blo = cdy - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38905,18 +40802,18 @@ function orient3dadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, permanent
     ca[2] = _j - (u3 - bvirt) + (_i - bvirt);
     ca[3] = u3;
     s1 = adx * bdy;
-    c = splitter * adx;
+    c = orient3d_splitter * adx;
     ahi = c - (c - adx);
     alo = adx - ahi;
-    c = splitter * bdy;
+    c = orient3d_splitter * bdy;
     bhi = c - (c - bdy);
     blo = bdy - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = bdx * ady;
-    c = splitter * bdx;
+    c = orient3d_splitter * bdx;
     ahi = c - (c - bdx);
     alo = bdx - ahi;
-    c = splitter * ady;
+    c = orient3d_splitter * ady;
     bhi = c - (c - ady);
     blo = ady - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -38934,13 +40831,13 @@ function orient3dadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, permanent
     ab[2] = _j - (u3 - bvirt) + (_i - bvirt);
     ab[3] = u3;
 
-    finlen = sum(
-        sum(
-            scale(4, bc, adz, _8), _8,
-            scale(4, ca, bdz, _8b), _8b, _16), _16,
-        scale(4, ab, cdz, _8), _8, fin);
+    finlen = orient3d_sum(
+        orient3d_sum(
+            orient3d_scale(4, bc, adz, _8), _8,
+            orient3d_scale(4, ca, bdz, _8b), _8b, _16), _16,
+        orient3d_scale(4, ab, cdz, _8), _8, fin);
 
-    let det = estimate(finlen, fin);
+    let det = orient3d_estimate(finlen, fin);
     let errbound = o3derrboundB * permanent;
     if (det >= errbound || -det >= errbound) {
         return det;
@@ -38971,7 +40868,7 @@ function orient3dadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, permanent
         return det;
     }
 
-    errbound = o3derrboundC * permanent + resulterrbound * Math.abs(det);
+    errbound = o3derrboundC * permanent + orient3d_resulterrbound * Math.abs(det);
     det +=
         adz * (bdx * cdytail + cdy * bdxtail - (bdy * cdxtail + cdx * bdytail)) + adztail * (bdx * cdy - bdy * cdx) +
         bdz * (cdx * adytail + ady * cdxtail - (cdy * adxtail + adx * cdytail)) + bdztail * (cdx * ady - cdy * adx) +
@@ -38984,26 +40881,26 @@ function orient3dadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, permanent
     const bt_len = tailinit(bdxtail, bdytail, cdx, cdy, adx, ady, bt_c, bt_a);
     const ct_len = tailinit(cdxtail, cdytail, adx, ady, bdx, bdy, ct_a, ct_b);
 
-    const bctlen = sum(bt_len, bt_c, ct_len, ct_b, bct);
-    finlen = finadd(finlen, scale(bctlen, bct, adz, _16), _16);
+    const bctlen = orient3d_sum(bt_len, bt_c, ct_len, ct_b, bct);
+    finlen = finadd(finlen, orient3d_scale(bctlen, bct, adz, _16), _16);
 
-    const catlen = sum(ct_len, ct_a, at_len, at_c, cat);
-    finlen = finadd(finlen, scale(catlen, cat, bdz, _16), _16);
+    const catlen = orient3d_sum(ct_len, ct_a, at_len, at_c, cat);
+    finlen = finadd(finlen, orient3d_scale(catlen, cat, bdz, _16), _16);
 
-    const abtlen = sum(at_len, at_b, bt_len, bt_a, abt);
-    finlen = finadd(finlen, scale(abtlen, abt, cdz, _16), _16);
+    const abtlen = orient3d_sum(at_len, at_b, bt_len, bt_a, abt);
+    finlen = finadd(finlen, orient3d_scale(abtlen, abt, cdz, _16), _16);
 
     if (adztail !== 0) {
-        finlen = finadd(finlen, scale(4, bc, adztail, _12), _12);
-        finlen = finadd(finlen, scale(bctlen, bct, adztail, _16), _16);
+        finlen = finadd(finlen, orient3d_scale(4, bc, adztail, _12), _12);
+        finlen = finadd(finlen, orient3d_scale(bctlen, bct, adztail, _16), _16);
     }
     if (bdztail !== 0) {
-        finlen = finadd(finlen, scale(4, ca, bdztail, _12), _12);
-        finlen = finadd(finlen, scale(catlen, cat, bdztail, _16), _16);
+        finlen = finadd(finlen, orient3d_scale(4, ca, bdztail, _12), _12);
+        finlen = finadd(finlen, orient3d_scale(catlen, cat, bdztail, _16), _16);
     }
     if (cdztail !== 0) {
-        finlen = finadd(finlen, scale(4, ab, cdztail, _12), _12);
-        finlen = finadd(finlen, scale(abtlen, abt, cdztail, _16), _16);
+        finlen = finadd(finlen, orient3d_scale(4, ab, cdztail, _12), _12);
+        finlen = finadd(finlen, orient3d_scale(abtlen, abt, cdztail, _16), _16);
     }
 
     if (adxtail !== 0) {
@@ -39088,7 +40985,13 @@ function orient3dfast(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz) {
         cdx * (ady * bdz - adz * bdy);
 }
 
-;// CONCATENATED MODULE: ./node_modules/robust-predicates/esm/incircle.js
+;// ./node_modules/robust-predicates/esm/incircle.js
+/* unused harmony import specifier */ var incircle_sum;
+/* unused harmony import specifier */ var incircle_splitter;
+/* unused harmony import specifier */ var incircle_scale;
+/* unused harmony import specifier */ var incircle_estimate;
+/* unused harmony import specifier */ var incircle_resulterrbound;
+/* unused harmony import specifier */ var incircle_sum_three;
 
 
 const iccerrboundA = (10 + 96 * util_epsilon) * util_epsilon;
@@ -39129,7 +41032,7 @@ let incircle_fin = vec(1152);
 let incircle_fin2 = vec(1152);
 
 function incircle_finadd(finlen, a, alen) {
-    finlen = sum(finlen, incircle_fin, a, alen, incircle_fin2);
+    finlen = incircle_sum(finlen, incircle_fin, a, alen, incircle_fin2);
     const tmp = incircle_fin; incircle_fin = incircle_fin2; incircle_fin2 = tmp;
     return finlen;
 }
@@ -39152,18 +41055,18 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
     const cdy = cy - dy;
 
     s1 = bdx * cdy;
-    c = splitter * bdx;
+    c = incircle_splitter * bdx;
     ahi = c - (c - bdx);
     alo = bdx - ahi;
-    c = splitter * cdy;
+    c = incircle_splitter * cdy;
     bhi = c - (c - cdy);
     blo = cdy - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = cdx * bdy;
-    c = splitter * cdx;
+    c = incircle_splitter * cdx;
     ahi = c - (c - cdx);
     alo = cdx - ahi;
-    c = splitter * bdy;
+    c = incircle_splitter * bdy;
     bhi = c - (c - bdy);
     blo = bdy - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39181,18 +41084,18 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
     incircle_bc[2] = _j - (u3 - bvirt) + (_i - bvirt);
     incircle_bc[3] = u3;
     s1 = cdx * ady;
-    c = splitter * cdx;
+    c = incircle_splitter * cdx;
     ahi = c - (c - cdx);
     alo = cdx - ahi;
-    c = splitter * ady;
+    c = incircle_splitter * ady;
     bhi = c - (c - ady);
     blo = ady - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = adx * cdy;
-    c = splitter * adx;
+    c = incircle_splitter * adx;
     ahi = c - (c - adx);
     alo = adx - ahi;
-    c = splitter * cdy;
+    c = incircle_splitter * cdy;
     bhi = c - (c - cdy);
     blo = cdy - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39210,18 +41113,18 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
     incircle_ca[2] = _j - (u3 - bvirt) + (_i - bvirt);
     incircle_ca[3] = u3;
     s1 = adx * bdy;
-    c = splitter * adx;
+    c = incircle_splitter * adx;
     ahi = c - (c - adx);
     alo = adx - ahi;
-    c = splitter * bdy;
+    c = incircle_splitter * bdy;
     bhi = c - (c - bdy);
     blo = bdy - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = bdx * ady;
-    c = splitter * bdx;
+    c = incircle_splitter * bdx;
     ahi = c - (c - bdx);
     alo = bdx - ahi;
-    c = splitter * ady;
+    c = incircle_splitter * ady;
     bhi = c - (c - ady);
     blo = ady - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39239,19 +41142,19 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
     incircle_ab[2] = _j - (u3 - bvirt) + (_i - bvirt);
     incircle_ab[3] = u3;
 
-    finlen = sum(
-        sum(
-            sum(
-                scale(scale(4, incircle_bc, adx, incircle_8), incircle_8, adx, incircle_16), incircle_16,
-                scale(scale(4, incircle_bc, ady, incircle_8), incircle_8, ady, _16b), _16b, _32), _32,
-            sum(
-                scale(scale(4, incircle_ca, bdx, incircle_8), incircle_8, bdx, incircle_16), incircle_16,
-                scale(scale(4, incircle_ca, bdy, incircle_8), incircle_8, bdy, _16b), _16b, _32b), _32b, _64), _64,
-        sum(
-            scale(scale(4, incircle_ab, cdx, incircle_8), incircle_8, cdx, incircle_16), incircle_16,
-            scale(scale(4, incircle_ab, cdy, incircle_8), incircle_8, cdy, _16b), _16b, _32), _32, incircle_fin);
+    finlen = incircle_sum(
+        incircle_sum(
+            incircle_sum(
+                incircle_scale(incircle_scale(4, incircle_bc, adx, incircle_8), incircle_8, adx, incircle_16), incircle_16,
+                incircle_scale(incircle_scale(4, incircle_bc, ady, incircle_8), incircle_8, ady, _16b), _16b, _32), _32,
+            incircle_sum(
+                incircle_scale(incircle_scale(4, incircle_ca, bdx, incircle_8), incircle_8, bdx, incircle_16), incircle_16,
+                incircle_scale(incircle_scale(4, incircle_ca, bdy, incircle_8), incircle_8, bdy, _16b), _16b, _32b), _32b, _64), _64,
+        incircle_sum(
+            incircle_scale(incircle_scale(4, incircle_ab, cdx, incircle_8), incircle_8, cdx, incircle_16), incircle_16,
+            incircle_scale(incircle_scale(4, incircle_ab, cdy, incircle_8), incircle_8, cdy, _16b), _16b, _32), _32, incircle_fin);
 
-    let det = estimate(finlen, incircle_fin);
+    let det = incircle_estimate(finlen, incircle_fin);
     let errbound = iccerrboundB * permanent;
     if (det >= errbound || -det >= errbound) {
         return det;
@@ -39273,7 +41176,7 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
         return det;
     }
 
-    errbound = iccerrboundC * permanent + resulterrbound * Math.abs(det);
+    errbound = iccerrboundC * permanent + incircle_resulterrbound * Math.abs(det);
     det += ((adx * adx + ady * ady) * ((bdx * cdytail + cdy * bdxtail) - (bdy * cdxtail + cdx * bdytail)) +
         2 * (adx * adxtail + ady * adytail) * (bdx * cdy - bdy * cdx)) +
         ((bdx * bdx + bdy * bdy) * ((cdx * adytail + ady * cdxtail) - (cdy * adxtail + adx * cdytail)) +
@@ -39287,12 +41190,12 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
 
     if (bdxtail !== 0 || bdytail !== 0 || cdxtail !== 0 || cdytail !== 0) {
         s1 = adx * adx;
-        c = splitter * adx;
+        c = incircle_splitter * adx;
         ahi = c - (c - adx);
         alo = adx - ahi;
         s0 = alo * alo - (s1 - ahi * ahi - (ahi + ahi) * alo);
         t1 = ady * ady;
-        c = splitter * ady;
+        c = incircle_splitter * ady;
         ahi = c - (c - ady);
         alo = ady - ahi;
         t0 = alo * alo - (t1 - ahi * ahi - (ahi + ahi) * alo);
@@ -39312,12 +41215,12 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
     }
     if (cdxtail !== 0 || cdytail !== 0 || adxtail !== 0 || adytail !== 0) {
         s1 = bdx * bdx;
-        c = splitter * bdx;
+        c = incircle_splitter * bdx;
         ahi = c - (c - bdx);
         alo = bdx - ahi;
         s0 = alo * alo - (s1 - ahi * ahi - (ahi + ahi) * alo);
         t1 = bdy * bdy;
-        c = splitter * bdy;
+        c = incircle_splitter * bdy;
         ahi = c - (c - bdy);
         alo = bdy - ahi;
         t0 = alo * alo - (t1 - ahi * ahi - (ahi + ahi) * alo);
@@ -39337,12 +41240,12 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
     }
     if (adxtail !== 0 || adytail !== 0 || bdxtail !== 0 || bdytail !== 0) {
         s1 = cdx * cdx;
-        c = splitter * cdx;
+        c = incircle_splitter * cdx;
         ahi = c - (c - cdx);
         alo = cdx - ahi;
         s0 = alo * alo - (s1 - ahi * ahi - (ahi + ahi) * alo);
         t1 = cdy * cdy;
-        c = splitter * cdy;
+        c = incircle_splitter * cdy;
         ahi = c - (c - cdy);
         alo = cdy - ahi;
         t0 = alo * alo - (t1 - ahi * ahi - (ahi + ahi) * alo);
@@ -39362,63 +41265,63 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
     }
 
     if (adxtail !== 0) {
-        axtbclen = scale(4, incircle_bc, adxtail, axtbc);
-        finlen = incircle_finadd(finlen, sum_three(
-            scale(axtbclen, axtbc, 2 * adx, incircle_16), incircle_16,
-            scale(scale(4, cc, adxtail, incircle_8), incircle_8, bdy, _16b), _16b,
-            scale(scale(4, bb, adxtail, incircle_8), incircle_8, -cdy, _16c), _16c, _32, _48), _48);
+        axtbclen = incircle_scale(4, incircle_bc, adxtail, axtbc);
+        finlen = incircle_finadd(finlen, incircle_sum_three(
+            incircle_scale(axtbclen, axtbc, 2 * adx, incircle_16), incircle_16,
+            incircle_scale(incircle_scale(4, cc, adxtail, incircle_8), incircle_8, bdy, _16b), _16b,
+            incircle_scale(incircle_scale(4, bb, adxtail, incircle_8), incircle_8, -cdy, _16c), _16c, _32, _48), _48);
     }
     if (adytail !== 0) {
-        aytbclen = scale(4, incircle_bc, adytail, aytbc);
-        finlen = incircle_finadd(finlen, sum_three(
-            scale(aytbclen, aytbc, 2 * ady, incircle_16), incircle_16,
-            scale(scale(4, bb, adytail, incircle_8), incircle_8, cdx, _16b), _16b,
-            scale(scale(4, cc, adytail, incircle_8), incircle_8, -bdx, _16c), _16c, _32, _48), _48);
+        aytbclen = incircle_scale(4, incircle_bc, adytail, aytbc);
+        finlen = incircle_finadd(finlen, incircle_sum_three(
+            incircle_scale(aytbclen, aytbc, 2 * ady, incircle_16), incircle_16,
+            incircle_scale(incircle_scale(4, bb, adytail, incircle_8), incircle_8, cdx, _16b), _16b,
+            incircle_scale(incircle_scale(4, cc, adytail, incircle_8), incircle_8, -bdx, _16c), _16c, _32, _48), _48);
     }
     if (bdxtail !== 0) {
-        bxtcalen = scale(4, incircle_ca, bdxtail, bxtca);
-        finlen = incircle_finadd(finlen, sum_three(
-            scale(bxtcalen, bxtca, 2 * bdx, incircle_16), incircle_16,
-            scale(scale(4, aa, bdxtail, incircle_8), incircle_8, cdy, _16b), _16b,
-            scale(scale(4, cc, bdxtail, incircle_8), incircle_8, -ady, _16c), _16c, _32, _48), _48);
+        bxtcalen = incircle_scale(4, incircle_ca, bdxtail, bxtca);
+        finlen = incircle_finadd(finlen, incircle_sum_three(
+            incircle_scale(bxtcalen, bxtca, 2 * bdx, incircle_16), incircle_16,
+            incircle_scale(incircle_scale(4, aa, bdxtail, incircle_8), incircle_8, cdy, _16b), _16b,
+            incircle_scale(incircle_scale(4, cc, bdxtail, incircle_8), incircle_8, -ady, _16c), _16c, _32, _48), _48);
     }
     if (bdytail !== 0) {
-        bytcalen = scale(4, incircle_ca, bdytail, bytca);
-        finlen = incircle_finadd(finlen, sum_three(
-            scale(bytcalen, bytca, 2 * bdy, incircle_16), incircle_16,
-            scale(scale(4, cc, bdytail, incircle_8), incircle_8, adx, _16b), _16b,
-            scale(scale(4, aa, bdytail, incircle_8), incircle_8, -cdx, _16c), _16c, _32, _48), _48);
+        bytcalen = incircle_scale(4, incircle_ca, bdytail, bytca);
+        finlen = incircle_finadd(finlen, incircle_sum_three(
+            incircle_scale(bytcalen, bytca, 2 * bdy, incircle_16), incircle_16,
+            incircle_scale(incircle_scale(4, cc, bdytail, incircle_8), incircle_8, adx, _16b), _16b,
+            incircle_scale(incircle_scale(4, aa, bdytail, incircle_8), incircle_8, -cdx, _16c), _16c, _32, _48), _48);
     }
     if (cdxtail !== 0) {
-        cxtablen = scale(4, incircle_ab, cdxtail, cxtab);
-        finlen = incircle_finadd(finlen, sum_three(
-            scale(cxtablen, cxtab, 2 * cdx, incircle_16), incircle_16,
-            scale(scale(4, bb, cdxtail, incircle_8), incircle_8, ady, _16b), _16b,
-            scale(scale(4, aa, cdxtail, incircle_8), incircle_8, -bdy, _16c), _16c, _32, _48), _48);
+        cxtablen = incircle_scale(4, incircle_ab, cdxtail, cxtab);
+        finlen = incircle_finadd(finlen, incircle_sum_three(
+            incircle_scale(cxtablen, cxtab, 2 * cdx, incircle_16), incircle_16,
+            incircle_scale(incircle_scale(4, bb, cdxtail, incircle_8), incircle_8, ady, _16b), _16b,
+            incircle_scale(incircle_scale(4, aa, cdxtail, incircle_8), incircle_8, -bdy, _16c), _16c, _32, _48), _48);
     }
     if (cdytail !== 0) {
-        cytablen = scale(4, incircle_ab, cdytail, cytab);
-        finlen = incircle_finadd(finlen, sum_three(
-            scale(cytablen, cytab, 2 * cdy, incircle_16), incircle_16,
-            scale(scale(4, aa, cdytail, incircle_8), incircle_8, bdx, _16b), _16b,
-            scale(scale(4, bb, cdytail, incircle_8), incircle_8, -adx, _16c), _16c, _32, _48), _48);
+        cytablen = incircle_scale(4, incircle_ab, cdytail, cytab);
+        finlen = incircle_finadd(finlen, incircle_sum_three(
+            incircle_scale(cytablen, cytab, 2 * cdy, incircle_16), incircle_16,
+            incircle_scale(incircle_scale(4, aa, cdytail, incircle_8), incircle_8, bdx, _16b), _16b,
+            incircle_scale(incircle_scale(4, bb, cdytail, incircle_8), incircle_8, -adx, _16c), _16c, _32, _48), _48);
     }
 
     if (adxtail !== 0 || adytail !== 0) {
         if (bdxtail !== 0 || bdytail !== 0 || cdxtail !== 0 || cdytail !== 0) {
             s1 = bdxtail * cdy;
-            c = splitter * bdxtail;
+            c = incircle_splitter * bdxtail;
             ahi = c - (c - bdxtail);
             alo = bdxtail - ahi;
-            c = splitter * cdy;
+            c = incircle_splitter * cdy;
             bhi = c - (c - cdy);
             blo = cdy - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = bdx * cdytail;
-            c = splitter * bdx;
+            c = incircle_splitter * bdx;
             ahi = c - (c - bdx);
             alo = bdx - ahi;
-            c = splitter * cdytail;
+            c = incircle_splitter * cdytail;
             bhi = c - (c - cdytail);
             blo = cdytail - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39436,18 +41339,18 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
             incircle_u[2] = _j - (u3 - bvirt) + (_i - bvirt);
             incircle_u[3] = u3;
             s1 = cdxtail * -bdy;
-            c = splitter * cdxtail;
+            c = incircle_splitter * cdxtail;
             ahi = c - (c - cdxtail);
             alo = cdxtail - ahi;
-            c = splitter * -bdy;
+            c = incircle_splitter * -bdy;
             bhi = c - (c - -bdy);
             blo = -bdy - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = cdx * -bdytail;
-            c = splitter * cdx;
+            c = incircle_splitter * cdx;
             ahi = c - (c - cdx);
             alo = cdx - ahi;
-            c = splitter * -bdytail;
+            c = incircle_splitter * -bdytail;
             bhi = c - (c - -bdytail);
             blo = -bdytail - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39464,20 +41367,20 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
             bvirt = u3 - _j;
             v[2] = _j - (u3 - bvirt) + (_i - bvirt);
             v[3] = u3;
-            bctlen = sum(4, incircle_u, 4, v, incircle_bct);
+            bctlen = incircle_sum(4, incircle_u, 4, v, incircle_bct);
             s1 = bdxtail * cdytail;
-            c = splitter * bdxtail;
+            c = incircle_splitter * bdxtail;
             ahi = c - (c - bdxtail);
             alo = bdxtail - ahi;
-            c = splitter * cdytail;
+            c = incircle_splitter * cdytail;
             bhi = c - (c - cdytail);
             blo = cdytail - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = cdxtail * bdytail;
-            c = splitter * cdxtail;
+            c = incircle_splitter * cdxtail;
             ahi = c - (c - cdxtail);
             alo = cdxtail - ahi;
-            c = splitter * bdytail;
+            c = incircle_splitter * bdytail;
             bhi = c - (c - bdytail);
             blo = bdytail - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39502,52 +41405,52 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
             bcttlen = 1;
         }
         if (adxtail !== 0) {
-            const len = scale(bctlen, incircle_bct, adxtail, _16c);
-            finlen = incircle_finadd(finlen, sum(
-                scale(axtbclen, axtbc, adxtail, incircle_16), incircle_16,
-                scale(len, _16c, 2 * adx, _32), _32, _48), _48);
+            const len = incircle_scale(bctlen, incircle_bct, adxtail, _16c);
+            finlen = incircle_finadd(finlen, incircle_sum(
+                incircle_scale(axtbclen, axtbc, adxtail, incircle_16), incircle_16,
+                incircle_scale(len, _16c, 2 * adx, _32), _32, _48), _48);
 
-            const len2 = scale(bcttlen, bctt, adxtail, incircle_8);
-            finlen = incircle_finadd(finlen, sum_three(
-                scale(len2, incircle_8, 2 * adx, incircle_16), incircle_16,
-                scale(len2, incircle_8, adxtail, _16b), _16b,
-                scale(len, _16c, adxtail, _32), _32, _32b, _64), _64);
+            const len2 = incircle_scale(bcttlen, bctt, adxtail, incircle_8);
+            finlen = incircle_finadd(finlen, incircle_sum_three(
+                incircle_scale(len2, incircle_8, 2 * adx, incircle_16), incircle_16,
+                incircle_scale(len2, incircle_8, adxtail, _16b), _16b,
+                incircle_scale(len, _16c, adxtail, _32), _32, _32b, _64), _64);
 
             if (bdytail !== 0) {
-                finlen = incircle_finadd(finlen, scale(scale(4, cc, adxtail, incircle_8), incircle_8, bdytail, incircle_16), incircle_16);
+                finlen = incircle_finadd(finlen, incircle_scale(incircle_scale(4, cc, adxtail, incircle_8), incircle_8, bdytail, incircle_16), incircle_16);
             }
             if (cdytail !== 0) {
-                finlen = incircle_finadd(finlen, scale(scale(4, bb, -adxtail, incircle_8), incircle_8, cdytail, incircle_16), incircle_16);
+                finlen = incircle_finadd(finlen, incircle_scale(incircle_scale(4, bb, -adxtail, incircle_8), incircle_8, cdytail, incircle_16), incircle_16);
             }
         }
         if (adytail !== 0) {
-            const len = scale(bctlen, incircle_bct, adytail, _16c);
-            finlen = incircle_finadd(finlen, sum(
-                scale(aytbclen, aytbc, adytail, incircle_16), incircle_16,
-                scale(len, _16c, 2 * ady, _32), _32, _48), _48);
+            const len = incircle_scale(bctlen, incircle_bct, adytail, _16c);
+            finlen = incircle_finadd(finlen, incircle_sum(
+                incircle_scale(aytbclen, aytbc, adytail, incircle_16), incircle_16,
+                incircle_scale(len, _16c, 2 * ady, _32), _32, _48), _48);
 
-            const len2 = scale(bcttlen, bctt, adytail, incircle_8);
-            finlen = incircle_finadd(finlen, sum_three(
-                scale(len2, incircle_8, 2 * ady, incircle_16), incircle_16,
-                scale(len2, incircle_8, adytail, _16b), _16b,
-                scale(len, _16c, adytail, _32), _32, _32b, _64), _64);
+            const len2 = incircle_scale(bcttlen, bctt, adytail, incircle_8);
+            finlen = incircle_finadd(finlen, incircle_sum_three(
+                incircle_scale(len2, incircle_8, 2 * ady, incircle_16), incircle_16,
+                incircle_scale(len2, incircle_8, adytail, _16b), _16b,
+                incircle_scale(len, _16c, adytail, _32), _32, _32b, _64), _64);
         }
     }
     if (bdxtail !== 0 || bdytail !== 0) {
         if (cdxtail !== 0 || cdytail !== 0 || adxtail !== 0 || adytail !== 0) {
             s1 = cdxtail * ady;
-            c = splitter * cdxtail;
+            c = incircle_splitter * cdxtail;
             ahi = c - (c - cdxtail);
             alo = cdxtail - ahi;
-            c = splitter * ady;
+            c = incircle_splitter * ady;
             bhi = c - (c - ady);
             blo = ady - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = cdx * adytail;
-            c = splitter * cdx;
+            c = incircle_splitter * cdx;
             ahi = c - (c - cdx);
             alo = cdx - ahi;
-            c = splitter * adytail;
+            c = incircle_splitter * adytail;
             bhi = c - (c - adytail);
             blo = adytail - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39567,18 +41470,18 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
             n1 = -cdy;
             n0 = -cdytail;
             s1 = adxtail * n1;
-            c = splitter * adxtail;
+            c = incircle_splitter * adxtail;
             ahi = c - (c - adxtail);
             alo = adxtail - ahi;
-            c = splitter * n1;
+            c = incircle_splitter * n1;
             bhi = c - (c - n1);
             blo = n1 - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = adx * n0;
-            c = splitter * adx;
+            c = incircle_splitter * adx;
             ahi = c - (c - adx);
             alo = adx - ahi;
-            c = splitter * n0;
+            c = incircle_splitter * n0;
             bhi = c - (c - n0);
             blo = n0 - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39595,20 +41498,20 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
             bvirt = u3 - _j;
             v[2] = _j - (u3 - bvirt) + (_i - bvirt);
             v[3] = u3;
-            catlen = sum(4, incircle_u, 4, v, incircle_cat);
+            catlen = incircle_sum(4, incircle_u, 4, v, incircle_cat);
             s1 = cdxtail * adytail;
-            c = splitter * cdxtail;
+            c = incircle_splitter * cdxtail;
             ahi = c - (c - cdxtail);
             alo = cdxtail - ahi;
-            c = splitter * adytail;
+            c = incircle_splitter * adytail;
             bhi = c - (c - adytail);
             blo = adytail - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = adxtail * cdytail;
-            c = splitter * adxtail;
+            c = incircle_splitter * adxtail;
             ahi = c - (c - adxtail);
             alo = adxtail - ahi;
-            c = splitter * cdytail;
+            c = incircle_splitter * cdytail;
             bhi = c - (c - cdytail);
             blo = cdytail - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39633,52 +41536,52 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
             cattlen = 1;
         }
         if (bdxtail !== 0) {
-            const len = scale(catlen, incircle_cat, bdxtail, _16c);
-            finlen = incircle_finadd(finlen, sum(
-                scale(bxtcalen, bxtca, bdxtail, incircle_16), incircle_16,
-                scale(len, _16c, 2 * bdx, _32), _32, _48), _48);
+            const len = incircle_scale(catlen, incircle_cat, bdxtail, _16c);
+            finlen = incircle_finadd(finlen, incircle_sum(
+                incircle_scale(bxtcalen, bxtca, bdxtail, incircle_16), incircle_16,
+                incircle_scale(len, _16c, 2 * bdx, _32), _32, _48), _48);
 
-            const len2 = scale(cattlen, catt, bdxtail, incircle_8);
-            finlen = incircle_finadd(finlen, sum_three(
-                scale(len2, incircle_8, 2 * bdx, incircle_16), incircle_16,
-                scale(len2, incircle_8, bdxtail, _16b), _16b,
-                scale(len, _16c, bdxtail, _32), _32, _32b, _64), _64);
+            const len2 = incircle_scale(cattlen, catt, bdxtail, incircle_8);
+            finlen = incircle_finadd(finlen, incircle_sum_three(
+                incircle_scale(len2, incircle_8, 2 * bdx, incircle_16), incircle_16,
+                incircle_scale(len2, incircle_8, bdxtail, _16b), _16b,
+                incircle_scale(len, _16c, bdxtail, _32), _32, _32b, _64), _64);
 
             if (cdytail !== 0) {
-                finlen = incircle_finadd(finlen, scale(scale(4, aa, bdxtail, incircle_8), incircle_8, cdytail, incircle_16), incircle_16);
+                finlen = incircle_finadd(finlen, incircle_scale(incircle_scale(4, aa, bdxtail, incircle_8), incircle_8, cdytail, incircle_16), incircle_16);
             }
             if (adytail !== 0) {
-                finlen = incircle_finadd(finlen, scale(scale(4, cc, -bdxtail, incircle_8), incircle_8, adytail, incircle_16), incircle_16);
+                finlen = incircle_finadd(finlen, incircle_scale(incircle_scale(4, cc, -bdxtail, incircle_8), incircle_8, adytail, incircle_16), incircle_16);
             }
         }
         if (bdytail !== 0) {
-            const len = scale(catlen, incircle_cat, bdytail, _16c);
-            finlen = incircle_finadd(finlen, sum(
-                scale(bytcalen, bytca, bdytail, incircle_16), incircle_16,
-                scale(len, _16c, 2 * bdy, _32), _32, _48), _48);
+            const len = incircle_scale(catlen, incircle_cat, bdytail, _16c);
+            finlen = incircle_finadd(finlen, incircle_sum(
+                incircle_scale(bytcalen, bytca, bdytail, incircle_16), incircle_16,
+                incircle_scale(len, _16c, 2 * bdy, _32), _32, _48), _48);
 
-            const len2 = scale(cattlen, catt, bdytail, incircle_8);
-            finlen = incircle_finadd(finlen, sum_three(
-                scale(len2, incircle_8, 2 * bdy, incircle_16), incircle_16,
-                scale(len2, incircle_8, bdytail, _16b), _16b,
-                scale(len, _16c, bdytail, _32), _32,  _32b, _64), _64);
+            const len2 = incircle_scale(cattlen, catt, bdytail, incircle_8);
+            finlen = incircle_finadd(finlen, incircle_sum_three(
+                incircle_scale(len2, incircle_8, 2 * bdy, incircle_16), incircle_16,
+                incircle_scale(len2, incircle_8, bdytail, _16b), _16b,
+                incircle_scale(len, _16c, bdytail, _32), _32,  _32b, _64), _64);
         }
     }
     if (cdxtail !== 0 || cdytail !== 0) {
         if (adxtail !== 0 || adytail !== 0 || bdxtail !== 0 || bdytail !== 0) {
             s1 = adxtail * bdy;
-            c = splitter * adxtail;
+            c = incircle_splitter * adxtail;
             ahi = c - (c - adxtail);
             alo = adxtail - ahi;
-            c = splitter * bdy;
+            c = incircle_splitter * bdy;
             bhi = c - (c - bdy);
             blo = bdy - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = adx * bdytail;
-            c = splitter * adx;
+            c = incircle_splitter * adx;
             ahi = c - (c - adx);
             alo = adx - ahi;
-            c = splitter * bdytail;
+            c = incircle_splitter * bdytail;
             bhi = c - (c - bdytail);
             blo = bdytail - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39698,18 +41601,18 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
             n1 = -ady;
             n0 = -adytail;
             s1 = bdxtail * n1;
-            c = splitter * bdxtail;
+            c = incircle_splitter * bdxtail;
             ahi = c - (c - bdxtail);
             alo = bdxtail - ahi;
-            c = splitter * n1;
+            c = incircle_splitter * n1;
             bhi = c - (c - n1);
             blo = n1 - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = bdx * n0;
-            c = splitter * bdx;
+            c = incircle_splitter * bdx;
             ahi = c - (c - bdx);
             alo = bdx - ahi;
-            c = splitter * n0;
+            c = incircle_splitter * n0;
             bhi = c - (c - n0);
             blo = n0 - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39726,20 +41629,20 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
             bvirt = u3 - _j;
             v[2] = _j - (u3 - bvirt) + (_i - bvirt);
             v[3] = u3;
-            abtlen = sum(4, incircle_u, 4, v, incircle_abt);
+            abtlen = incircle_sum(4, incircle_u, 4, v, incircle_abt);
             s1 = adxtail * bdytail;
-            c = splitter * adxtail;
+            c = incircle_splitter * adxtail;
             ahi = c - (c - adxtail);
             alo = adxtail - ahi;
-            c = splitter * bdytail;
+            c = incircle_splitter * bdytail;
             bhi = c - (c - bdytail);
             blo = bdytail - bhi;
             s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
             t1 = bdxtail * adytail;
-            c = splitter * bdxtail;
+            c = incircle_splitter * bdxtail;
             ahi = c - (c - bdxtail);
             alo = bdxtail - ahi;
-            c = splitter * adytail;
+            c = incircle_splitter * adytail;
             bhi = c - (c - adytail);
             blo = adytail - bhi;
             t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39764,35 +41667,35 @@ function incircleadapt(ax, ay, bx, by, cx, cy, dx, dy, permanent) {
             abttlen = 1;
         }
         if (cdxtail !== 0) {
-            const len = scale(abtlen, incircle_abt, cdxtail, _16c);
-            finlen = incircle_finadd(finlen, sum(
-                scale(cxtablen, cxtab, cdxtail, incircle_16), incircle_16,
-                scale(len, _16c, 2 * cdx, _32), _32, _48), _48);
+            const len = incircle_scale(abtlen, incircle_abt, cdxtail, _16c);
+            finlen = incircle_finadd(finlen, incircle_sum(
+                incircle_scale(cxtablen, cxtab, cdxtail, incircle_16), incircle_16,
+                incircle_scale(len, _16c, 2 * cdx, _32), _32, _48), _48);
 
-            const len2 = scale(abttlen, abtt, cdxtail, incircle_8);
-            finlen = incircle_finadd(finlen, sum_three(
-                scale(len2, incircle_8, 2 * cdx, incircle_16), incircle_16,
-                scale(len2, incircle_8, cdxtail, _16b), _16b,
-                scale(len, _16c, cdxtail, _32), _32, _32b, _64), _64);
+            const len2 = incircle_scale(abttlen, abtt, cdxtail, incircle_8);
+            finlen = incircle_finadd(finlen, incircle_sum_three(
+                incircle_scale(len2, incircle_8, 2 * cdx, incircle_16), incircle_16,
+                incircle_scale(len2, incircle_8, cdxtail, _16b), _16b,
+                incircle_scale(len, _16c, cdxtail, _32), _32, _32b, _64), _64);
 
             if (adytail !== 0) {
-                finlen = incircle_finadd(finlen, scale(scale(4, bb, cdxtail, incircle_8), incircle_8, adytail, incircle_16), incircle_16);
+                finlen = incircle_finadd(finlen, incircle_scale(incircle_scale(4, bb, cdxtail, incircle_8), incircle_8, adytail, incircle_16), incircle_16);
             }
             if (bdytail !== 0) {
-                finlen = incircle_finadd(finlen, scale(scale(4, aa, -cdxtail, incircle_8), incircle_8, bdytail, incircle_16), incircle_16);
+                finlen = incircle_finadd(finlen, incircle_scale(incircle_scale(4, aa, -cdxtail, incircle_8), incircle_8, bdytail, incircle_16), incircle_16);
             }
         }
         if (cdytail !== 0) {
-            const len = scale(abtlen, incircle_abt, cdytail, _16c);
-            finlen = incircle_finadd(finlen, sum(
-                scale(cytablen, cytab, cdytail, incircle_16), incircle_16,
-                scale(len, _16c, 2 * cdy, _32), _32, _48), _48);
+            const len = incircle_scale(abtlen, incircle_abt, cdytail, _16c);
+            finlen = incircle_finadd(finlen, incircle_sum(
+                incircle_scale(cytablen, cytab, cdytail, incircle_16), incircle_16,
+                incircle_scale(len, _16c, 2 * cdy, _32), _32, _48), _48);
 
-            const len2 = scale(abttlen, abtt, cdytail, incircle_8);
-            finlen = incircle_finadd(finlen, sum_three(
-                scale(len2, incircle_8, 2 * cdy, incircle_16), incircle_16,
-                scale(len2, incircle_8, cdytail, _16b), _16b,
-                scale(len, _16c, cdytail, _32), _32, _32b, _64), _64);
+            const len2 = incircle_scale(abttlen, abtt, cdytail, incircle_8);
+            finlen = incircle_finadd(finlen, incircle_sum_three(
+                incircle_scale(len2, incircle_8, 2 * cdy, incircle_16), incircle_16,
+                incircle_scale(len2, incircle_8, cdytail, _16b), _16b,
+                incircle_scale(len, _16c, cdytail, _32), _32, _32b, _64), _64);
         }
     }
 
@@ -39855,7 +41758,14 @@ function incirclefast(ax, ay, bx, by, cx, cy, dx, dy) {
     return alift * bcdet + blift * cadet + clift * abdet;
 }
 
-;// CONCATENATED MODULE: ./node_modules/robust-predicates/esm/insphere.js
+;// ./node_modules/robust-predicates/esm/insphere.js
+/* unused harmony import specifier */ var insphere_sum_three;
+/* unused harmony import specifier */ var insphere_scale;
+/* unused harmony import specifier */ var insphere_sum;
+/* unused harmony import specifier */ var insphere_negate;
+/* unused harmony import specifier */ var insphere_splitter;
+/* unused harmony import specifier */ var insphere_estimate;
+/* unused harmony import specifier */ var insphere_resulterrbound;
 
 
 const isperrboundA = (16 + 224 * util_epsilon) * util_epsilon;
@@ -39909,39 +41819,39 @@ const _384z = vec(384);
 const _768 = vec(768);
 
 function sum_three_scale(a, b, c, az, bz, cz, out) {
-    return sum_three(
-        scale(4, a, az, insphere_8), insphere_8,
-        scale(4, b, bz, insphere_8b), insphere_8b,
-        scale(4, c, cz, _8c), _8c, insphere_16, out);
+    return insphere_sum_three(
+        insphere_scale(4, a, az, insphere_8), insphere_8,
+        insphere_scale(4, b, bz, insphere_8b), insphere_8b,
+        insphere_scale(4, c, cz, _8c), _8c, insphere_16, out);
 }
 
 function liftexact(alen, a, blen, b, clen, c, dlen, d, x, y, z, out) {
-    const len = sum(
-        sum(alen, a, blen, b, insphere_48), insphere_48,
-        negate(sum(clen, c, dlen, d, _48b), _48b), _48b, _96);
+    const len = insphere_sum(
+        insphere_sum(alen, a, blen, b, insphere_48), insphere_48,
+        insphere_negate(insphere_sum(clen, c, dlen, d, _48b), _48b), _48b, _96);
 
-    return sum_three(
-        scale(scale(len, _96, x, _192), _192, x, _384x), _384x,
-        scale(scale(len, _96, y, _192), _192, y, _384y), _384y,
-        scale(scale(len, _96, z, _192), _192, z, _384z), _384z, _768, out);
+    return insphere_sum_three(
+        insphere_scale(insphere_scale(len, _96, x, _192), _192, x, _384x), _384x,
+        insphere_scale(insphere_scale(len, _96, y, _192), _192, y, _384y), _384y,
+        insphere_scale(insphere_scale(len, _96, z, _192), _192, z, _384z), _384z, _768, out);
 }
 
 function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, ez) {
     let bvirt, c, ahi, alo, bhi, blo, _i, _j, _0, s1, s0, t1, t0, u3;
 
     s1 = ax * by;
-    c = splitter * ax;
+    c = insphere_splitter * ax;
     ahi = c - (c - ax);
     alo = ax - ahi;
-    c = splitter * by;
+    c = insphere_splitter * by;
     bhi = c - (c - by);
     blo = by - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = bx * ay;
-    c = splitter * bx;
+    c = insphere_splitter * bx;
     ahi = c - (c - bx);
     alo = bx - ahi;
-    c = splitter * ay;
+    c = insphere_splitter * ay;
     bhi = c - (c - ay);
     blo = ay - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39959,18 +41869,18 @@ function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     insphere_ab[2] = _j - (u3 - bvirt) + (_i - bvirt);
     insphere_ab[3] = u3;
     s1 = bx * cy;
-    c = splitter * bx;
+    c = insphere_splitter * bx;
     ahi = c - (c - bx);
     alo = bx - ahi;
-    c = splitter * cy;
+    c = insphere_splitter * cy;
     bhi = c - (c - cy);
     blo = cy - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = cx * by;
-    c = splitter * cx;
+    c = insphere_splitter * cx;
     ahi = c - (c - cx);
     alo = cx - ahi;
-    c = splitter * by;
+    c = insphere_splitter * by;
     bhi = c - (c - by);
     blo = by - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -39988,18 +41898,18 @@ function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     insphere_bc[2] = _j - (u3 - bvirt) + (_i - bvirt);
     insphere_bc[3] = u3;
     s1 = cx * dy;
-    c = splitter * cx;
+    c = insphere_splitter * cx;
     ahi = c - (c - cx);
     alo = cx - ahi;
-    c = splitter * dy;
+    c = insphere_splitter * dy;
     bhi = c - (c - dy);
     blo = dy - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = dx * cy;
-    c = splitter * dx;
+    c = insphere_splitter * dx;
     ahi = c - (c - dx);
     alo = dx - ahi;
-    c = splitter * cy;
+    c = insphere_splitter * cy;
     bhi = c - (c - cy);
     blo = cy - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40017,18 +41927,18 @@ function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     cd[2] = _j - (u3 - bvirt) + (_i - bvirt);
     cd[3] = u3;
     s1 = dx * ey;
-    c = splitter * dx;
+    c = insphere_splitter * dx;
     ahi = c - (c - dx);
     alo = dx - ahi;
-    c = splitter * ey;
+    c = insphere_splitter * ey;
     bhi = c - (c - ey);
     blo = ey - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = ex * dy;
-    c = splitter * ex;
+    c = insphere_splitter * ex;
     ahi = c - (c - ex);
     alo = ex - ahi;
-    c = splitter * dy;
+    c = insphere_splitter * dy;
     bhi = c - (c - dy);
     blo = dy - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40046,18 +41956,18 @@ function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     de[2] = _j - (u3 - bvirt) + (_i - bvirt);
     de[3] = u3;
     s1 = ex * ay;
-    c = splitter * ex;
+    c = insphere_splitter * ex;
     ahi = c - (c - ex);
     alo = ex - ahi;
-    c = splitter * ay;
+    c = insphere_splitter * ay;
     bhi = c - (c - ay);
     blo = ay - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = ax * ey;
-    c = splitter * ax;
+    c = insphere_splitter * ax;
     ahi = c - (c - ax);
     alo = ax - ahi;
-    c = splitter * ey;
+    c = insphere_splitter * ey;
     bhi = c - (c - ey);
     blo = ey - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40075,18 +41985,18 @@ function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     ea[2] = _j - (u3 - bvirt) + (_i - bvirt);
     ea[3] = u3;
     s1 = ax * cy;
-    c = splitter * ax;
+    c = insphere_splitter * ax;
     ahi = c - (c - ax);
     alo = ax - ahi;
-    c = splitter * cy;
+    c = insphere_splitter * cy;
     bhi = c - (c - cy);
     blo = cy - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = cx * ay;
-    c = splitter * cx;
+    c = insphere_splitter * cx;
     ahi = c - (c - cx);
     alo = cx - ahi;
-    c = splitter * ay;
+    c = insphere_splitter * ay;
     bhi = c - (c - ay);
     blo = ay - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40104,18 +42014,18 @@ function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     ac[2] = _j - (u3 - bvirt) + (_i - bvirt);
     ac[3] = u3;
     s1 = bx * dy;
-    c = splitter * bx;
+    c = insphere_splitter * bx;
     ahi = c - (c - bx);
     alo = bx - ahi;
-    c = splitter * dy;
+    c = insphere_splitter * dy;
     bhi = c - (c - dy);
     blo = dy - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = dx * by;
-    c = splitter * dx;
+    c = insphere_splitter * dx;
     ahi = c - (c - dx);
     alo = dx - ahi;
-    c = splitter * by;
+    c = insphere_splitter * by;
     bhi = c - (c - by);
     blo = by - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40133,18 +42043,18 @@ function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     bd[2] = _j - (u3 - bvirt) + (_i - bvirt);
     bd[3] = u3;
     s1 = cx * ey;
-    c = splitter * cx;
+    c = insphere_splitter * cx;
     ahi = c - (c - cx);
     alo = cx - ahi;
-    c = splitter * ey;
+    c = insphere_splitter * ey;
     bhi = c - (c - ey);
     blo = ey - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = ex * cy;
-    c = splitter * ex;
+    c = insphere_splitter * ex;
     ahi = c - (c - ex);
     alo = ex - ahi;
-    c = splitter * cy;
+    c = insphere_splitter * cy;
     bhi = c - (c - cy);
     blo = cy - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40162,18 +42072,18 @@ function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     ce[2] = _j - (u3 - bvirt) + (_i - bvirt);
     ce[3] = u3;
     s1 = dx * ay;
-    c = splitter * dx;
+    c = insphere_splitter * dx;
     ahi = c - (c - dx);
     alo = dx - ahi;
-    c = splitter * ay;
+    c = insphere_splitter * ay;
     bhi = c - (c - ay);
     blo = ay - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = ax * dy;
-    c = splitter * ax;
+    c = insphere_splitter * ax;
     ahi = c - (c - ax);
     alo = ax - ahi;
-    c = splitter * dy;
+    c = insphere_splitter * dy;
     bhi = c - (c - dy);
     blo = dy - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40191,18 +42101,18 @@ function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     da[2] = _j - (u3 - bvirt) + (_i - bvirt);
     da[3] = u3;
     s1 = ex * by;
-    c = splitter * ex;
+    c = insphere_splitter * ex;
     ahi = c - (c - ex);
     alo = ex - ahi;
-    c = splitter * by;
+    c = insphere_splitter * by;
     bhi = c - (c - by);
     blo = by - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = bx * ey;
-    c = splitter * bx;
+    c = insphere_splitter * bx;
     ahi = c - (c - bx);
     alo = bx - ahi;
-    c = splitter * ey;
+    c = insphere_splitter * ey;
     bhi = c - (c - ey);
     blo = ey - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40231,10 +42141,10 @@ function insphereexact(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     const deblen = sum_three_scale(de, eb, bd, bz, dz, ez, deb);
     const eaclen = sum_three_scale(ea, ac, ce, cz, ez, az, eac);
 
-    const deterlen = sum_three(
+    const deterlen = insphere_sum_three(
         liftexact(cdelen, cde, bcelen, bce, deblen, deb, bcdlen, bcd, ax, ay, az, adet), adet,
         liftexact(dealen, dea, cdalen, cda, eaclen, eac, cdelen, cde, bx, by, bz, bdet), bdet,
-        sum_three(
+        insphere_sum_three(
             liftexact(eablen, eab, deblen, deb, abdlen, abd, dealen, dea, cx, cy, cz, cdet), cdet,
             liftexact(abclen, abc, eaclen, eac, bcelen, bce, eablen, eab, dx, dy, dz, ddet), ddet,
             liftexact(bcdlen, bcd, abdlen, abd, cdalen, cda, abclen, abc, ex, ey, ez, edet), edet, cddet, cdedet), cdedet, abdet, deter);
@@ -40249,10 +42159,10 @@ const insphere_fin = vec(1152);
 
 function liftadapt(a, b, c, az, bz, cz, x, y, z, out) {
     const len = sum_three_scale(a, b, c, az, bz, cz, _24);
-    return sum_three(
-        scale(scale(len, _24, x, insphere_48), insphere_48, x, xdet), xdet,
-        scale(scale(len, _24, y, insphere_48), insphere_48, y, ydet), ydet,
-        scale(scale(len, _24, z, insphere_48), insphere_48, z, zdet), zdet, _192, out);
+    return insphere_sum_three(
+        insphere_scale(insphere_scale(len, _24, x, insphere_48), insphere_48, x, xdet), xdet,
+        insphere_scale(insphere_scale(len, _24, y, insphere_48), insphere_48, y, ydet), ydet,
+        insphere_scale(insphere_scale(len, _24, z, insphere_48), insphere_48, z, zdet), zdet, _192, out);
 }
 
 function insphereadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, ez, permanent) {
@@ -40278,18 +42188,18 @@ function insphereadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     const dez = dz - ez;
 
     s1 = aex * bey;
-    c = splitter * aex;
+    c = insphere_splitter * aex;
     ahi = c - (c - aex);
     alo = aex - ahi;
-    c = splitter * bey;
+    c = insphere_splitter * bey;
     bhi = c - (c - bey);
     blo = bey - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = bex * aey;
-    c = splitter * bex;
+    c = insphere_splitter * bex;
     ahi = c - (c - bex);
     alo = bex - ahi;
-    c = splitter * aey;
+    c = insphere_splitter * aey;
     bhi = c - (c - aey);
     blo = aey - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40307,18 +42217,18 @@ function insphereadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     insphere_ab[2] = _j - (ab3 - bvirt) + (_i - bvirt);
     insphere_ab[3] = ab3;
     s1 = bex * cey;
-    c = splitter * bex;
+    c = insphere_splitter * bex;
     ahi = c - (c - bex);
     alo = bex - ahi;
-    c = splitter * cey;
+    c = insphere_splitter * cey;
     bhi = c - (c - cey);
     blo = cey - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = cex * bey;
-    c = splitter * cex;
+    c = insphere_splitter * cex;
     ahi = c - (c - cex);
     alo = cex - ahi;
-    c = splitter * bey;
+    c = insphere_splitter * bey;
     bhi = c - (c - bey);
     blo = bey - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40336,18 +42246,18 @@ function insphereadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     insphere_bc[2] = _j - (bc3 - bvirt) + (_i - bvirt);
     insphere_bc[3] = bc3;
     s1 = cex * dey;
-    c = splitter * cex;
+    c = insphere_splitter * cex;
     ahi = c - (c - cex);
     alo = cex - ahi;
-    c = splitter * dey;
+    c = insphere_splitter * dey;
     bhi = c - (c - dey);
     blo = dey - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = dex * cey;
-    c = splitter * dex;
+    c = insphere_splitter * dex;
     ahi = c - (c - dex);
     alo = dex - ahi;
-    c = splitter * cey;
+    c = insphere_splitter * cey;
     bhi = c - (c - cey);
     blo = cey - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40365,18 +42275,18 @@ function insphereadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     cd[2] = _j - (cd3 - bvirt) + (_i - bvirt);
     cd[3] = cd3;
     s1 = dex * aey;
-    c = splitter * dex;
+    c = insphere_splitter * dex;
     ahi = c - (c - dex);
     alo = dex - ahi;
-    c = splitter * aey;
+    c = insphere_splitter * aey;
     bhi = c - (c - aey);
     blo = aey - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = aex * dey;
-    c = splitter * aex;
+    c = insphere_splitter * aex;
     ahi = c - (c - aex);
     alo = aex - ahi;
-    c = splitter * dey;
+    c = insphere_splitter * dey;
     bhi = c - (c - dey);
     blo = dey - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40394,18 +42304,18 @@ function insphereadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     da[2] = _j - (da3 - bvirt) + (_i - bvirt);
     da[3] = da3;
     s1 = aex * cey;
-    c = splitter * aex;
+    c = insphere_splitter * aex;
     ahi = c - (c - aex);
     alo = aex - ahi;
-    c = splitter * cey;
+    c = insphere_splitter * cey;
     bhi = c - (c - cey);
     blo = cey - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = cex * aey;
-    c = splitter * cex;
+    c = insphere_splitter * cex;
     ahi = c - (c - cex);
     alo = cex - ahi;
-    c = splitter * aey;
+    c = insphere_splitter * aey;
     bhi = c - (c - aey);
     blo = aey - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40423,18 +42333,18 @@ function insphereadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     ac[2] = _j - (ac3 - bvirt) + (_i - bvirt);
     ac[3] = ac3;
     s1 = bex * dey;
-    c = splitter * bex;
+    c = insphere_splitter * bex;
     ahi = c - (c - bex);
     alo = bex - ahi;
-    c = splitter * dey;
+    c = insphere_splitter * dey;
     bhi = c - (c - dey);
     blo = dey - bhi;
     s0 = alo * blo - (s1 - ahi * bhi - alo * bhi - ahi * blo);
     t1 = dex * bey;
-    c = splitter * dex;
+    c = insphere_splitter * dex;
     ahi = c - (c - dex);
     alo = dex - ahi;
-    c = splitter * bey;
+    c = insphere_splitter * bey;
     bhi = c - (c - bey);
     blo = bey - bhi;
     t0 = alo * blo - (t1 - ahi * bhi - alo * bhi - ahi * blo);
@@ -40452,15 +42362,15 @@ function insphereadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
     bd[2] = _j - (bd3 - bvirt) + (_i - bvirt);
     bd[3] = bd3;
 
-    const finlen = sum(
-        sum(
-            negate(liftadapt(insphere_bc, cd, bd, dez, bez, -cez, aex, aey, aez, adet), adet), adet,
+    const finlen = insphere_sum(
+        insphere_sum(
+            insphere_negate(liftadapt(insphere_bc, cd, bd, dez, bez, -cez, aex, aey, aez, adet), adet), adet,
             liftadapt(cd, da, ac, aez, cez, dez, bex, bey, bez, bdet), bdet, abdet), abdet,
-        sum(
-            negate(liftadapt(da, insphere_ab, bd, bez, dez, aez, cex, cey, cez, cdet), cdet), cdet,
+        insphere_sum(
+            insphere_negate(liftadapt(da, insphere_ab, bd, bez, dez, aez, cex, cey, cez, cdet), cdet), cdet,
             liftadapt(insphere_ab, insphere_bc, ac, cez, aez, -bez, dex, dey, dez, ddet), ddet, cddet), cddet, insphere_fin);
 
-    let det = estimate(finlen, insphere_fin);
+    let det = insphere_estimate(finlen, insphere_fin);
     let errbound = isperrboundB * permanent;
     if (det >= errbound || -det >= errbound) {
         return det;
@@ -40497,7 +42407,7 @@ function insphereadapt(ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, e
         return det;
     }
 
-    errbound = isperrboundC * permanent + resulterrbound * Math.abs(det);
+    errbound = isperrboundC * permanent + insphere_resulterrbound * Math.abs(det);
 
     const abeps = (aex * beytail + bey * aextail) - (aey * bextail + bex * aeytail);
     const bceps = (bex * ceytail + cey * bextail) - (bey * cextail + cex * beytail);
@@ -40632,14 +42542,14 @@ function inspherefast(pax, pay, paz, pbx, pby, pbz, pcx, pcy, pcz, pdx, pdy, pdz
     return (clift * dab - dlift * abc) + (alift * bcd - blift * cda);
 }
 
-;// CONCATENATED MODULE: ./node_modules/robust-predicates/index.js
+;// ./node_modules/robust-predicates/index.js
 
 
 
 
 
 
-;// CONCATENATED MODULE: ./node_modules/delaunator/index.js
+;// ./node_modules/delaunator/index.js
 
 const EPSILON = Math.pow(2, -52);
 const EDGE_STACK = new Uint32Array(512);
@@ -41123,7 +43033,7 @@ function defaultGetY(p) {
     return p[1];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-delaunay/src/path.js
+;// ./node_modules/d3-delaunay/src/path.js
 const src_path_epsilon = 1e-6;
 
 class path_Path {
@@ -41162,7 +43072,7 @@ class path_Path {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-delaunay/src/polygon.js
+;// ./node_modules/d3-delaunay/src/polygon.js
 class Polygon {
   constructor() {
     this._ = [];
@@ -41181,7 +43091,7 @@ class Polygon {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-delaunay/src/voronoi.js
+;// ./node_modules/d3-delaunay/src/voronoi.js
 
 
 
@@ -41515,7 +43425,7 @@ class Voronoi {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-delaunay/src/delaunay.js
+;// ./node_modules/d3-delaunay/src/delaunay.js
 
 
 
@@ -41765,17 +43675,18 @@ function* flatIterable(points, fx, fy, that) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-delaunay/src/index.js
+;// ./node_modules/d3-delaunay/src/index.js
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-dispatch/src/index.js
+;// ./node_modules/d3-dispatch/src/index.js
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-drag/src/constant.js
+;// ./node_modules/d3-drag/src/constant.js
 /* harmony default export */ var d3_drag_src_constant = (x => () => x);
+(Object.getOwnPropertyDescriptor(d3_drag_src_constant, "name") || {}).writable || Object.defineProperty(d3_drag_src_constant, "name", { value: "default", configurable: true });
 
-;// CONCATENATED MODULE: ./node_modules/d3-drag/src/event.js
+;// ./node_modules/d3-drag/src/event.js
 function DragEvent(type, {
   sourceEvent,
   subject,
@@ -41805,7 +43716,8 @@ DragEvent.prototype.on = function() {
   return value === this._ ? this : value;
 };
 
-;// CONCATENATED MODULE: ./node_modules/d3-drag/src/drag.js
+;// ./node_modules/d3-drag/src/drag.js
+Object.defineProperty(drag, "name", { value: "default", configurable: true });
 
 
 
@@ -42001,11 +43913,12 @@ function drag_defaultTouchable() {
   return drag;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-drag/src/index.js
+;// ./node_modules/d3-drag/src/index.js
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-dsv/src/dsv.js
+;// ./node_modules/d3-dsv/src/dsv.js
+Object.defineProperty(dsv, "name", { value: "default", configurable: true });
 var EOL = {},
     EOF = {},
     QUOTE = 34,
@@ -42171,7 +44084,7 @@ function formatDate(date) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-dsv/src/csv.js
+;// ./node_modules/d3-dsv/src/csv.js
 
 
 var csv = dsv(",");
@@ -42184,7 +44097,7 @@ var csvFormatRows = csv.formatRows;
 var csvFormatRow = csv.formatRow;
 var csvFormatValue = csv.formatValue;
 
-;// CONCATENATED MODULE: ./node_modules/d3-dsv/src/tsv.js
+;// ./node_modules/d3-dsv/src/tsv.js
 
 
 var tsv = dsv("\t");
@@ -42197,7 +44110,7 @@ var tsvFormatRows = tsv.formatRows;
 var tsvFormatRow = tsv.formatRow;
 var tsvFormatValue = tsv.formatValue;
 
-;// CONCATENATED MODULE: ./node_modules/d3-dsv/src/autoType.js
+;// ./node_modules/d3-dsv/src/autoType.js
 function autoType(object) {
   for (var key in object) {
     var value = object[key].trim(), number, m;
@@ -42218,16 +44131,16 @@ function autoType(object) {
 
 // https://github.com/d3/d3-dsv/issues/45
 const fixtz = new Date("2019-01-01T00:00").getHours() || new Date("2019-07-01T00:00").getHours();
-;// CONCATENATED MODULE: ./node_modules/d3-dsv/src/index.js
+;// ./node_modules/d3-dsv/src/index.js
 
 
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/linear.js
+;// ./node_modules/d3-ease/src/linear.js
 const linear_linear = t => +t;
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/quad.js
+;// ./node_modules/d3-ease/src/quad.js
 function quadIn(t) {
   return t * t;
 }
@@ -42240,7 +44153,7 @@ function quadInOut(t) {
   return ((t *= 2) <= 1 ? t * t : --t * (2 - t) + 1) / 2;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/poly.js
+;// ./node_modules/d3-ease/src/poly.js
 var exponent = 3;
 
 var polyIn = (function custom(e) {
@@ -42279,7 +44192,7 @@ var polyInOut = (function custom(e) {
   return polyInOut;
 })(exponent);
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/sin.js
+;// ./node_modules/d3-ease/src/sin.js
 var sin_pi = Math.PI,
     sin_halfPi = sin_pi / 2;
 
@@ -42295,13 +44208,13 @@ function sinInOut(t) {
   return (1 - Math.cos(sin_pi * t)) / 2;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/math.js
+;// ./node_modules/d3-ease/src/math.js
 // tpmt is two power minus ten times t scaled to [0,1]
 function tpmt(x) {
   return (Math.pow(2, -10 * x) - 0.0009765625) * 1.0009775171065494;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/exp.js
+;// ./node_modules/d3-ease/src/exp.js
 
 
 function expIn(t) {
@@ -42316,7 +44229,7 @@ function expInOut(t) {
   return ((t *= 2) <= 1 ? tpmt(1 - t) : 2 - tpmt(t - 1)) / 2;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/circle.js
+;// ./node_modules/d3-ease/src/circle.js
 function circleIn(t) {
   return 1 - Math.sqrt(1 - t * t);
 }
@@ -42329,7 +44242,7 @@ function circleInOut(t) {
   return ((t *= 2) <= 1 ? 1 - Math.sqrt(1 - t * t) : Math.sqrt(1 - (t -= 2) * t) + 1) / 2;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/bounce.js
+;// ./node_modules/d3-ease/src/bounce.js
 var b1 = 4 / 11,
     b2 = 6 / 11,
     b3 = 8 / 11,
@@ -42353,7 +44266,7 @@ function bounceInOut(t) {
   return ((t *= 2) <= 1 ? 1 - bounceOut(1 - t) : bounceOut(t - 1) + 1) / 2;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/back.js
+;// ./node_modules/d3-ease/src/back.js
 var overshoot = 1.70158;
 
 var backIn = (function custom(s) {
@@ -42392,7 +44305,7 @@ var backInOut = (function custom(s) {
   return backInOut;
 })(overshoot);
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/elastic.js
+;// ./node_modules/d3-ease/src/elastic.js
 
 
 var elastic_tau = 2 * Math.PI,
@@ -42440,7 +44353,7 @@ var elasticInOut = (function custom(a, p) {
   return elasticInOut;
 })(amplitude, period);
 
-;// CONCATENATED MODULE: ./node_modules/d3-ease/src/index.js
+;// ./node_modules/d3-ease/src/index.js
 
 
 
@@ -42461,7 +44374,8 @@ var elasticInOut = (function custom(a, p) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-fetch/src/blob.js
+;// ./node_modules/d3-fetch/src/blob.js
+Object.defineProperty(blob, "name", { value: "default", configurable: true });
 function responseBlob(response) {
   if (!response.ok) throw new Error(response.status + " " + response.statusText);
   return response.blob();
@@ -42471,7 +44385,8 @@ function responseBlob(response) {
   return fetch(input, init).then(responseBlob);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-fetch/src/buffer.js
+;// ./node_modules/d3-fetch/src/buffer.js
+Object.defineProperty(src_buffer, "name", { value: "default", configurable: true });
 function responseArrayBuffer(response) {
   if (!response.ok) throw new Error(response.status + " " + response.statusText);
   return response.arrayBuffer();
@@ -42481,7 +44396,8 @@ function responseArrayBuffer(response) {
   return fetch(input, init).then(responseArrayBuffer);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-fetch/src/text.js
+;// ./node_modules/d3-fetch/src/text.js
+Object.defineProperty(src_text, "name", { value: "default", configurable: true });
 function responseText(response) {
   if (!response.ok) throw new Error(response.status + " " + response.statusText);
   return response.text();
@@ -42491,7 +44407,7 @@ function responseText(response) {
   return fetch(input, init).then(responseText);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-fetch/src/dsv.js
+;// ./node_modules/d3-fetch/src/dsv.js
 
 
 
@@ -42515,7 +44431,8 @@ function dsv_dsv(delimiter, input, init, row) {
 var dsv_csv = dsvParse(csvParse);
 var dsv_tsv = dsvParse(tsvParse);
 
-;// CONCATENATED MODULE: ./node_modules/d3-fetch/src/image.js
+;// ./node_modules/d3-fetch/src/image.js
+Object.defineProperty(src_image, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_image(input, init) {
   return new Promise(function(resolve, reject) {
     var image = new Image;
@@ -42526,7 +44443,8 @@ var dsv_tsv = dsvParse(tsvParse);
   });
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-fetch/src/json.js
+;// ./node_modules/d3-fetch/src/json.js
+Object.defineProperty(json, "name", { value: "default", configurable: true });
 function responseJson(response) {
   if (!response.ok) throw new Error(response.status + " " + response.statusText);
   if (response.status === 204 || response.status === 205) return;
@@ -42537,7 +44455,7 @@ function responseJson(response) {
   return fetch(input, init).then(responseJson);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-fetch/src/xml.js
+;// ./node_modules/d3-fetch/src/xml.js
 
 
 function parser(type) {
@@ -42551,7 +44469,7 @@ var xml_html = parser("text/html");
 
 var svg = parser("image/svg+xml");
 
-;// CONCATENATED MODULE: ./node_modules/d3-fetch/src/index.js
+;// ./node_modules/d3-fetch/src/index.js
 
 
 
@@ -42560,7 +44478,8 @@ var svg = parser("image/svg+xml");
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/center.js
+;// ./node_modules/d3-force/src/center.js
+Object.defineProperty(src_center, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_center(x, y) {
   var nodes, strength = 1;
 
@@ -42602,7 +44521,8 @@ var svg = parser("image/svg+xml");
   return force;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/add.js
+;// ./node_modules/d3-quadtree/src/add.js
+Object.defineProperty(src_add, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_add(d) {
   const x = +this._x.call(null, d),
       y = +this._y.call(null, d);
@@ -42688,7 +44608,8 @@ function addAll(data) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/cover.js
+;// ./node_modules/d3-quadtree/src/cover.js
+Object.defineProperty(cover, "name", { value: "default", configurable: true });
 /* harmony default export */ function cover(x, y) {
   if (isNaN(x = +x) || isNaN(y = +y)) return this; // ignore invalid points
 
@@ -42733,7 +44654,8 @@ function addAll(data) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/data.js
+;// ./node_modules/d3-quadtree/src/data.js
+Object.defineProperty(src_data, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_data() {
   var data = [];
   this.visit(function(node) {
@@ -42742,14 +44664,16 @@ function addAll(data) {
   return data;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/extent.js
+;// ./node_modules/d3-quadtree/src/extent.js
+Object.defineProperty(src_extent, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_extent(_) {
   return arguments.length
       ? this.cover(+_[0][0], +_[0][1]).cover(+_[1][0], +_[1][1])
       : isNaN(this._x0) ? undefined : [[this._x0, this._y0], [this._x1, this._y1]];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/quad.js
+;// ./node_modules/d3-quadtree/src/quad.js
+Object.defineProperty(quad, "name", { value: "default", configurable: true });
 /* harmony default export */ function quad(node, x0, y0, x1, y1) {
   this.node = node;
   this.x0 = x0;
@@ -42758,7 +44682,8 @@ function addAll(data) {
   this.y1 = y1;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/find.js
+;// ./node_modules/d3-quadtree/src/find.js
+Object.defineProperty(src_find, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function src_find(x, y, radius) {
@@ -42830,7 +44755,8 @@ function addAll(data) {
   return data;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/remove.js
+;// ./node_modules/d3-quadtree/src/remove.js
+Object.defineProperty(src_remove, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_remove(d) {
   if (isNaN(x = +this._x.call(null, d)) || isNaN(y = +this._y.call(null, d))) return this; // ignore invalid points
 
@@ -42894,12 +44820,14 @@ function removeAll(data) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/root.js
+;// ./node_modules/d3-quadtree/src/root.js
+Object.defineProperty(src_root, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_root() {
   return this._root;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/size.js
+;// ./node_modules/d3-quadtree/src/size.js
+Object.defineProperty(src_size, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_size() {
   var size = 0;
   this.visit(function(node) {
@@ -42908,7 +44836,8 @@ function removeAll(data) {
   return size;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/visit.js
+;// ./node_modules/d3-quadtree/src/visit.js
+Object.defineProperty(visit, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function visit(callback) {
@@ -42926,7 +44855,8 @@ function removeAll(data) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/visitAfter.js
+;// ./node_modules/d3-quadtree/src/visitAfter.js
+Object.defineProperty(visitAfter, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function visitAfter(callback) {
@@ -42949,7 +44879,8 @@ function removeAll(data) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/x.js
+;// ./node_modules/d3-quadtree/src/x.js
+Object.defineProperty(x, "name", { value: "default", configurable: true });
 function x_defaultX(d) {
   return d[0];
 }
@@ -42958,7 +44889,8 @@ function x_defaultX(d) {
   return arguments.length ? (this._x = _, this) : this._x;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/y.js
+;// ./node_modules/d3-quadtree/src/y.js
+Object.defineProperty(y, "name", { value: "default", configurable: true });
 function y_defaultY(d) {
   return d[1];
 }
@@ -42967,7 +44899,7 @@ function y_defaultY(d) {
   return arguments.length ? (this._y = _, this) : this._y;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/quadtree.js
+;// ./node_modules/d3-quadtree/src/quadtree.js
 
 
 
@@ -43042,19 +44974,22 @@ treeProto.visitAfter = visitAfter;
 treeProto.x = x;
 treeProto.y = y;
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/constant.js
+;// ./node_modules/d3-force/src/constant.js
+Object.defineProperty(d3_force_src_constant, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_force_src_constant(x) {
   return function() {
     return x;
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/jiggle.js
+;// ./node_modules/d3-force/src/jiggle.js
+Object.defineProperty(jiggle, "name", { value: "default", configurable: true });
 /* harmony default export */ function jiggle(random) {
   return (random() - 0.5) * 1e-6;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/collide.js
+;// ./node_modules/d3-force/src/collide.js
+Object.defineProperty(collide, "name", { value: "default", configurable: true });
 
 
 
@@ -43156,7 +45091,8 @@ function collide_y(d) {
   return force;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/link.js
+;// ./node_modules/d3-force/src/link.js
+Object.defineProperty(src_link, "name", { value: "default", configurable: true });
 
 
 
@@ -43275,7 +45211,8 @@ function link_find(nodeById, nodeId) {
   return force;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/lcg.js
+;// ./node_modules/d3-force/src/lcg.js
+Object.defineProperty(lcg, "name", { value: "default", configurable: true });
 // https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
 const a = 1664525;
 const c = 1013904223;
@@ -43286,7 +45223,8 @@ const m = 4294967296; // 2^32
   return () => (s = (a * s + c) % m) / m;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/simulation.js
+;// ./node_modules/d3-force/src/simulation.js
+Object.defineProperty(src_simulation, "name", { value: "default", configurable: true });
 
 
 
@@ -43444,7 +45382,8 @@ var initialRadius = 10,
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/manyBody.js
+;// ./node_modules/d3-force/src/manyBody.js
+Object.defineProperty(manyBody, "name", { value: "default", configurable: true });
 
 
 
@@ -43562,7 +45501,8 @@ var initialRadius = 10,
   return force;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/radial.js
+;// ./node_modules/d3-force/src/radial.js
+Object.defineProperty(radial, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function radial(radius, x, y) {
@@ -43621,7 +45561,8 @@ var initialRadius = 10,
   return force;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/x.js
+;// ./node_modules/d3-force/src/x.js
+Object.defineProperty(src_x, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function src_x(x) {
@@ -43664,7 +45605,8 @@ var initialRadius = 10,
   return force;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/y.js
+;// ./node_modules/d3-force/src/y.js
+Object.defineProperty(src_y, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function src_y(y) {
@@ -43707,7 +45649,7 @@ var initialRadius = 10,
   return force;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-force/src/index.js
+;// ./node_modules/d3-force/src/index.js
 
 
 
@@ -43717,7 +45659,8 @@ var initialRadius = 10,
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/formatDecimal.js
+;// ./node_modules/d3-format/src/formatDecimal.js
+Object.defineProperty(formatDecimal, "name", { value: "default", configurable: true });
 /* harmony default export */ function formatDecimal(x) {
   return Math.abs(x = Math.round(x)) >= 1e21
       ? x.toLocaleString("en").replace(/,/g, "")
@@ -43739,14 +45682,16 @@ function formatDecimalParts(x, p) {
   ];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/exponent.js
+;// ./node_modules/d3-format/src/exponent.js
+Object.defineProperty(src_exponent, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function src_exponent(x) {
   return x = formatDecimalParts(Math.abs(x)), x ? x[1] : NaN;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/formatGroup.js
+;// ./node_modules/d3-format/src/formatGroup.js
+Object.defineProperty(formatGroup, "name", { value: "default", configurable: true });
 /* harmony default export */ function formatGroup(grouping, thousands) {
   return function(value, width) {
     var i = value.length,
@@ -43766,7 +45711,8 @@ function formatDecimalParts(x, p) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/formatNumerals.js
+;// ./node_modules/d3-format/src/formatNumerals.js
+Object.defineProperty(formatNumerals, "name", { value: "default", configurable: true });
 /* harmony default export */ function formatNumerals(numerals) {
   return function(value) {
     return value.replace(/[0-9]/g, function(i) {
@@ -43775,7 +45721,7 @@ function formatDecimalParts(x, p) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/formatSpecifier.js
+;// ./node_modules/d3-format/src/formatSpecifier.js
 // [[fill]align][sign][symbol][0][width][,][.precision][~][type]
 var re = /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
 
@@ -43824,7 +45770,8 @@ FormatSpecifier.prototype.toString = function() {
       + this.type;
 };
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/formatTrim.js
+;// ./node_modules/d3-format/src/formatTrim.js
+Object.defineProperty(formatTrim, "name", { value: "default", configurable: true });
 // Trims insignificant zeros, e.g., replaces 1.2000k with 1.2k.
 /* harmony default export */ function formatTrim(s) {
   out: for (var n = s.length, i = 1, i0 = -1, i1; i < n; ++i) {
@@ -43837,7 +45784,8 @@ FormatSpecifier.prototype.toString = function() {
   return i0 > 0 ? s.slice(0, i0) + s.slice(i1 + 1) : s;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/formatPrefixAuto.js
+;// ./node_modules/d3-format/src/formatPrefixAuto.js
+Object.defineProperty(formatPrefixAuto, "name", { value: "default", configurable: true });
 
 
 var prefixExponent;
@@ -43855,7 +45803,8 @@ var prefixExponent;
       : "0." + new Array(1 - i).join("0") + formatDecimalParts(x, Math.max(0, p + i - 1))[0]; // less than 1y!
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/formatRounded.js
+;// ./node_modules/d3-format/src/formatRounded.js
+Object.defineProperty(formatRounded, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function formatRounded(x, p) {
@@ -43868,7 +45817,7 @@ var prefixExponent;
       : coefficient + new Array(exponent - coefficient.length + 2).join("0");
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/formatTypes.js
+;// ./node_modules/d3-format/src/formatTypes.js
 
 
 
@@ -43889,12 +45838,14 @@ var prefixExponent;
   "x": (x) => Math.round(x).toString(16)
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/identity.js
+;// ./node_modules/d3-format/src/identity.js
+Object.defineProperty(d3_format_src_identity, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_format_src_identity(x) {
   return x;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/locale.js
+;// ./node_modules/d3-format/src/locale.js
+Object.defineProperty(locale, "name", { value: "default", configurable: true });
 
 
 
@@ -44044,7 +45995,7 @@ var locale_map = Array.prototype.map,
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/defaultLocale.js
+;// ./node_modules/d3-format/src/defaultLocale.js
 
 
 var defaultLocale_locale;
@@ -44064,21 +46015,24 @@ function defaultLocale(definition) {
   return defaultLocale_locale;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/precisionFixed.js
+;// ./node_modules/d3-format/src/precisionFixed.js
+Object.defineProperty(precisionFixed, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function precisionFixed(step) {
   return Math.max(0, -src_exponent(Math.abs(step)));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/precisionPrefix.js
+;// ./node_modules/d3-format/src/precisionPrefix.js
+Object.defineProperty(precisionPrefix, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function precisionPrefix(step, value) {
   return Math.max(0, Math.max(-8, Math.min(8, Math.floor(src_exponent(value) / 3))) * 3 - src_exponent(Math.abs(step)));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/precisionRound.js
+;// ./node_modules/d3-format/src/precisionRound.js
+Object.defineProperty(precisionRound, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function precisionRound(step, max) {
@@ -44086,7 +46040,7 @@ function defaultLocale(definition) {
   return Math.max(0, src_exponent(max) - src_exponent(step)) + 1;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-format/src/index.js
+;// ./node_modules/d3-format/src/index.js
 
 
 
@@ -44094,7 +46048,7 @@ function defaultLocale(definition) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/math.js
+;// ./node_modules/d3-geo/src/math.js
 var src_math_epsilon = 1e-6;
 var epsilon2 = 1e-12;
 var math_pi = Math.PI;
@@ -44132,10 +46086,11 @@ function haversin(x) {
   return (x = math_sin(x / 2)) * x;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/noop.js
+;// ./node_modules/d3-geo/src/noop.js
 function noop_noop() {}
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/stream.js
+;// ./node_modules/d3-geo/src/stream.js
+Object.defineProperty(stream, "name", { value: "default", configurable: true });
 function streamGeometry(geometry, stream) {
   if (geometry && streamGeometryType.hasOwnProperty(geometry.type)) {
     streamGeometryType[geometry.type](geometry, stream);
@@ -44206,7 +46161,8 @@ function streamPolygon(coordinates, stream) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/area.js
+;// ./node_modules/d3-geo/src/area.js
+Object.defineProperty(d3_geo_src_area, "name", { value: "default", configurable: true });
 
 
 
@@ -44284,7 +46240,7 @@ function areaPoint(lambda, phi) {
   return areaSum * 2;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/cartesian.js
+;// ./node_modules/d3-geo/src/cartesian.js
 
 
 function spherical(cartesian) {
@@ -44319,7 +46275,8 @@ function cartesianNormalizeInPlace(d) {
   d[0] /= l, d[1] /= l, d[2] /= l;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/bounds.js
+;// ./node_modules/d3-geo/src/bounds.js
+Object.defineProperty(bounds, "name", { value: "default", configurable: true });
 
 
 
@@ -44500,7 +46457,8 @@ function rangeContains(range, x) {
       : [[bounds_lambda0, phi0], [lambda1, phi1]];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/centroid.js
+;// ./node_modules/d3-geo/src/centroid.js
+Object.defineProperty(centroid, "name", { value: "default", configurable: true });
 
 
 
@@ -44645,14 +46603,16 @@ function centroidRingPoint(lambda, phi) {
   return [atan2(y, x) * src_math_degrees, asin(z / m) * src_math_degrees];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/constant.js
+;// ./node_modules/d3-geo/src/constant.js
+Object.defineProperty(d3_geo_src_constant, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_geo_src_constant(x) {
   return function() {
     return x;
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/compose.js
+;// ./node_modules/d3-geo/src/compose.js
+Object.defineProperty(compose, "name", { value: "default", configurable: true });
 /* harmony default export */ function compose(a, b) {
 
   function compose(x, y) {
@@ -44666,7 +46626,8 @@ function centroidRingPoint(lambda, phi) {
   return compose;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/rotation.js
+;// ./node_modules/d3-geo/src/rotation.js
+Object.defineProperty(rotation, "name", { value: "default", configurable: true });
 
 
 
@@ -44747,7 +46708,8 @@ function rotationPhiGamma(deltaPhi, deltaGamma) {
   return forward;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/circle.js
+;// ./node_modules/d3-geo/src/circle.js
+Object.defineProperty(circle, "name", { value: "default", configurable: true });
 
 
 
@@ -44821,7 +46783,8 @@ function circleRadius(cosRadius, point) {
   return circle;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/clip/buffer.js
+;// ./node_modules/d3-geo/src/clip/buffer.js
+Object.defineProperty(clip_buffer, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function clip_buffer() {
@@ -44847,14 +46810,16 @@ function circleRadius(cosRadius, point) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/pointEqual.js
+;// ./node_modules/d3-geo/src/pointEqual.js
+Object.defineProperty(pointEqual, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function pointEqual(a, b) {
   return src_math_abs(a[0] - b[0]) < src_math_epsilon && src_math_abs(a[1] - b[1]) < src_math_epsilon;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/clip/rejoin.js
+;// ./node_modules/d3-geo/src/clip/rejoin.js
+Object.defineProperty(rejoin, "name", { value: "default", configurable: true });
 
 
 
@@ -44959,7 +46924,8 @@ function rejoin_link(array) {
   b.p = a;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/polygonContains.js
+;// ./node_modules/d3-geo/src/polygonContains.js
+Object.defineProperty(polygonContains, "name", { value: "default", configurable: true });
 
 
 
@@ -45035,7 +47001,8 @@ function longitude(point) {
   return (angle < -src_math_epsilon || angle < src_math_epsilon && sum < -epsilon2) ^ (winding & 1);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/clip/index.js
+;// ./node_modules/d3-geo/src/clip/index.js
+Object.defineProperty(clip, "name", { value: "default", configurable: true });
 
 
 
@@ -45168,7 +47135,7 @@ function compareIntersection(a, b) {
        - ((b = b.x)[0] < 0 ? b[1] - math_halfPi - src_math_epsilon : math_halfPi - b[1]);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/clip/antimeridian.js
+;// ./node_modules/d3-geo/src/clip/antimeridian.js
 
 
 
@@ -45262,7 +47229,8 @@ function clipAntimeridianInterpolate(from, to, direction, stream) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/clip/circle.js
+;// ./node_modules/d3-geo/src/clip/circle.js
+Object.defineProperty(clip_circle, "name", { value: "default", configurable: true });
 
 
 
@@ -45441,7 +47409,8 @@ function clipAntimeridianInterpolate(from, to, direction, stream) {
   return clip(visible, clipLine, interpolate, smallRadius ? [0, -radius] : [-math_pi, radius - math_pi]);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/clip/line.js
+;// ./node_modules/d3-geo/src/clip/line.js
+Object.defineProperty(line, "name", { value: "default", configurable: true });
 /* harmony default export */ function line(a, b, x0, y0, x1, y1) {
   var ax = a[0],
       ay = a[1],
@@ -45502,7 +47471,7 @@ function clipAntimeridianInterpolate(from, to, direction, stream) {
   return true;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/clip/rectangle.js
+;// ./node_modules/d3-geo/src/clip/rectangle.js
 
 
 
@@ -45672,7 +47641,8 @@ function clipRectangle(x0, y0, x1, y1) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/clip/extent.js
+;// ./node_modules/d3-geo/src/clip/extent.js
+Object.defineProperty(clip_extent, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function clip_extent() {
@@ -45694,7 +47664,8 @@ function clipRectangle(x0, y0, x1, y1) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/length.js
+;// ./node_modules/d3-geo/src/length.js
+Object.defineProperty(src_length, "name", { value: "default", configurable: true });
 
 
 
@@ -45749,7 +47720,8 @@ function lengthPoint(lambda, phi) {
   return +lengthSum;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/distance.js
+;// ./node_modules/d3-geo/src/distance.js
+Object.defineProperty(distance, "name", { value: "default", configurable: true });
 
 
 var coordinates = [null, null],
@@ -45761,7 +47733,8 @@ var coordinates = [null, null],
   return src_length(distance_object);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/contains.js
+;// ./node_modules/d3-geo/src/contains.js
+Object.defineProperty(src_contains, "name", { value: "default", configurable: true });
 
 
 
@@ -45860,7 +47833,7 @@ function pointRadians(point) {
       : containsGeometry)(object, point);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/graticule.js
+;// ./node_modules/d3-geo/src/graticule.js
 
 
 
@@ -45967,7 +47940,8 @@ function graticule10() {
   return graticule()();
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/interpolate.js
+;// ./node_modules/d3-geo/src/interpolate.js
+Object.defineProperty(src_interpolate, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function src_interpolate(a, b) {
@@ -46005,10 +47979,11 @@ function graticule10() {
   return interpolate;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/identity.js
+;// ./node_modules/d3-geo/src/identity.js
 /* harmony default export */ var d3_geo_src_identity = (x => x);
+(Object.getOwnPropertyDescriptor(d3_geo_src_identity, "name") || {}).writable || Object.defineProperty(d3_geo_src_identity, "name", { value: "default", configurable: true });
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/path/area.js
+;// ./node_modules/d3-geo/src/path/area.js
 
 
 
@@ -46060,7 +48035,7 @@ function area_areaRingEnd() {
 
 /* harmony default export */ var path_area = (area_areaStream);
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/path/bounds.js
+;// ./node_modules/d3-geo/src/path/bounds.js
 
 
 var bounds_x0 = Infinity,
@@ -46090,7 +48065,7 @@ function bounds_boundsPoint(x, y) {
 
 /* harmony default export */ var path_bounds = (bounds_boundsStream);
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/path/centroid.js
+;// ./node_modules/d3-geo/src/path/centroid.js
 
 
 // TODO Enforce positive area for exterior, negative area for interior?
@@ -46192,7 +48167,7 @@ function centroidPointRing(x, y) {
 
 /* harmony default export */ var path_centroid = (centroid_centroidStream);
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/path/context.js
+;// ./node_modules/d3-geo/src/path/context.js
 
 
 
@@ -46239,7 +48214,7 @@ PathContext.prototype = {
   result: noop_noop
 };
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/path/measure.js
+;// ./node_modules/d3-geo/src/path/measure.js
 
 
 
@@ -46286,7 +48261,7 @@ function measure_lengthPoint(x, y) {
 
 /* harmony default export */ var measure = (measure_lengthStream);
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/path/string.js
+;// ./node_modules/d3-geo/src/path/string.js
 // Simple caching for constant-radius points.
 let cacheDigits, cacheAppend, cacheRadius, cacheCircle;
 
@@ -46374,7 +48349,8 @@ function string_appendRound(digits) {
   return cacheAppend;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/path/index.js
+;// ./node_modules/d3-geo/src/path/index.js
+Object.defineProperty(src_path, "name", { value: "default", configurable: true });
 
 
 
@@ -46452,7 +48428,8 @@ function string_appendRound(digits) {
   return path.projection(projection).digits(digits).context(context);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/transform.js
+;// ./node_modules/d3-geo/src/transform.js
+Object.defineProperty(src_transform, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_transform(methods) {
   return {
     stream: transformer(methods)
@@ -46480,7 +48457,7 @@ TransformStream.prototype = {
   polygonEnd: function() { this.stream.polygonEnd(); }
 };
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/fit.js
+;// ./node_modules/d3-geo/src/projection/fit.js
 
 
 
@@ -46529,7 +48506,8 @@ function fitHeight(projection, height, object) {
   }, object);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/resample.js
+;// ./node_modules/d3-geo/src/projection/resample.js
+Object.defineProperty(resample, "name", { value: "default", configurable: true });
 
 
 
@@ -46633,7 +48611,7 @@ function resample_resample(project, delta2) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/index.js
+;// ./node_modules/d3-geo/src/projection/index.js
 
 
 
@@ -46812,7 +48790,7 @@ function projectionMutator(projectAt) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/conic.js
+;// ./node_modules/d3-geo/src/projection/conic.js
 
 
 
@@ -46829,7 +48807,7 @@ function conicProjection(projectAt) {
   return p;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/cylindricalEqualArea.js
+;// ./node_modules/d3-geo/src/projection/cylindricalEqualArea.js
 
 
 function cylindricalEqualAreaRaw(phi0) {
@@ -46846,7 +48824,8 @@ function cylindricalEqualAreaRaw(phi0) {
   return forward;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/conicEqualArea.js
+;// ./node_modules/d3-geo/src/projection/conicEqualArea.js
+Object.defineProperty(conicEqualArea, "name", { value: "default", configurable: true });
 
 
 
@@ -46881,7 +48860,8 @@ function conicEqualAreaRaw(y0, y1) {
       .center([0, 33.6442]);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/albers.js
+;// ./node_modules/d3-geo/src/projection/albers.js
+Object.defineProperty(albers, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function albers() {
@@ -46893,7 +48873,8 @@ function conicEqualAreaRaw(y0, y1) {
       .center([-0.6, 38.7]);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/albersUsa.js
+;// ./node_modules/d3-geo/src/projection/albersUsa.js
+Object.defineProperty(albersUsa, "name", { value: "default", configurable: true });
 
 
 
@@ -47006,7 +48987,7 @@ function multiplex(streams) {
   return albersUsa.scale(1070);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/azimuthal.js
+;// ./node_modules/d3-geo/src/projection/azimuthal.js
 
 
 function azimuthalRaw(scale) {
@@ -47035,7 +49016,8 @@ function azimuthalInvert(angle) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/azimuthalEqualArea.js
+;// ./node_modules/d3-geo/src/projection/azimuthalEqualArea.js
+Object.defineProperty(azimuthalEqualArea, "name", { value: "default", configurable: true });
 
 
 
@@ -47054,7 +49036,8 @@ azimuthalEqualAreaRaw.invert = azimuthalInvert(function(z) {
       .clipAngle(180 - 1e-3);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/azimuthalEquidistant.js
+;// ./node_modules/d3-geo/src/projection/azimuthalEquidistant.js
+Object.defineProperty(azimuthalEquidistant, "name", { value: "default", configurable: true });
 
 
 
@@ -47073,7 +49056,8 @@ azimuthalEquidistantRaw.invert = azimuthalInvert(function(z) {
       .clipAngle(180 - 1e-3);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/mercator.js
+;// ./node_modules/d3-geo/src/projection/mercator.js
+Object.defineProperty(mercator, "name", { value: "default", configurable: true });
 
 
 
@@ -47127,7 +49111,8 @@ function mercatorProjection(project) {
   return reclip();
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/conicConformal.js
+;// ./node_modules/d3-geo/src/projection/conicConformal.js
+Object.defineProperty(conicConformal, "name", { value: "default", configurable: true });
 
 
 
@@ -47167,7 +49152,8 @@ function conicConformalRaw(y0, y1) {
       .parallels([30, 30]);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/equirectangular.js
+;// ./node_modules/d3-geo/src/projection/equirectangular.js
+Object.defineProperty(equirectangular, "name", { value: "default", configurable: true });
 
 
 function equirectangularRaw(lambda, phi) {
@@ -47181,7 +49167,8 @@ equirectangularRaw.invert = equirectangularRaw;
       .scale(152.63);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/conicEquidistant.js
+;// ./node_modules/d3-geo/src/projection/conicEquidistant.js
+Object.defineProperty(conicEquidistant, "name", { value: "default", configurable: true });
 
 
 
@@ -47215,7 +49202,8 @@ function conicEquidistantRaw(y0, y1) {
       .center([0, 13.9389]);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/equalEarth.js
+;// ./node_modules/d3-geo/src/projection/equalEarth.js
+Object.defineProperty(equalEarth, "name", { value: "default", configurable: true });
 
 
 
@@ -47253,7 +49241,8 @@ equalEarthRaw.invert = function(x, y) {
       .scale(177.158);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/gnomonic.js
+;// ./node_modules/d3-geo/src/projection/gnomonic.js
+Object.defineProperty(gnomonic, "name", { value: "default", configurable: true });
 
 
 
@@ -47271,7 +49260,8 @@ gnomonicRaw.invert = azimuthalInvert(atan);
       .clipAngle(60);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/identity.js
+;// ./node_modules/d3-geo/src/projection/identity.js
+Object.defineProperty(projection_identity, "name", { value: "default", configurable: true });
 
 
 
@@ -47358,7 +49348,8 @@ gnomonicRaw.invert = azimuthalInvert(atan);
   return projection;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/naturalEarth1.js
+;// ./node_modules/d3-geo/src/projection/naturalEarth1.js
+Object.defineProperty(naturalEarth1, "name", { value: "default", configurable: true });
 
 
 
@@ -47388,7 +49379,8 @@ naturalEarth1Raw.invert = function(x, y) {
       .scale(175.295);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/orthographic.js
+;// ./node_modules/d3-geo/src/projection/orthographic.js
+Object.defineProperty(orthographic, "name", { value: "default", configurable: true });
 
 
 
@@ -47405,7 +49397,8 @@ orthographicRaw.invert = azimuthalInvert(asin);
       .clipAngle(90 + src_math_epsilon);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/stereographic.js
+;// ./node_modules/d3-geo/src/projection/stereographic.js
+Object.defineProperty(stereographic, "name", { value: "default", configurable: true });
 
 
 
@@ -47425,7 +49418,8 @@ stereographicRaw.invert = azimuthalInvert(function(z) {
       .clipAngle(142);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/projection/transverseMercator.js
+;// ./node_modules/d3-geo/src/projection/transverseMercator.js
+Object.defineProperty(transverseMercator, "name", { value: "default", configurable: true });
 
 
 
@@ -47454,7 +49448,7 @@ transverseMercatorRaw.invert = function(x, y) {
       .scale(159.155);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-geo/src/index.js
+;// ./node_modules/d3-geo/src/index.js
 
 
 
@@ -47490,7 +49484,8 @@ transverseMercatorRaw.invert = function(x, y) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/cluster.js
+;// ./node_modules/d3-hierarchy/src/cluster.js
+Object.defineProperty(cluster, "name", { value: "default", configurable: true });
 function defaultSeparation(a, b) {
   return a.parent === b.parent ? 1 : 2;
 }
@@ -47576,7 +49571,8 @@ function leafRight(node) {
   return cluster;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/count.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/count.js
+Object.defineProperty(hierarchy_count, "name", { value: "default", configurable: true });
 function count_count(node) {
   var sum = 0,
       children = node.children,
@@ -47590,7 +49586,8 @@ function count_count(node) {
   return this.eachAfter(count_count);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/each.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/each.js
+Object.defineProperty(hierarchy_each, "name", { value: "default", configurable: true });
 /* harmony default export */ function hierarchy_each(callback, that) {
   let index = -1;
   for (const node of this) {
@@ -47599,7 +49596,8 @@ function count_count(node) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/eachBefore.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/eachBefore.js
+Object.defineProperty(eachBefore, "name", { value: "default", configurable: true });
 /* harmony default export */ function eachBefore(callback, that) {
   var node = this, nodes = [node], children, i, index = -1;
   while (node = nodes.pop()) {
@@ -47613,7 +49611,8 @@ function count_count(node) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/eachAfter.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/eachAfter.js
+Object.defineProperty(eachAfter, "name", { value: "default", configurable: true });
 /* harmony default export */ function eachAfter(callback, that) {
   var node = this, nodes = [node], next = [], children, i, n, index = -1;
   while (node = nodes.pop()) {
@@ -47630,7 +49629,8 @@ function count_count(node) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/find.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/find.js
+Object.defineProperty(hierarchy_find, "name", { value: "default", configurable: true });
 /* harmony default export */ function hierarchy_find(callback, that) {
   let index = -1;
   for (const node of this) {
@@ -47640,7 +49640,8 @@ function count_count(node) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/sum.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/sum.js
+Object.defineProperty(hierarchy_sum, "name", { value: "default", configurable: true });
 /* harmony default export */ function hierarchy_sum(value) {
   return this.eachAfter(function(node) {
     var sum = +value(node.data) || 0,
@@ -47651,7 +49652,8 @@ function count_count(node) {
   });
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/sort.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/sort.js
+Object.defineProperty(hierarchy_sort, "name", { value: "default", configurable: true });
 /* harmony default export */ function hierarchy_sort(compare) {
   return this.eachBefore(function(node) {
     if (node.children) {
@@ -47660,7 +49662,8 @@ function count_count(node) {
   });
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/path.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/path.js
+Object.defineProperty(hierarchy_path, "name", { value: "default", configurable: true });
 /* harmony default export */ function hierarchy_path(end) {
   var start = this,
       ancestor = leastCommonAncestor(start, end),
@@ -47692,7 +49695,8 @@ function leastCommonAncestor(a, b) {
   return c;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/ancestors.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/ancestors.js
+Object.defineProperty(ancestors, "name", { value: "default", configurable: true });
 /* harmony default export */ function ancestors() {
   var node = this, nodes = [node];
   while (node = node.parent) {
@@ -47701,12 +49705,14 @@ function leastCommonAncestor(a, b) {
   return nodes;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/descendants.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/descendants.js
+Object.defineProperty(descendants, "name", { value: "default", configurable: true });
 /* harmony default export */ function descendants() {
   return Array.from(this);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/leaves.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/leaves.js
+Object.defineProperty(leaves, "name", { value: "default", configurable: true });
 /* harmony default export */ function leaves() {
   var leaves = [];
   this.eachBefore(function(node) {
@@ -47717,7 +49723,8 @@ function leastCommonAncestor(a, b) {
   return leaves;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/links.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/links.js
+Object.defineProperty(links, "name", { value: "default", configurable: true });
 /* harmony default export */ function links() {
   var root = this, links = [];
   root.each(function(node) {
@@ -47728,7 +49735,8 @@ function leastCommonAncestor(a, b) {
   return links;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/iterator.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/iterator.js
+Object.defineProperty(hierarchy_iterator, "name", { value: "default", configurable: true });
 /* harmony default export */ function* hierarchy_iterator() {
   var node = this, current, next = [node], children, i, n;
   do {
@@ -47744,7 +49752,7 @@ function leastCommonAncestor(a, b) {
   } while (next.length);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/hierarchy/index.js
+;// ./node_modules/d3-hierarchy/src/hierarchy/index.js
 
 
 
@@ -47837,7 +49845,7 @@ hierarchy_Node.prototype = hierarchy.prototype = {
   [Symbol.iterator]: hierarchy_iterator
 };
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/accessors.js
+;// ./node_modules/d3-hierarchy/src/accessors.js
 function optional(f) {
   return f == null ? null : required(f);
 }
@@ -47847,7 +49855,8 @@ function required(f) {
   return f;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/constant.js
+;// ./node_modules/d3-hierarchy/src/constant.js
+Object.defineProperty(d3_hierarchy_src_constant, "name", { value: "default", configurable: true });
 function constantZero() {
   return 0;
 }
@@ -47858,7 +49867,8 @@ function constantZero() {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/lcg.js
+;// ./node_modules/d3-hierarchy/src/lcg.js
+Object.defineProperty(src_lcg, "name", { value: "default", configurable: true });
 // https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
 const lcg_a = 1664525;
 const lcg_c = 1013904223;
@@ -47869,7 +49879,8 @@ const lcg_m = 4294967296; // 2^32
   return () => (s = (lcg_a * s + lcg_c) % lcg_m) / lcg_m;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/array.js
+;// ./node_modules/d3-hierarchy/src/array.js
+Object.defineProperty(d3_hierarchy_src_array, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_hierarchy_src_array(x) {
   return typeof x === "object" && "length" in x
     ? x // Array, TypedArray, NodeList, array-like
@@ -47891,7 +49902,8 @@ function array_shuffle(array, random) {
   return array;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/pack/enclose.js
+;// ./node_modules/d3-hierarchy/src/pack/enclose.js
+Object.defineProperty(enclose, "name", { value: "default", configurable: true });
 
 
 
@@ -48016,7 +50028,8 @@ function encloseBasis3(a, b, c) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/pack/siblings.js
+;// ./node_modules/d3-hierarchy/src/pack/siblings.js
+Object.defineProperty(siblings, "name", { value: "default", configurable: true });
 
 
 
@@ -48138,7 +50151,8 @@ function packSiblingsRandom(circles, random) {
   return circles;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/pack/index.js
+;// ./node_modules/d3-hierarchy/src/pack/index.js
+Object.defineProperty(pack, "name", { value: "default", configurable: true });
 
 
 
@@ -48221,7 +50235,8 @@ function translateChild(k) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/treemap/round.js
+;// ./node_modules/d3-hierarchy/src/treemap/round.js
+Object.defineProperty(treemap_round, "name", { value: "default", configurable: true });
 /* harmony default export */ function treemap_round(node) {
   node.x0 = Math.round(node.x0);
   node.y0 = Math.round(node.y0);
@@ -48229,7 +50244,8 @@ function translateChild(k) {
   node.y1 = Math.round(node.y1);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/treemap/dice.js
+;// ./node_modules/d3-hierarchy/src/treemap/dice.js
+Object.defineProperty(dice, "name", { value: "default", configurable: true });
 /* harmony default export */ function dice(parent, x0, y0, x1, y1) {
   var nodes = parent.children,
       node,
@@ -48243,7 +50259,8 @@ function translateChild(k) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/partition.js
+;// ./node_modules/d3-hierarchy/src/partition.js
+Object.defineProperty(partition, "name", { value: "default", configurable: true });
 
 
 
@@ -48297,7 +50314,8 @@ function translateChild(k) {
   return partition;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/stratify.js
+;// ./node_modules/d3-hierarchy/src/stratify.js
+Object.defineProperty(stratify, "name", { value: "default", configurable: true });
 
 
 
@@ -48444,7 +50462,8 @@ function slash(path, i) {
   return false;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/tree.js
+;// ./node_modules/d3-hierarchy/src/tree.js
+Object.defineProperty(tree, "name", { value: "default", configurable: true });
 
 
 function tree_defaultSeparation(a, b) {
@@ -48683,7 +50702,8 @@ function treeRoot(root) {
   return tree;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/treemap/slice.js
+;// ./node_modules/d3-hierarchy/src/treemap/slice.js
+Object.defineProperty(treemap_slice, "name", { value: "default", configurable: true });
 /* harmony default export */ function treemap_slice(parent, x0, y0, x1, y1) {
   var nodes = parent.children,
       node,
@@ -48697,7 +50717,7 @@ function treeRoot(root) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/treemap/squarify.js
+;// ./node_modules/d3-hierarchy/src/treemap/squarify.js
 
 
 
@@ -48765,7 +50785,8 @@ function squarifyRatio(ratio, parent, x0, y0, x1, y1) {
   return squarify;
 })(phi));
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/treemap/index.js
+;// ./node_modules/d3-hierarchy/src/treemap/index.js
+Object.defineProperty(treemap, "name", { value: "default", configurable: true });
 
 
 
@@ -48861,7 +50882,8 @@ function squarifyRatio(ratio, parent, x0, y0, x1, y1) {
   return treemap;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/treemap/binary.js
+;// ./node_modules/d3-hierarchy/src/treemap/binary.js
+Object.defineProperty(binary, "name", { value: "default", configurable: true });
 /* harmony default export */ function binary(parent, x0, y0, x1, y1) {
   var nodes = parent.children,
       i, n = nodes.length,
@@ -48909,7 +50931,8 @@ function squarifyRatio(ratio, parent, x0, y0, x1, y1) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/treemap/sliceDice.js
+;// ./node_modules/d3-hierarchy/src/treemap/sliceDice.js
+Object.defineProperty(sliceDice, "name", { value: "default", configurable: true });
 
 
 
@@ -48917,7 +50940,7 @@ function squarifyRatio(ratio, parent, x0, y0, x1, y1) {
   (parent.depth & 1 ? treemap_slice : dice)(parent, x0, y0, x1, y1);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/treemap/resquarify.js
+;// ./node_modules/d3-hierarchy/src/treemap/resquarify.js
 
 
 
@@ -48955,7 +50978,7 @@ function squarifyRatio(ratio, parent, x0, y0, x1, y1) {
   return resquarify;
 })(phi));
 
-;// CONCATENATED MODULE: ./node_modules/d3-hierarchy/src/index.js
+;// ./node_modules/d3-hierarchy/src/index.js
 
 
 
@@ -48972,7 +50995,8 @@ function squarifyRatio(ratio, parent, x0, y0, x1, y1) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/discrete.js
+;// ./node_modules/d3-interpolate/src/discrete.js
+Object.defineProperty(discrete, "name", { value: "default", configurable: true });
 /* harmony default export */ function discrete(range) {
   var n = range.length;
   return function(t) {
@@ -48980,7 +51004,8 @@ function squarifyRatio(ratio, parent, x0, y0, x1, y1) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/hue.js
+;// ./node_modules/d3-interpolate/src/hue.js
+Object.defineProperty(src_hue, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function src_hue(a, b) {
@@ -48991,14 +51016,15 @@ function squarifyRatio(ratio, parent, x0, y0, x1, y1) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/round.js
+;// ./node_modules/d3-interpolate/src/round.js
+Object.defineProperty(src_round, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_round(a, b) {
   return a = +a, b = +b, function(t) {
     return Math.round(a * (1 - t) + b * t);
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/zoom.js
+;// ./node_modules/d3-interpolate/src/zoom.js
 var zoom_epsilon2 = 1e-12;
 
 function cosh(x) {
@@ -49071,7 +51097,7 @@ function tanh(x) {
   return zoom;
 })(Math.SQRT2, 2, 4));
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/hsl.js
+;// ./node_modules/d3-interpolate/src/hsl.js
 
 
 
@@ -49094,7 +51120,7 @@ function hsl_hsl(hue) {
 /* harmony default export */ var src_hsl = (hsl_hsl(hue));
 var hslLong = hsl_hsl(nogamma);
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/lab.js
+;// ./node_modules/d3-interpolate/src/lab.js
 
 
 
@@ -49112,7 +51138,7 @@ function lab_lab(start, end) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/hcl.js
+;// ./node_modules/d3-interpolate/src/hcl.js
 
 
 
@@ -49135,7 +51161,7 @@ function hcl_hcl(hue) {
 /* harmony default export */ var src_hcl = (hcl_hcl(hue));
 var hclLong = hcl_hcl(nogamma);
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/cubehelix.js
+;// ./node_modules/d3-interpolate/src/cubehelix.js
 
 
 
@@ -49166,7 +51192,7 @@ function cubehelix(hue) {
 /* harmony default export */ var src_cubehelix = (cubehelix(hue));
 var cubehelixLong = cubehelix(nogamma);
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/piecewise.js
+;// ./node_modules/d3-interpolate/src/piecewise.js
 
 
 function piecewise(interpolate, values) {
@@ -49179,14 +51205,15 @@ function piecewise(interpolate, values) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/quantize.js
+;// ./node_modules/d3-interpolate/src/quantize.js
+Object.defineProperty(quantize, "name", { value: "default", configurable: true });
 /* harmony default export */ function quantize(interpolator, n) {
   var samples = new Array(n);
   for (var i = 0; i < n; ++i) samples[i] = interpolator(i / (n - 1));
   return samples;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-interpolate/src/index.js
+;// ./node_modules/d3-interpolate/src/index.js
 
 
 
@@ -49209,10 +51236,11 @@ function piecewise(interpolate, values) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-path/src/index.js
+;// ./node_modules/d3-path/src/index.js
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-polygon/src/area.js
+;// ./node_modules/d3-polygon/src/area.js
+Object.defineProperty(d3_polygon_src_area, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_polygon_src_area(polygon) {
   var i = -1,
       n = polygon.length,
@@ -49229,7 +51257,8 @@ function piecewise(interpolate, values) {
   return area / 2;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-polygon/src/centroid.js
+;// ./node_modules/d3-polygon/src/centroid.js
+Object.defineProperty(src_centroid, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_centroid(polygon) {
   var i = -1,
       n = polygon.length,
@@ -49251,7 +51280,8 @@ function piecewise(interpolate, values) {
   return k *= 3, [x / k, y / k];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-polygon/src/cross.js
+;// ./node_modules/d3-polygon/src/cross.js
+Object.defineProperty(src_cross, "name", { value: "default", configurable: true });
 // Returns the 2D cross product of AB and AC vectors, i.e., the z-component of
 // the 3D cross product in a quadrant I Cartesian coordinate system (+x is
 // right, +y is up). Returns a positive value if ABC is counter-clockwise,
@@ -49260,7 +51290,8 @@ function piecewise(interpolate, values) {
   return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-polygon/src/hull.js
+;// ./node_modules/d3-polygon/src/hull.js
+Object.defineProperty(hull, "name", { value: "default", configurable: true });
 
 
 function lexicographicOrder(a, b) {
@@ -49311,7 +51342,8 @@ function computeUpperHullIndexes(points) {
   return hull;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-polygon/src/contains.js
+;// ./node_modules/d3-polygon/src/contains.js
+Object.defineProperty(d3_polygon_src_contains, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_polygon_src_contains(polygon, point) {
   var n = polygon.length,
       p = polygon[n - 1],
@@ -49329,7 +51361,8 @@ function computeUpperHullIndexes(points) {
   return inside;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-polygon/src/length.js
+;// ./node_modules/d3-polygon/src/length.js
+Object.defineProperty(d3_polygon_src_length, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_polygon_src_length(polygon) {
   var i = -1,
       n = polygon.length,
@@ -49354,20 +51387,20 @@ function computeUpperHullIndexes(points) {
   return perimeter;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-polygon/src/index.js
+;// ./node_modules/d3-polygon/src/index.js
 
 
 
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-quadtree/src/index.js
+;// ./node_modules/d3-quadtree/src/index.js
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/defaultSource.js
+;// ./node_modules/d3-random/src/defaultSource.js
 /* harmony default export */ var src_defaultSource = (Math.random);
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/uniform.js
+;// ./node_modules/d3-random/src/uniform.js
 
 
 /* harmony default export */ var uniform = ((function sourceRandomUniform(source) {
@@ -49386,7 +51419,7 @@ function computeUpperHullIndexes(points) {
   return randomUniform;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/int.js
+;// ./node_modules/d3-random/src/int.js
 
 
 /* harmony default export */ var src_int = ((function sourceRandomInt(source) {
@@ -49404,7 +51437,7 @@ function computeUpperHullIndexes(points) {
   return randomInt;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/normal.js
+;// ./node_modules/d3-random/src/normal.js
 
 
 /* harmony default export */ var normal = ((function sourceRandomNormal(source) {
@@ -49434,7 +51467,7 @@ function computeUpperHullIndexes(points) {
   return randomNormal;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/logNormal.js
+;// ./node_modules/d3-random/src/logNormal.js
 
 
 
@@ -49453,7 +51486,7 @@ function computeUpperHullIndexes(points) {
   return randomLogNormal;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/irwinHall.js
+;// ./node_modules/d3-random/src/irwinHall.js
 
 
 /* harmony default export */ var irwinHall = ((function sourceRandomIrwinHall(source) {
@@ -49470,7 +51503,7 @@ function computeUpperHullIndexes(points) {
   return randomIrwinHall;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/bates.js
+;// ./node_modules/d3-random/src/bates.js
 
 
 
@@ -49491,7 +51524,7 @@ function computeUpperHullIndexes(points) {
   return randomBates;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/exponential.js
+;// ./node_modules/d3-random/src/exponential.js
 
 
 /* harmony default export */ var src_exponential = ((function sourceRandomExponential(source) {
@@ -49506,7 +51539,7 @@ function computeUpperHullIndexes(points) {
   return randomExponential;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/pareto.js
+;// ./node_modules/d3-random/src/pareto.js
 
 
 /* harmony default export */ var pareto = ((function sourceRandomPareto(source) {
@@ -49523,7 +51556,7 @@ function computeUpperHullIndexes(points) {
   return randomPareto;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/bernoulli.js
+;// ./node_modules/d3-random/src/bernoulli.js
 
 
 /* harmony default export */ var bernoulli = ((function sourceRandomBernoulli(source) {
@@ -49539,7 +51572,7 @@ function computeUpperHullIndexes(points) {
   return randomBernoulli;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/geometric.js
+;// ./node_modules/d3-random/src/geometric.js
 
 
 /* harmony default export */ var geometric = ((function sourceRandomGeometric(source) {
@@ -49558,7 +51591,7 @@ function computeUpperHullIndexes(points) {
   return randomGeometric;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/gamma.js
+;// ./node_modules/d3-random/src/gamma.js
 
 
 
@@ -49594,7 +51627,7 @@ function computeUpperHullIndexes(points) {
   return randomGamma;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/beta.js
+;// ./node_modules/d3-random/src/beta.js
 
 
 
@@ -49615,7 +51648,7 @@ function computeUpperHullIndexes(points) {
   return randomBeta;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/binomial.js
+;// ./node_modules/d3-random/src/binomial.js
 
 
 
@@ -49655,7 +51688,7 @@ function computeUpperHullIndexes(points) {
   return randomBinomial;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/weibull.js
+;// ./node_modules/d3-random/src/weibull.js
 
 
 /* harmony default export */ var weibull = ((function sourceRandomWeibull(source) {
@@ -49679,7 +51712,7 @@ function computeUpperHullIndexes(points) {
   return randomWeibull;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/cauchy.js
+;// ./node_modules/d3-random/src/cauchy.js
 
 
 /* harmony default export */ var cauchy = ((function sourceRandomCauchy(source) {
@@ -49696,7 +51729,7 @@ function computeUpperHullIndexes(points) {
   return randomCauchy;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/logistic.js
+;// ./node_modules/d3-random/src/logistic.js
 
 
 /* harmony default export */ var logistic = ((function sourceRandomLogistic(source) {
@@ -49714,7 +51747,7 @@ function computeUpperHullIndexes(points) {
   return randomLogistic;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/poisson.js
+;// ./node_modules/d3-random/src/poisson.js
 
 
 
@@ -49743,7 +51776,7 @@ function computeUpperHullIndexes(points) {
   return randomPoisson;
 })(src_defaultSource));
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/lcg.js
+;// ./node_modules/d3-random/src/lcg.js
 // https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
 const mul = 0x19660D;
 const inc = 0x3C6EF35F;
@@ -49754,7 +51787,7 @@ function lcg_lcg(seed = Math.random()) {
   return () => (state = mul * state + inc | 0, eps * (state >>> 0));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-random/src/index.js
+;// ./node_modules/d3-random/src/index.js
 
 
 
@@ -49774,7 +51807,7 @@ function lcg_lcg(seed = Math.random()) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/init.js
+;// ./node_modules/d3-scale/src/init.js
 function initRange(domain, range) {
   switch (arguments.length) {
     case 0: break;
@@ -49802,7 +51835,7 @@ function initInterpolator(domain, interpolator) {
   return this;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/ordinal.js
+;// ./node_modules/d3-scale/src/ordinal.js
 
 
 
@@ -49850,7 +51883,7 @@ function ordinal() {
   return scale;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/band.js
+;// ./node_modules/d3-scale/src/band.js
 
 
 
@@ -49953,19 +51986,19 @@ function point() {
   return pointish(band.apply(null, arguments).paddingInner(1));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/constant.js
+;// ./node_modules/d3-scale/src/constant.js
 function constants(x) {
   return function() {
     return x;
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/number.js
+;// ./node_modules/d3-scale/src/number.js
 function number_number(x) {
   return +x;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/continuous.js
+;// ./node_modules/d3-scale/src/continuous.js
 
 
 
@@ -50092,7 +52125,7 @@ function continuous() {
   return continuous_transformer()(continuous_identity, continuous_identity);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/tickFormat.js
+;// ./node_modules/d3-scale/src/tickFormat.js
 
 
 
@@ -50123,7 +52156,7 @@ function tickFormat(start, stop, count, specifier) {
   return defaultLocale_format(specifier);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/linear.js
+;// ./node_modules/d3-scale/src/linear.js
 
 
 
@@ -50195,11 +52228,11 @@ function src_linear_linear() {
   return linearish(scale);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/identity.js
+;// ./node_modules/d3-scale/src/identity.js
 
 
 
-function src_identity_identity(domain) {
+function identity_identity(domain) {
   var unknown;
 
   function scale(x) {
@@ -50217,7 +52250,7 @@ function src_identity_identity(domain) {
   };
 
   scale.copy = function() {
-    return src_identity_identity(domain).unknown(unknown);
+    return identity_identity(domain).unknown(unknown);
   };
 
   domain = arguments.length ? Array.from(domain, number_number) : [0, 1];
@@ -50225,7 +52258,7 @@ function src_identity_identity(domain) {
   return linearish(scale);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/nice.js
+;// ./node_modules/d3-scale/src/nice.js
 function nice_nice(domain, interval) {
   domain = domain.slice();
 
@@ -50245,7 +52278,7 @@ function nice_nice(domain, interval) {
   return domain;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/log.js
+;// ./node_modules/d3-scale/src/log.js
 
 
 
@@ -50387,7 +52420,7 @@ function log_log() {
   return scale;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/symlog.js
+;// ./node_modules/d3-scale/src/symlog.js
 
 
 
@@ -50424,7 +52457,7 @@ function symlog() {
   return initRange.apply(scale, arguments);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/pow.js
+;// ./node_modules/d3-scale/src/pow.js
 
 
 
@@ -50476,7 +52509,7 @@ function pow_sqrt() {
   return pow_pow.apply(null, arguments).exponent(0.5);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/radial.js
+;// ./node_modules/d3-scale/src/radial.js
 
 
 
@@ -50541,7 +52574,7 @@ function radial_radial() {
   return linearish(scale);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/quantile.js
+;// ./node_modules/d3-scale/src/quantile.js
 
 
 
@@ -50600,7 +52633,7 @@ function quantile_quantile() {
   return initRange.apply(scale, arguments);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/quantize.js
+;// ./node_modules/d3-scale/src/quantize.js
 
 
 
@@ -50658,7 +52691,7 @@ function quantize_quantize() {
   return initRange.apply(linearish(scale), arguments);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/threshold.js
+;// ./node_modules/d3-scale/src/threshold.js
 
 
 
@@ -50699,7 +52732,7 @@ function threshold() {
   return initRange.apply(scale, arguments);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/duration.js
+;// ./node_modules/d3-time/src/duration.js
 const durationSecond = 1000;
 const durationMinute = durationSecond * 60;
 const durationHour = durationMinute * 60;
@@ -50708,7 +52741,7 @@ const durationWeek = durationDay * 7;
 const durationMonth = durationDay * 30;
 const durationYear = durationDay * 365;
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/interval.js
+;// ./node_modules/d3-time/src/interval.js
 const interval_t0 = new Date, interval_t1 = new Date;
 
 function timeInterval(floori, offseti, count, field) {
@@ -50779,7 +52812,7 @@ function timeInterval(floori, offseti, count, field) {
   return interval;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/millisecond.js
+;// ./node_modules/d3-time/src/millisecond.js
 
 
 const millisecond = timeInterval(() => {
@@ -50806,7 +52839,7 @@ millisecond.every = (k) => {
 
 const milliseconds = millisecond.range;
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/second.js
+;// ./node_modules/d3-time/src/second.js
 
 
 
@@ -50822,7 +52855,7 @@ const second = timeInterval((date) => {
 
 const seconds = second.range;
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/minute.js
+;// ./node_modules/d3-time/src/minute.js
 
 
 
@@ -50850,7 +52883,7 @@ const utcMinute = timeInterval((date) => {
 
 const utcMinutes = utcMinute.range;
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/hour.js
+;// ./node_modules/d3-time/src/hour.js
 
 
 
@@ -50878,7 +52911,7 @@ const utcHour = timeInterval((date) => {
 
 const utcHours = utcHour.range;
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/day.js
+;// ./node_modules/d3-time/src/day.js
 
 
 
@@ -50915,7 +52948,7 @@ const unixDay = timeInterval((date) => {
 
 const unixDays = unixDay.range;
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/week.js
+;// ./node_modules/d3-time/src/week.js
 
 
 
@@ -50973,7 +53006,7 @@ const utcThursdays = utcThursday.range;
 const utcFridays = utcFriday.range;
 const utcSaturdays = utcSaturday.range;
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/month.js
+;// ./node_modules/d3-time/src/month.js
 
 
 const timeMonth = timeInterval((date) => {
@@ -51002,7 +53035,7 @@ const utcMonth = timeInterval((date) => {
 
 const utcMonths = utcMonth.range;
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/year.js
+;// ./node_modules/d3-time/src/year.js
 
 
 const timeYear = timeInterval((date) => {
@@ -51053,7 +53086,7 @@ utcYear.every = (k) => {
 
 const utcYears = utcYear.range;
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/ticks.js
+;// ./node_modules/d3-time/src/ticks.js
 
 
 
@@ -51113,7 +53146,7 @@ const [timeTicks, timeTickInterval] = ticker(timeYear, timeMonth, timeSunday, ti
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-time-format/src/locale.js
+;// ./node_modules/d3-time-format/src/locale.js
 
 
 function localDate(d) {
@@ -51801,7 +53834,7 @@ function formatUnixTimestampSeconds(d) {
   return Math.floor(+d / 1000);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-time-format/src/defaultLocale.js
+;// ./node_modules/d3-time-format/src/defaultLocale.js
 
 
 var src_defaultLocale_locale;
@@ -51830,7 +53863,7 @@ function defaultLocale_defaultLocale(definition) {
   return src_defaultLocale_locale;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/time.js
+;// ./node_modules/d3-scale/src/time.js
 
 
 
@@ -51903,7 +53936,7 @@ function time() {
   return initRange.apply(calendar(timeTicks, timeTickInterval, timeYear, timeMonth, timeSunday, timeDay, timeHour, timeMinute, second, timeFormat).domain([new Date(2000, 0, 1), new Date(2000, 0, 2)]), arguments);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/utcTime.js
+;// ./node_modules/d3-scale/src/utcTime.js
 
 
 
@@ -51913,7 +53946,7 @@ function utcTime() {
   return initRange.apply(calendar(utcTicks, utcTickInterval, utcYear, utcMonth, utcSunday, utcDay, utcHour, utcMinute, second, utcFormat).domain([Date.UTC(2000, 0, 1), Date.UTC(2000, 0, 2)]), arguments);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/sequential.js
+;// ./node_modules/d3-scale/src/sequential.js
 
 
 
@@ -52022,7 +54055,7 @@ function sequentialSqrt() {
   return sequentialPow.apply(null, arguments).exponent(0.5);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/sequentialQuantile.js
+;// ./node_modules/d3-scale/src/sequentialQuantile.js
 
 
 
@@ -52062,7 +54095,7 @@ function sequentialQuantile() {
   return initInterpolator.apply(scale, arguments);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/diverging.js
+;// ./node_modules/d3-scale/src/diverging.js
 
 
 
@@ -52168,7 +54201,7 @@ function divergingSqrt() {
   return divergingPow.apply(null, arguments).exponent(0.5);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale/src/index.js
+;// ./node_modules/d3-scale/src/index.js
 
 
 
@@ -52203,69 +54236,71 @@ function divergingSqrt() {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/colors.js
+;// ./node_modules/d3-scale-chromatic/src/colors.js
+Object.defineProperty(colors, "name", { value: "default", configurable: true });
 /* harmony default export */ function colors(specifier) {
   var n = specifier.length / 6 | 0, colors = new Array(n), i = 0;
   while (i < n) colors[i] = "#" + specifier.slice(i * 6, ++i * 6);
   return colors;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/categorical/category10.js
+;// ./node_modules/d3-scale-chromatic/src/categorical/category10.js
 
 
 /* harmony default export */ var category10 = (colors("1f77b4ff7f0e2ca02cd627289467bd8c564be377c27f7f7fbcbd2217becf"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/categorical/Accent.js
+;// ./node_modules/d3-scale-chromatic/src/categorical/Accent.js
 
 
 /* harmony default export */ var Accent = (colors("7fc97fbeaed4fdc086ffff99386cb0f0027fbf5b17666666"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/categorical/Dark2.js
+;// ./node_modules/d3-scale-chromatic/src/categorical/Dark2.js
 
 
 /* harmony default export */ var Dark2 = (colors("1b9e77d95f027570b3e7298a66a61ee6ab02a6761d666666"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/categorical/Paired.js
+;// ./node_modules/d3-scale-chromatic/src/categorical/Paired.js
 
 
 /* harmony default export */ var Paired = (colors("a6cee31f78b4b2df8a33a02cfb9a99e31a1cfdbf6fff7f00cab2d66a3d9affff99b15928"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/categorical/Pastel1.js
+;// ./node_modules/d3-scale-chromatic/src/categorical/Pastel1.js
 
 
 /* harmony default export */ var Pastel1 = (colors("fbb4aeb3cde3ccebc5decbe4fed9a6ffffcce5d8bdfddaecf2f2f2"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/categorical/Pastel2.js
+;// ./node_modules/d3-scale-chromatic/src/categorical/Pastel2.js
 
 
 /* harmony default export */ var Pastel2 = (colors("b3e2cdfdcdaccbd5e8f4cae4e6f5c9fff2aef1e2cccccccc"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/categorical/Set1.js
+;// ./node_modules/d3-scale-chromatic/src/categorical/Set1.js
 
 
 /* harmony default export */ var Set1 = (colors("e41a1c377eb84daf4a984ea3ff7f00ffff33a65628f781bf999999"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/categorical/Set2.js
+;// ./node_modules/d3-scale-chromatic/src/categorical/Set2.js
 
 
 /* harmony default export */ var Set2 = (colors("66c2a5fc8d628da0cbe78ac3a6d854ffd92fe5c494b3b3b3"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/categorical/Set3.js
+;// ./node_modules/d3-scale-chromatic/src/categorical/Set3.js
 
 
 /* harmony default export */ var Set3 = (colors("8dd3c7ffffb3bebadafb807280b1d3fdb462b3de69fccde5d9d9d9bc80bdccebc5ffed6f"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/categorical/Tableau10.js
+;// ./node_modules/d3-scale-chromatic/src/categorical/Tableau10.js
 
 
 /* harmony default export */ var Tableau10 = (colors("4e79a7f28e2ce1575976b7b259a14fedc949af7aa1ff9da79c755fbab0ab"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/ramp.js
+;// ./node_modules/d3-scale-chromatic/src/ramp.js
 
 
 /* harmony default export */ var ramp = (scheme => rgbBasis(scheme[scheme.length - 1]));
+(Object.getOwnPropertyDescriptor(ramp, "name") || {}).writable || Object.defineProperty(ramp, "name", { value: "default", configurable: true });
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/diverging/BrBG.js
+;// ./node_modules/d3-scale-chromatic/src/diverging/BrBG.js
 
 
 
@@ -52283,7 +54318,7 @@ var scheme = new Array(3).concat(
 
 /* harmony default export */ var BrBG = (ramp(scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/diverging/PRGn.js
+;// ./node_modules/d3-scale-chromatic/src/diverging/PRGn.js
 
 
 
@@ -52301,7 +54336,7 @@ var PRGn_scheme = new Array(3).concat(
 
 /* harmony default export */ var PRGn = (ramp(PRGn_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/diverging/PiYG.js
+;// ./node_modules/d3-scale-chromatic/src/diverging/PiYG.js
 
 
 
@@ -52319,7 +54354,7 @@ var PiYG_scheme = new Array(3).concat(
 
 /* harmony default export */ var PiYG = (ramp(PiYG_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/diverging/PuOr.js
+;// ./node_modules/d3-scale-chromatic/src/diverging/PuOr.js
 
 
 
@@ -52337,7 +54372,7 @@ var PuOr_scheme = new Array(3).concat(
 
 /* harmony default export */ var PuOr = (ramp(PuOr_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/diverging/RdBu.js
+;// ./node_modules/d3-scale-chromatic/src/diverging/RdBu.js
 
 
 
@@ -52355,7 +54390,7 @@ var RdBu_scheme = new Array(3).concat(
 
 /* harmony default export */ var RdBu = (ramp(RdBu_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/diverging/RdGy.js
+;// ./node_modules/d3-scale-chromatic/src/diverging/RdGy.js
 
 
 
@@ -52373,7 +54408,7 @@ var RdGy_scheme = new Array(3).concat(
 
 /* harmony default export */ var RdGy = (ramp(RdGy_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/diverging/RdYlBu.js
+;// ./node_modules/d3-scale-chromatic/src/diverging/RdYlBu.js
 
 
 
@@ -52391,7 +54426,7 @@ var RdYlBu_scheme = new Array(3).concat(
 
 /* harmony default export */ var RdYlBu = (ramp(RdYlBu_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/diverging/RdYlGn.js
+;// ./node_modules/d3-scale-chromatic/src/diverging/RdYlGn.js
 
 
 
@@ -52409,7 +54444,7 @@ var RdYlGn_scheme = new Array(3).concat(
 
 /* harmony default export */ var RdYlGn = (ramp(RdYlGn_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/diverging/Spectral.js
+;// ./node_modules/d3-scale-chromatic/src/diverging/Spectral.js
 
 
 
@@ -52427,7 +54462,7 @@ var Spectral_scheme = new Array(3).concat(
 
 /* harmony default export */ var Spectral = (ramp(Spectral_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/BuGn.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/BuGn.js
 
 
 
@@ -52443,7 +54478,7 @@ var BuGn_scheme = new Array(3).concat(
 
 /* harmony default export */ var BuGn = (ramp(BuGn_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/BuPu.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/BuPu.js
 
 
 
@@ -52459,7 +54494,7 @@ var BuPu_scheme = new Array(3).concat(
 
 /* harmony default export */ var BuPu = (ramp(BuPu_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/GnBu.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/GnBu.js
 
 
 
@@ -52475,7 +54510,7 @@ var GnBu_scheme = new Array(3).concat(
 
 /* harmony default export */ var GnBu = (ramp(GnBu_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/OrRd.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/OrRd.js
 
 
 
@@ -52491,7 +54526,7 @@ var OrRd_scheme = new Array(3).concat(
 
 /* harmony default export */ var OrRd = (ramp(OrRd_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/PuBuGn.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/PuBuGn.js
 
 
 
@@ -52507,7 +54542,7 @@ var PuBuGn_scheme = new Array(3).concat(
 
 /* harmony default export */ var PuBuGn = (ramp(PuBuGn_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/PuBu.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/PuBu.js
 
 
 
@@ -52523,7 +54558,7 @@ var PuBu_scheme = new Array(3).concat(
 
 /* harmony default export */ var PuBu = (ramp(PuBu_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/PuRd.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/PuRd.js
 
 
 
@@ -52539,7 +54574,7 @@ var PuRd_scheme = new Array(3).concat(
 
 /* harmony default export */ var PuRd = (ramp(PuRd_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/RdPu.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/RdPu.js
 
 
 
@@ -52555,7 +54590,7 @@ var RdPu_scheme = new Array(3).concat(
 
 /* harmony default export */ var RdPu = (ramp(RdPu_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/YlGnBu.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/YlGnBu.js
 
 
 
@@ -52571,7 +54606,7 @@ var YlGnBu_scheme = new Array(3).concat(
 
 /* harmony default export */ var YlGnBu = (ramp(YlGnBu_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/YlGn.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/YlGn.js
 
 
 
@@ -52587,7 +54622,7 @@ var YlGn_scheme = new Array(3).concat(
 
 /* harmony default export */ var YlGn = (ramp(YlGn_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/YlOrBr.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/YlOrBr.js
 
 
 
@@ -52603,7 +54638,7 @@ var YlOrBr_scheme = new Array(3).concat(
 
 /* harmony default export */ var YlOrBr = (ramp(YlOrBr_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/YlOrRd.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/YlOrRd.js
 
 
 
@@ -52619,7 +54654,7 @@ var YlOrRd_scheme = new Array(3).concat(
 
 /* harmony default export */ var YlOrRd = (ramp(YlOrRd_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-single/Blues.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-single/Blues.js
 
 
 
@@ -52635,7 +54670,7 @@ var Blues_scheme = new Array(3).concat(
 
 /* harmony default export */ var Blues = (ramp(Blues_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-single/Greens.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-single/Greens.js
 
 
 
@@ -52651,7 +54686,7 @@ var Greens_scheme = new Array(3).concat(
 
 /* harmony default export */ var Greens = (ramp(Greens_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-single/Greys.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-single/Greys.js
 
 
 
@@ -52667,7 +54702,7 @@ var Greys_scheme = new Array(3).concat(
 
 /* harmony default export */ var Greys = (ramp(Greys_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-single/Purples.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-single/Purples.js
 
 
 
@@ -52683,7 +54718,7 @@ var Purples_scheme = new Array(3).concat(
 
 /* harmony default export */ var Purples = (ramp(Purples_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-single/Reds.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-single/Reds.js
 
 
 
@@ -52699,7 +54734,7 @@ var Reds_scheme = new Array(3).concat(
 
 /* harmony default export */ var Reds = (ramp(Reds_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-single/Oranges.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-single/Oranges.js
 
 
 
@@ -52715,7 +54750,8 @@ var Oranges_scheme = new Array(3).concat(
 
 /* harmony default export */ var Oranges = (ramp(Oranges_scheme));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/cividis.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/cividis.js
+Object.defineProperty(cividis, "name", { value: "default", configurable: true });
 /* harmony default export */ function cividis(t) {
   t = Math.max(0, Math.min(1, t));
   return "rgb("
@@ -52725,13 +54761,14 @@ var Oranges_scheme = new Array(3).concat(
       + ")";
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/cubehelix.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/cubehelix.js
 
 
 
 /* harmony default export */ var sequential_multi_cubehelix = (cubehelixLong(cubehelix_cubehelix(300, 0.5, 0.0), cubehelix_cubehelix(-240, 0.5, 1.0)));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/rainbow.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/rainbow.js
+Object.defineProperty(rainbow, "name", { value: "default", configurable: true });
 
 
 
@@ -52750,7 +54787,8 @@ var rainbow_c = cubehelix_cubehelix();
   return rainbow_c + "";
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/sinebow.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/sinebow.js
+Object.defineProperty(sinebow, "name", { value: "default", configurable: true });
 
 
 var sinebow_c = color_rgb(),
@@ -52766,7 +54804,8 @@ var sinebow_c = color_rgb(),
   return sinebow_c + "";
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/turbo.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/turbo.js
+Object.defineProperty(turbo, "name", { value: "default", configurable: true });
 /* harmony default export */ function turbo(t) {
   t = Math.max(0, Math.min(1, t));
   return "rgb("
@@ -52776,7 +54815,7 @@ var sinebow_c = color_rgb(),
       + ")";
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/sequential-multi/viridis.js
+;// ./node_modules/d3-scale-chromatic/src/sequential-multi/viridis.js
 
 
 function viridis_ramp(range) {
@@ -52794,7 +54833,7 @@ var inferno = viridis_ramp(colors("00000401000501010601010802010a02020c02020e030
 
 var plasma = viridis_ramp(colors("0d088710078813078916078a19068c1b068d1d068e20068f2206902406912605912805922a05932c05942e05952f059631059733059735049837049938049a3a049a3c049b3e049c3f049c41049d43039e44039e46039f48039f4903a04b03a14c02a14e02a25002a25102a35302a35502a45601a45801a45901a55b01a55c01a65e01a66001a66100a76300a76400a76600a76700a86900a86a00a86c00a86e00a86f00a87100a87201a87401a87501a87701a87801a87a02a87b02a87d03a87e03a88004a88104a78305a78405a78606a68707a68808a68a09a58b0aa58d0ba58e0ca48f0da4910ea3920fa39410a29511a19613a19814a099159f9a169f9c179e9d189d9e199da01a9ca11b9ba21d9aa31e9aa51f99a62098a72197a82296aa2395ab2494ac2694ad2793ae2892b02991b12a90b22b8fb32c8eb42e8db52f8cb6308bb7318ab83289ba3388bb3488bc3587bd3786be3885bf3984c03a83c13b82c23c81c33d80c43e7fc5407ec6417dc7427cc8437bc9447aca457acb4679cc4778cc4977cd4a76ce4b75cf4c74d04d73d14e72d24f71d35171d45270d5536fd5546ed6556dd7566cd8576bd9586ada5a6ada5b69db5c68dc5d67dd5e66de5f65de6164df6263e06363e16462e26561e26660e3685fe4695ee56a5de56b5de66c5ce76e5be76f5ae87059e97158e97257ea7457eb7556eb7655ec7754ed7953ed7a52ee7b51ef7c51ef7e50f07f4ff0804ef1814df1834cf2844bf3854bf3874af48849f48948f58b47f58c46f68d45f68f44f79044f79143f79342f89441f89540f9973ff9983ef99a3efa9b3dfa9c3cfa9e3bfb9f3afba139fba238fca338fca537fca636fca835fca934fdab33fdac33fdae32fdaf31fdb130fdb22ffdb42ffdb52efeb72dfeb82cfeba2cfebb2bfebd2afebe2afec029fdc229fdc328fdc527fdc627fdc827fdca26fdcb26fccd25fcce25fcd025fcd225fbd324fbd524fbd724fad824fada24f9dc24f9dd25f8df25f8e125f7e225f7e425f6e626f6e826f5e926f5eb27f4ed27f3ee27f3f027f2f227f1f426f1f525f0f724f0f921"));
 
-;// CONCATENATED MODULE: ./node_modules/d3-scale-chromatic/src/index.js
+;// ./node_modules/d3-scale-chromatic/src/index.js
 
 
 
@@ -52839,7 +54878,8 @@ var plasma = viridis_ramp(colors("0d088710078813078916078a19068c1b068d1d068e2006
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/create.js
+;// ./node_modules/d3-selection/src/create.js
+Object.defineProperty(src_create, "name", { value: "default", configurable: true });
 
 
 
@@ -52847,7 +54887,7 @@ var plasma = viridis_ramp(colors("0d088710078813078916078a19068c1b068d1d068e2006
   return src_select(creator(name).call(document.documentElement));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/local.js
+;// ./node_modules/d3-selection/src/local.js
 var nextId = 0;
 
 function local_local() {
@@ -52876,7 +54916,8 @@ Local.prototype = local_local.prototype = {
   }
 };
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/pointers.js
+;// ./node_modules/d3-selection/src/pointers.js
+Object.defineProperty(pointers, "name", { value: "default", configurable: true });
 
 
 
@@ -52889,7 +54930,8 @@ Local.prototype = local_local.prototype = {
   return Array.from(events, event => pointer(event, node));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/selectAll.js
+;// ./node_modules/d3-selection/src/selectAll.js
+Object.defineProperty(src_selectAll, "name", { value: "default", configurable: true });
 
 
 
@@ -52899,7 +54941,7 @@ Local.prototype = local_local.prototype = {
       : new Selection([array_array(selector)], root);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-selection/src/index.js
+;// ./node_modules/d3-selection/src/index.js
 
 
 
@@ -52916,14 +54958,15 @@ Local.prototype = local_local.prototype = {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/constant.js
+;// ./node_modules/d3-shape/src/constant.js
+Object.defineProperty(d3_shape_src_constant, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_shape_src_constant(x) {
   return function constant() {
     return x;
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/math.js
+;// ./node_modules/d3-shape/src/math.js
 const d3_shape_src_math_abs = Math.abs;
 const math_atan2 = Math.atan2;
 const src_math_cos = Math.cos;
@@ -52945,7 +54988,7 @@ function math_asin(x) {
   return x >= 1 ? src_math_halfPi : x <= -1 ? -src_math_halfPi : Math.asin(x);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/path.js
+;// ./node_modules/d3-shape/src/path.js
 
 
 function withPath(shape) {
@@ -52966,7 +55009,8 @@ function withPath(shape) {
   return () => new Path(digits);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/arc.js
+;// ./node_modules/d3-shape/src/arc.js
+Object.defineProperty(src_arc, "name", { value: "default", configurable: true });
 
 
 
@@ -53236,7 +55280,8 @@ function cornerTangents(x0, y0, x1, y1, r1, rc, cw) {
   return arc;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/array.js
+;// ./node_modules/d3-shape/src/array.js
+Object.defineProperty(d3_shape_src_array, "name", { value: "default", configurable: true });
 var d3_shape_src_array_slice = Array.prototype.slice;
 
 /* harmony default export */ function d3_shape_src_array(x) {
@@ -53245,7 +55290,8 @@ var d3_shape_src_array_slice = Array.prototype.slice;
     : Array.from(x); // Map, Set, iterable, string, or anything else
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/linear.js
+;// ./node_modules/d3-shape/src/curve/linear.js
+Object.defineProperty(curve_linear, "name", { value: "default", configurable: true });
 function Linear(context) {
   this._context = context;
 }
@@ -53278,7 +55324,7 @@ Linear.prototype = {
   return new Linear(context);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/point.js
+;// ./node_modules/d3-shape/src/point.js
 function point_x(p) {
   return p[0];
 }
@@ -53287,7 +55333,8 @@ function point_y(p) {
   return p[1];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/line.js
+;// ./node_modules/d3-shape/src/line.js
+Object.defineProperty(src_line, "name", { value: "default", configurable: true });
 
 
 
@@ -53347,7 +55394,8 @@ function point_y(p) {
   return line;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/area.js
+;// ./node_modules/d3-shape/src/area.js
+Object.defineProperty(d3_shape_src_area, "name", { value: "default", configurable: true });
 
 
 
@@ -53461,17 +55509,20 @@ function point_y(p) {
   return area;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/descending.js
+;// ./node_modules/d3-shape/src/descending.js
+Object.defineProperty(src_descending, "name", { value: "default", configurable: true });
 /* harmony default export */ function src_descending(a, b) {
   return b < a ? -1 : b > a ? 1 : b >= a ? 0 : NaN;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/identity.js
+;// ./node_modules/d3-shape/src/identity.js
+Object.defineProperty(d3_shape_src_identity, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_shape_src_identity(d) {
   return d;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/pie.js
+;// ./node_modules/d3-shape/src/pie.js
+Object.defineProperty(pie, "name", { value: "default", configurable: true });
 
 
 
@@ -53553,7 +55604,7 @@ function point_y(p) {
   return pie;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/radial.js
+;// ./node_modules/d3-shape/src/curve/radial.js
 
 
 var curveRadialLinear = curveRadial(curve_linear);
@@ -53591,7 +55642,8 @@ function curveRadial(curve) {
   return radial;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/lineRadial.js
+;// ./node_modules/d3-shape/src/lineRadial.js
+Object.defineProperty(src_lineRadial, "name", { value: "default", configurable: true });
 
 
 
@@ -53612,7 +55664,8 @@ function lineRadial(l) {
   return lineRadial(src_line().curve(curveRadialLinear));
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/areaRadial.js
+;// ./node_modules/d3-shape/src/areaRadial.js
+Object.defineProperty(areaRadial, "name", { value: "default", configurable: true });
 
 
 
@@ -53643,12 +55696,13 @@ function lineRadial(l) {
   return a;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/pointRadial.js
+;// ./node_modules/d3-shape/src/pointRadial.js
+Object.defineProperty(pointRadial, "name", { value: "default", configurable: true });
 /* harmony default export */ function pointRadial(x, y) {
   return [(y = +y) * Math.cos(x -= Math.PI / 2), y * Math.sin(x)];
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/bump.js
+;// ./node_modules/d3-shape/src/curve/bump.js
 
 
 class Bump {
@@ -53725,7 +55779,7 @@ function bumpRadial(context) {
   return new BumpRadial(context);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/link.js
+;// ./node_modules/d3-shape/src/link.js
 
 
 
@@ -53800,7 +55854,7 @@ function linkRadial() {
   return l;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/asterisk.js
+;// ./node_modules/d3-shape/src/symbol/asterisk.js
 
 
 const sqrt3 = math_sqrt(3);
@@ -53819,7 +55873,7 @@ const sqrt3 = math_sqrt(3);
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/circle.js
+;// ./node_modules/d3-shape/src/symbol/circle.js
 
 
 /* harmony default export */ var symbol_circle = ({
@@ -53830,7 +55884,7 @@ const sqrt3 = math_sqrt(3);
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/cross.js
+;// ./node_modules/d3-shape/src/symbol/cross.js
 
 
 /* harmony default export */ var symbol_cross = ({
@@ -53852,7 +55906,7 @@ const sqrt3 = math_sqrt(3);
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/diamond.js
+;// ./node_modules/d3-shape/src/symbol/diamond.js
 
 
 const tan30 = math_sqrt(1 / 3);
@@ -53870,7 +55924,7 @@ const tan30_2 = tan30 * 2;
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/diamond2.js
+;// ./node_modules/d3-shape/src/symbol/diamond2.js
 
 
 /* harmony default export */ var diamond2 = ({
@@ -53884,7 +55938,7 @@ const tan30_2 = tan30 * 2;
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/plus.js
+;// ./node_modules/d3-shape/src/symbol/plus.js
 
 
 /* harmony default export */ var plus = ({
@@ -53897,7 +55951,7 @@ const tan30_2 = tan30 * 2;
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/square.js
+;// ./node_modules/d3-shape/src/symbol/square.js
 
 
 /* harmony default export */ var symbol_square = ({
@@ -53908,7 +55962,7 @@ const tan30_2 = tan30 * 2;
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/square2.js
+;// ./node_modules/d3-shape/src/symbol/square2.js
 
 
 /* harmony default export */ var square2 = ({
@@ -53922,7 +55976,7 @@ const tan30_2 = tan30 * 2;
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/star.js
+;// ./node_modules/d3-shape/src/symbol/star.js
 
 
 const ka = 0.89081309152928522810;
@@ -53948,7 +56002,7 @@ const ky = -src_math_cos(src_math_tau / 10) * kr;
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/triangle.js
+;// ./node_modules/d3-shape/src/symbol/triangle.js
 
 
 const triangle_sqrt3 = math_sqrt(3);
@@ -53963,7 +56017,7 @@ const triangle_sqrt3 = math_sqrt(3);
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/triangle2.js
+;// ./node_modules/d3-shape/src/symbol/triangle2.js
 
 
 const triangle2_sqrt3 = math_sqrt(3);
@@ -53980,7 +56034,7 @@ const triangle2_sqrt3 = math_sqrt(3);
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/wye.js
+;// ./node_modules/d3-shape/src/symbol/wye.js
 
 
 const wye_c = -0.5;
@@ -54007,7 +56061,7 @@ const wye_a = (k / 2 + 1) * 3;
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol/times.js
+;// ./node_modules/d3-shape/src/symbol/times.js
 
 
 /* harmony default export */ var times = ({
@@ -54020,7 +56074,7 @@ const wye_a = (k / 2 + 1) * 3;
   }
 });
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/symbol.js
+;// ./node_modules/d3-shape/src/symbol.js
 
 
 
@@ -54088,10 +56142,12 @@ function symbol_Symbol(type, size) {
   return symbol;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/noop.js
+;// ./node_modules/d3-shape/src/noop.js
+Object.defineProperty(d3_shape_src_noop, "name", { value: "default", configurable: true });
 /* harmony default export */ function d3_shape_src_noop() {}
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/basis.js
+;// ./node_modules/d3-shape/src/curve/basis.js
+Object.defineProperty(curve_basis, "name", { value: "default", configurable: true });
 function basis_point(that, x, y) {
   that._context.bezierCurveTo(
     (2 * that._x0 + that._x1) / 3,
@@ -54144,7 +56200,8 @@ Basis.prototype = {
   return new Basis(context);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/basisClosed.js
+;// ./node_modules/d3-shape/src/curve/basisClosed.js
+Object.defineProperty(curve_basisClosed, "name", { value: "default", configurable: true });
 
 
 
@@ -54198,7 +56255,8 @@ BasisClosed.prototype = {
   return new BasisClosed(context);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/basisOpen.js
+;// ./node_modules/d3-shape/src/curve/basisOpen.js
+Object.defineProperty(basisOpen, "name", { value: "default", configurable: true });
 
 
 function BasisOpen(context) {
@@ -54239,7 +56297,7 @@ BasisOpen.prototype = {
   return new BasisOpen(context);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/bundle.js
+;// ./node_modules/d3-shape/src/curve/bundle.js
 
 
 function Bundle(context, beta) {
@@ -54297,7 +56355,7 @@ Bundle.prototype = {
   return bundle;
 })(0.85));
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/cardinal.js
+;// ./node_modules/d3-shape/src/curve/cardinal.js
 function cardinal_point(that, x, y) {
   that._context.bezierCurveTo(
     that._x1 + that._k * (that._x2 - that._x0),
@@ -54360,7 +56418,7 @@ Cardinal.prototype = {
   return cardinal;
 })(0));
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/cardinalClosed.js
+;// ./node_modules/d3-shape/src/curve/cardinalClosed.js
 
 
 
@@ -54423,7 +56481,7 @@ CardinalClosed.prototype = {
   return cardinal;
 })(0));
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/cardinalOpen.js
+;// ./node_modules/d3-shape/src/curve/cardinalOpen.js
 
 
 function CardinalOpen(context, tension) {
@@ -54474,7 +56532,7 @@ CardinalOpen.prototype = {
   return cardinal;
 })(0));
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/catmullRom.js
+;// ./node_modules/d3-shape/src/curve/catmullRom.js
 
 
 
@@ -54564,7 +56622,7 @@ CatmullRom.prototype = {
   return catmullRom;
 })(0.5));
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/catmullRomClosed.js
+;// ./node_modules/d3-shape/src/curve/catmullRomClosed.js
 
 
 
@@ -54640,7 +56698,7 @@ CatmullRomClosed.prototype = {
   return catmullRom;
 })(0.5));
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/catmullRomOpen.js
+;// ./node_modules/d3-shape/src/curve/catmullRomOpen.js
 
 
 
@@ -54704,7 +56762,8 @@ CatmullRomOpen.prototype = {
   return catmullRom;
 })(0.5));
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/linearClosed.js
+;// ./node_modules/d3-shape/src/curve/linearClosed.js
+Object.defineProperty(linearClosed, "name", { value: "default", configurable: true });
 
 
 function LinearClosed(context) {
@@ -54731,7 +56790,7 @@ LinearClosed.prototype = {
   return new LinearClosed(context);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/monotone.js
+;// ./node_modules/d3-shape/src/curve/monotone.js
 function monotone_sign(x) {
   return x < 0 ? -1 : 1;
 }
@@ -54837,7 +56896,8 @@ function monotoneY(context) {
   return new MonotoneY(context);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/natural.js
+;// ./node_modules/d3-shape/src/curve/natural.js
+Object.defineProperty(natural, "name", { value: "default", configurable: true });
 function Natural(context) {
   this._context = context;
 }
@@ -54904,7 +56964,8 @@ function controlPoints(x) {
   return new Natural(context);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/curve/step.js
+;// ./node_modules/d3-shape/src/curve/step.js
+Object.defineProperty(step, "name", { value: "default", configurable: true });
 function Step(context, t) {
   this._context = context;
   this._t = t;
@@ -54959,7 +57020,8 @@ function stepAfter(context) {
   return new Step(context, 1);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/offset/none.js
+;// ./node_modules/d3-shape/src/offset/none.js
+Object.defineProperty(offset_none, "name", { value: "default", configurable: true });
 /* harmony default export */ function offset_none(series, order) {
   if (!((n = series.length) > 1)) return;
   for (var i = 1, j, s0, s1 = series[order[0]], n, m = s1.length; i < n; ++i) {
@@ -54970,14 +57032,16 @@ function stepAfter(context) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/order/none.js
+;// ./node_modules/d3-shape/src/order/none.js
+Object.defineProperty(order_none, "name", { value: "default", configurable: true });
 /* harmony default export */ function order_none(series) {
   var n = series.length, o = new Array(n);
   while (--n >= 0) o[n] = n;
   return o;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/stack.js
+;// ./node_modules/d3-shape/src/stack.js
+Object.defineProperty(src_stack, "name", { value: "default", configurable: true });
 
 
 
@@ -55037,7 +57101,8 @@ function stackSeries(key) {
   return stack;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/offset/expand.js
+;// ./node_modules/d3-shape/src/offset/expand.js
+Object.defineProperty(expand, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function expand(series, order) {
@@ -55049,7 +57114,8 @@ function stackSeries(key) {
   offset_none(series, order);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/offset/diverging.js
+;// ./node_modules/d3-shape/src/offset/diverging.js
+Object.defineProperty(offset_diverging, "name", { value: "default", configurable: true });
 /* harmony default export */ function offset_diverging(series, order) {
   if (!((n = series.length) > 0)) return;
   for (var i, j = 0, d, dy, yp, yn, n, m = series[order[0]].length; j < m; ++j) {
@@ -55065,7 +57131,8 @@ function stackSeries(key) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/offset/silhouette.js
+;// ./node_modules/d3-shape/src/offset/silhouette.js
+Object.defineProperty(silhouette, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function silhouette(series, order) {
@@ -55077,7 +57144,8 @@ function stackSeries(key) {
   offset_none(series, order);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/offset/wiggle.js
+;// ./node_modules/d3-shape/src/offset/wiggle.js
+Object.defineProperty(wiggle, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function wiggle(series, order) {
@@ -55103,7 +57171,8 @@ function stackSeries(key) {
   offset_none(series, order);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/order/appearance.js
+;// ./node_modules/d3-shape/src/order/appearance.js
+Object.defineProperty(appearance, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function appearance(series) {
@@ -55117,7 +57186,8 @@ function peak(series) {
   return j;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/order/ascending.js
+;// ./node_modules/d3-shape/src/order/ascending.js
+Object.defineProperty(order_ascending, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function order_ascending(series) {
@@ -55131,14 +57201,16 @@ function ascending_sum(series) {
   return s;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/order/descending.js
+;// ./node_modules/d3-shape/src/order/descending.js
+Object.defineProperty(order_descending, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function order_descending(series) {
   return order_ascending(series).reverse();
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/order/insideOut.js
+;// ./node_modules/d3-shape/src/order/insideOut.js
+Object.defineProperty(insideOut, "name", { value: "default", configurable: true });
 
 
 
@@ -55167,14 +57239,15 @@ function ascending_sum(series) {
   return bottoms.reverse().concat(tops);
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/order/reverse.js
+;// ./node_modules/d3-shape/src/order/reverse.js
+Object.defineProperty(reverse, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function reverse(series) {
   return order_none(series).reverse();
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-shape/src/index.js
+;// ./node_modules/d3-shape/src/index.js
 
 
 
@@ -55229,7 +57302,7 @@ function ascending_sum(series) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-time/src/index.js
+;// ./node_modules/d3-time/src/index.js
 
 
 
@@ -55250,7 +57323,7 @@ function ascending_sum(series) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-time-format/src/isoFormat.js
+;// ./node_modules/d3-time-format/src/isoFormat.js
 
 
 var isoSpecifier = "%Y-%m-%dT%H:%M:%S.%LZ";
@@ -55265,7 +57338,7 @@ var formatIso = Date.prototype.toISOString
 
 /* harmony default export */ var isoFormat = (formatIso);
 
-;// CONCATENATED MODULE: ./node_modules/d3-time-format/src/isoParse.js
+;// ./node_modules/d3-time-format/src/isoParse.js
 
 
 
@@ -55280,13 +57353,14 @@ var parseIso = +new Date("2000-01-01T00:00:00.000Z")
 
 /* harmony default export */ var isoParse = (parseIso);
 
-;// CONCATENATED MODULE: ./node_modules/d3-time-format/src/index.js
+;// ./node_modules/d3-time-format/src/index.js
 
 
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-timer/src/interval.js
+;// ./node_modules/d3-timer/src/interval.js
+Object.defineProperty(src_interval, "name", { value: "default", configurable: true });
 
 
 /* harmony default export */ function src_interval(callback, delay, time) {
@@ -55305,17 +57379,18 @@ var parseIso = +new Date("2000-01-01T00:00:00.000Z")
   return t;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-timer/src/index.js
+;// ./node_modules/d3-timer/src/index.js
 
 
 
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3-zoom/src/constant.js
+;// ./node_modules/d3-zoom/src/constant.js
 /* harmony default export */ var d3_zoom_src_constant = (x => () => x);
+(Object.getOwnPropertyDescriptor(d3_zoom_src_constant, "name") || {}).writable || Object.defineProperty(d3_zoom_src_constant, "name", { value: "default", configurable: true });
 
-;// CONCATENATED MODULE: ./node_modules/d3-zoom/src/event.js
+;// ./node_modules/d3-zoom/src/event.js
 function ZoomEvent(type, {
   sourceEvent,
   target,
@@ -55331,7 +57406,7 @@ function ZoomEvent(type, {
   });
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-zoom/src/transform.js
+;// ./node_modules/d3-zoom/src/transform.js
 function Transform(k, x, y) {
   this.k = k;
   this.x = x;
@@ -55384,7 +57459,8 @@ function transform(node) {
   return node.__zoom;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-zoom/src/noevent.js
+;// ./node_modules/d3-zoom/src/noevent.js
+Object.defineProperty(d3_zoom_src_noevent, "name", { value: "default", configurable: true });
 function src_noevent_nopropagation(event) {
   event.stopImmediatePropagation();
 }
@@ -55394,7 +57470,8 @@ function src_noevent_nopropagation(event) {
   event.stopImmediatePropagation();
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-zoom/src/zoom.js
+;// ./node_modules/d3-zoom/src/zoom.js
+Object.defineProperty(zoom, "name", { value: "default", configurable: true });
 
 
 
@@ -55843,15 +57920,11 @@ function defaultConstrain(transform, extent, translateExtent) {
   return zoom;
 }
 
-;// CONCATENATED MODULE: ./node_modules/d3-zoom/src/index.js
+;// ./node_modules/d3-zoom/src/index.js
 
 
 
-;// CONCATENATED MODULE: ./node_modules/d3/src/index.js
-
-
-
-
+;// ./node_modules/d3/src/index.js
 
 
 
@@ -55879,7 +57952,11 @@ function defaultConstrain(transform, extent, translateExtent) {
 
 
 
-;// CONCATENATED MODULE: ./node_modules/isoformat/src/format.js
+
+
+
+
+;// ./node_modules/isoformat/src/format.js
 function format(date, fallback) {
   if (!(date instanceof Date)) date = new Date(+date);
   if (isNaN(date)) return typeof fallback === "function" ? fallback(date) : fallback;
@@ -55906,7 +57983,7 @@ function format_pad(value, width) {
   return `${value}`.padStart(width, "0");
 }
 
-;// CONCATENATED MODULE: ./node_modules/isoformat/src/parse.js
+;// ./node_modules/isoformat/src/parse.js
 const parse_re = /^(?:[-+]\d{2})?\d{4}(?:-\d{2}(?:-\d{2})?)?(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{3})?)?(?:Z|[-+]\d{2}:?\d{2})?)?$/;
 
 function parse(string, fallback) {
@@ -55914,7 +57991,7 @@ function parse(string, fallback) {
   return new Date(string);
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/time.js
+;// ./node_modules/@observablehq/plot/src/time.js
 
 
 
@@ -55970,7 +58047,7 @@ function maybeUtcInterval(interval) {
   return i;
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/options.js
+;// ./node_modules/@observablehq/plot/src/options.js
 
 
 
@@ -55979,7 +58056,7 @@ function maybeUtcInterval(interval) {
 const TypedArray = Object.getPrototypeOf(Uint8Array);
 const options_objectToString = Object.prototype.toString;
 
-function options_valueof(data, value, type) {
+function valueof(data, value, type) {
   const valueType = typeof value;
   return valueType === "string"
     ? maybeTypedMap(data, field(value), type)
@@ -56011,7 +58088,7 @@ function floater(f) {
 }
 
 const field = (name) => (d) => d[name];
-const options_indexOf = {transform: options_range};
+const indexOf = {transform: options_range};
 const options_identity = {transform: (d) => d};
 const options_zero = () => 0;
 const options_one = () => 1;
@@ -56019,7 +58096,7 @@ const yes = () => true;
 const options_string = (x) => (x == null ? x : `${x}`);
 const options_number = (x) => (x == null ? x : +x);
 const options_boolean = (x) => (x == null ? x : !!x);
-const options_first = (x) => (x ? x[0] : undefined);
+const first = (x) => (x ? x[0] : undefined);
 const options_second = (x) => (x ? x[1] : undefined);
 const third = (x) => (x ? x[2] : undefined);
 const options_constant = (x) => () => x;
@@ -56032,7 +58109,7 @@ function percentile(reduce) {
 }
 
 // If the values are specified as a typed array, no coercion is required.
-function options_coerceNumbers(values) {
+function coerceNumbers(values) {
   return values instanceof TypedArray ? values : options_map(values, coerceNumber, Float64Array);
 }
 
@@ -56069,7 +58146,7 @@ function coerceDate(x) {
 // tuple [channel, constant] where one of the two is undefined, and the other is
 // the given value. If you wish to reference a named field that is also a valid
 // CSS color, use an accessor (d => d.red) instead.
-function options_maybeColorChannel(value, defaultValue) {
+function maybeColorChannel(value, defaultValue) {
   if (value === undefined) value = defaultValue;
   return value === null ? [undefined, "none"] : isColor(value) ? [undefined, value] : [value, undefined];
 }
@@ -56120,7 +58197,7 @@ function options_isObject(option) {
 // this is used to test whether a scale is defined; this should be consistent
 // with inferScaleType when there are no channels associated with the scale, and
 // if this returns true, then normalizeScale must return non-null.
-function options_isScaleOptions(option) {
+function isScaleOptions(option) {
   return options_isObject(option) && (option.type !== undefined || option.domain !== undefined);
 }
 
@@ -56132,7 +58209,7 @@ function isOptions(option) {
 
 // Disambiguates a sort transform (e.g., {sort: "date"}) from a channel domain
 // sort definition (e.g., {sort: {y: "x"}}).
-function options_isDomainSort(sort) {
+function isDomainSort(sort) {
   return isOptions(sort) && sort.value === undefined && sort.channel === undefined;
 }
 
@@ -56152,15 +58229,15 @@ function maybeZero(x, x1, x2, x3 = options_identity) {
 }
 
 // For marks that have x and y channels (e.g., cell, dot, line, text).
-function options_maybeTuple(x, y) {
-  return x === undefined && y === undefined ? [options_first, options_second] : [x, y];
+function maybeTuple(x, y) {
+  return x === undefined && y === undefined ? [first, options_second] : [x, y];
 }
 
 // A helper for extracting the z channel, if it is variable. Used by transforms
 // that require series, such as moving average and normalize.
 function maybeZ({z, fill, stroke} = {}) {
-  if (z === undefined) [z] = options_maybeColorChannel(fill);
-  if (z === undefined) [z] = options_maybeColorChannel(stroke);
+  if (z === undefined) [z] = maybeColorChannel(fill);
+  if (z === undefined) [z] = maybeColorChannel(stroke);
   return z;
 }
 
@@ -56187,7 +58264,7 @@ function options_keyof(value) {
   return value !== null && typeof value === "object" ? value.valueOf() : value;
 }
 
-function options_maybeInput(key, options) {
+function maybeInput(key, options) {
   if (options[key] !== undefined) return options[key];
   switch (key) {
     case "x1":
@@ -56202,7 +58279,7 @@ function options_maybeInput(key, options) {
   return options[key];
 }
 
-function options_column(source) {
+function column(source) {
   // Defines a column whose values are lazily populated by calling the returned
   // setter. If the given source is labeled, the label is propagated to the
   // returned column definition.
@@ -56210,18 +58287,18 @@ function options_column(source) {
   return [
     {
       transform: () => value,
-      label: options_labelof(source)
+      label: labelof(source)
     },
     (v) => (value = v)
   ];
 }
 
 // Like column, but allows the source to be null.
-function options_maybeColumn(source) {
-  return source == null ? [source] : options_column(source);
+function maybeColumn(source) {
+  return source == null ? [source] : column(source);
 }
 
-function options_labelof(value, defaultValue) {
+function labelof(value, defaultValue) {
   return typeof value === "string" ? value : value && value.label !== undefined ? value.label : defaultValue;
 }
 
@@ -56294,8 +58371,8 @@ function numberChannel(source) {
   return source == null
     ? null
     : {
-        transform: (data) => options_valueof(data, source, Float64Array),
-        label: options_labelof(source)
+        transform: (data) => valueof(data, source, Float64Array),
+        label: labelof(source)
       };
 }
 
@@ -56471,7 +58548,7 @@ function maybeNamed(things) {
   return isIterable(things) ? options_named(things) : things;
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/memoize.js
+;// ./node_modules/@observablehq/plot/src/memoize.js
 function memoize1(compute) {
   let cacheValue, cacheKeys;
   return (...keys) => {
@@ -56483,7 +58560,7 @@ function memoize1(compute) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/format.js
+;// ./node_modules/@observablehq/plot/src/format.js
 
 
 
@@ -56529,7 +58606,7 @@ function formatAuto(locale = "en-US") {
 // used instead whenever possible.
 const formatDefault = formatAuto();
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/defined.js
+;// ./node_modules/@observablehq/plot/src/defined.js
 
 
 function defined(x) {
@@ -56560,7 +58637,7 @@ function negative(x) {
   return x < 0 && isFinite(x) ? x : NaN;
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/scales/index.js
+;// ./node_modules/@observablehq/plot/src/scales/index.js
 // Positional scales have associated axes, and for ordinal data, a point or band
 // scale is used instead of an ordinal scale.
 const position = Symbol("position");
@@ -56588,7 +58665,7 @@ const symbol = Symbol("symbol");
 // TODO Rather than hard-coding the list of known scale names, collect the names
 // and categories for each plot specification, so that custom marks can register
 // custom scales.
-const scales_registry = new Map([
+const registry = new Map([
   ["x", position],
   ["y", position],
   ["fx", position],
@@ -56600,7 +58677,7 @@ const scales_registry = new Map([
   ["length", scales_length]
 ]);
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/symbol.js
+;// ./node_modules/@observablehq/plot/src/symbol.js
 
 
 
@@ -56665,7 +58742,22 @@ function maybeSymbolChannel(symbol) {
   return [symbol, undefined];
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/transforms/group.js
+;// ./node_modules/@observablehq/plot/src/transforms/group.js
+/* unused harmony import specifier */ var group_sort;
+/* unused harmony import specifier */ var grouper;
+/* unused harmony import specifier */ var group_ascendingDefined;
+/* unused harmony import specifier */ var group_identity;
+/* unused harmony import specifier */ var group_maybeTuple;
+/* unused harmony import specifier */ var group_maybeColumn;
+/* unused harmony import specifier */ var group_maybeColorChannel;
+/* unused harmony import specifier */ var group_valueof;
+/* unused harmony import specifier */ var group_isObject;
+/* unused harmony import specifier */ var group_column;
+/* unused harmony import specifier */ var group_maybeInput;
+/* unused harmony import specifier */ var group_labelof;
+/* unused harmony import specifier */ var group_range;
+/* unused harmony import specifier */ var group_first;
+/* unused harmony import specifier */ var basic;
 
 
 
@@ -56678,14 +58770,14 @@ function groupZ(outputs, options) {
 
 // Group on {z, fill, stroke}, then on x.
 function groupX(outputs = {y: "count"}, options = {}) {
-  const {x = identity} = options;
+  const {x = group_identity} = options;
   if (x == null) throw new Error("missing channel: x");
   return groupn(x, null, outputs, options);
 }
 
 // Group on {z, fill, stroke}, then on y.
 function groupY(outputs = {x: "count"}, options = {}) {
-  const {y = identity} = options;
+  const {y = group_identity} = options;
   if (y == null) throw new Error("missing channel: y");
   return groupn(null, y, outputs, options);
 }
@@ -56693,7 +58785,7 @@ function groupY(outputs = {x: "count"}, options = {}) {
 // Group on {z, fill, stroke}, then on x and y.
 function group_group(outputs = {fill: "count"}, options = {}) {
   let {x, y} = options;
-  [x, y] = maybeTuple(x, y);
+  [x, y] = group_maybeTuple(x, y);
   if (x == null) throw new Error("missing channel: x");
   if (y == null) throw new Error("missing channel: y");
   return groupn(x, y, outputs, options);
@@ -56713,13 +58805,13 @@ function groupn(
 ) {
   // Compute the outputs.
   outputs = maybeOutputs(outputs, inputs);
-  reduceData = maybeReduce(reduceData, identity);
+  reduceData = maybeReduce(reduceData, group_identity);
   sort = sort == null ? undefined : maybeOutput("sort", sort, inputs);
   filter = filter == null ? undefined : maybeEvaluator("filter", filter, inputs);
 
   // Produce x and y output channels as appropriate.
-  const [GX, setGX] = maybeColumn(x);
-  const [GY, setGY] = maybeColumn(y);
+  const [GX, setGX] = group_maybeColumn(x);
+  const [GY, setGY] = group_maybeColumn(y);
 
   // Greedily materialize the z, fill, and stroke channels (if channels and not
   // constants) so that we can reference them for subdividing groups without
@@ -56734,22 +58826,22 @@ function groupn(
     y2, // consumed if y is an output
     ...options
   } = inputs;
-  const [GZ, setGZ] = maybeColumn(z);
-  const [vfill] = maybeColorChannel(fill);
-  const [vstroke] = maybeColorChannel(stroke);
-  const [GF, setGF] = maybeColumn(vfill);
-  const [GS, setGS] = maybeColumn(vstroke);
+  const [GZ, setGZ] = group_maybeColumn(z);
+  const [vfill] = group_maybeColorChannel(fill);
+  const [vstroke] = group_maybeColorChannel(stroke);
+  const [GF, setGF] = group_maybeColumn(vfill);
+  const [GS, setGS] = group_maybeColumn(vstroke);
 
   return {
     ...("z" in inputs && {z: GZ || z}),
     ...("fill" in inputs && {fill: GF || fill}),
     ...("stroke" in inputs && {stroke: GS || stroke}),
     ...basic(options, (data, facets) => {
-      const X = valueof(data, x);
-      const Y = valueof(data, y);
-      const Z = valueof(data, z);
-      const F = valueof(data, vfill);
-      const S = valueof(data, vstroke);
+      const X = group_valueof(data, x);
+      const Y = group_valueof(data, y);
+      const Z = group_valueof(data, z);
+      const F = group_valueof(data, vfill);
+      const S = group_valueof(data, vstroke);
       const G = maybeSubgroup(outputs, {z: Z, fill: F, stroke: S});
       const groupFacets = [];
       const groupData = [];
@@ -56815,9 +58907,9 @@ function maybeOutputs(outputs, inputs, asOutput = maybeOutput) {
 
 function maybeOutput(name, reduce, inputs, asEvaluator = maybeEvaluator) {
   let scale; // optional per-channel scale override
-  if (isObject(reduce) && "reduce" in reduce) (scale = reduce.scale), (reduce = reduce.reduce); // N.B. array.reduce
+  if (group_isObject(reduce) && "reduce" in reduce) (scale = reduce.scale), (reduce = reduce.reduce); // N.B. array.reduce
   const evaluator = asEvaluator(name, reduce, inputs);
-  const [output, setOutput] = column(evaluator.label);
+  const [output, setOutput] = group_column(evaluator.label);
   let O;
   return {
     name,
@@ -56840,15 +58932,15 @@ function nullOutput(name) {
 }
 
 function maybeEvaluator(name, reduce, inputs, asReduce = maybeReduce) {
-  const input = maybeInput(name, inputs);
+  const input = group_maybeInput(name, inputs);
   const reducer = asReduce(reduce, input);
   let V, context;
   return {
-    label: labelof(reducer === reduceCount ? null : input, reducer.label),
+    label: group_labelof(reducer === reduceCount ? null : input, reducer.label),
     initialize(data) {
-      V = input === undefined ? data : valueof(data, input);
+      V = input === undefined ? data : group_valueof(data, input);
       if (reducer.scope === "data") {
-        context = reducer.reduceIndex(range(data), V);
+        context = reducer.reduceIndex(group_range(data), V);
       }
     },
     scope(scope, I) {
@@ -56864,9 +58956,9 @@ function maybeEvaluator(name, reduce, inputs, asReduce = maybeReduce) {
 
 function maybeGroup(I, X) {
   return X
-    ? sort(
+    ? group_sort(
         grouper(I, (i) => X[i]),
-        first
+        group_first
       )
     : [[, I]];
 }
@@ -56932,7 +59024,7 @@ function maybeSubgroup(outputs, inputs) {
 function maybeSort(facets, sort, reverse) {
   if (sort) {
     const S = sort.output.transform();
-    const compare = (i, j) => ascendingDefined(S[i], S[j]);
+    const compare = (i, j) => group_ascendingDefined(S[i], S[j]);
     facets.forEach((f) => f.sort(compare));
   }
   if (reverse) {
@@ -56985,7 +59077,7 @@ const reduceFirst = {
 const reduceTitle = {
   reduceIndex(I, X) {
     const n = 5;
-    const groups = sort_sort(
+    const groups = sort(
       rollup(
         I,
         (V) => V.length,
@@ -56996,7 +59088,7 @@ const reduceTitle = {
     const top = groups.slice(-n).reverse();
     if (top.length < groups.length) {
       const bottom = groups.slice(0, 1 - n);
-      top[n - 1] = [`… ${bottom.length.toLocaleString("en-US")} more`, sum_sum(bottom, options_second)];
+      top[n - 1] = [`… ${bottom.length.toLocaleString("en-US")} more`, sum(bottom, options_second)];
     }
     return top.map(([key, value]) => `${key} (${value.toLocaleString("en-US")})`).join("\n");
   }
@@ -57024,15 +59116,15 @@ const reduceDistinct = {
   }
 };
 
-const reduceSum = reduceAccessor(sum_sum);
+const reduceSum = reduceAccessor(sum);
 
 function reduceProportion(value, scope) {
   return value == null
     ? {scope, label: "Frequency", reduceIndex: (I, V, basis = 1) => I.length / basis}
-    : {scope, reduceIndex: (I, V, basis = 1) => sum_sum(I, (i) => V[i]) / basis};
+    : {scope, reduceIndex: (I, V, basis = 1) => sum(I, (i) => V[i]) / basis};
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/channel.js
+;// ./node_modules/@observablehq/plot/src/channel.js
 
 
 
@@ -57045,8 +59137,8 @@ function createChannel(data, {scale, type, value, filter, hint}, name) {
   return inferChannelScale(name, {
     scale,
     type,
-    value: options_valueof(data, value),
-    label: options_labelof(value),
+    value: valueof(data, value),
+    label: labelof(value),
     filter,
     hint
   });
@@ -57059,7 +59151,7 @@ function createChannels(channels, data) {
 }
 
 // TODO Use Float64Array for scales with numeric ranges, e.g. position?
-function channel_valueObject(channels, scales) {
+function valueObject(channels, scales) {
   const values = Object.fromEntries(
     Object.entries(channels).map(([name, {scale: scaleName, value}]) => {
       const scale = scaleName == null ? null : scales[scaleName];
@@ -57097,12 +59189,12 @@ function inferChannelScale(name, channel) {
         }
         break;
       default:
-        channel.scale = scales_registry.has(name) ? name : null;
+        channel.scale = registry.has(name) ? name : null;
         break;
     }
   } else if (scale === false) {
     channel.scale = null;
-  } else if (scale != null && !scales_registry.has(scale)) {
+  } else if (scale != null && !registry.has(scale)) {
     throw new Error(`unknown scale: ${scale}`);
   }
   return channel;
@@ -57114,7 +59206,7 @@ function inferChannelScale(name, channel) {
 function channelDomain(data, facets, channels, facetChannels, options) {
   const {reverse: defaultReverse, reduce: defaultReduce = true, limit: defaultLimit} = options;
   for (const x in options) {
-    if (!scales_registry.has(x)) continue; // ignore unknown scale keys (including generic options)
+    if (!registry.has(x)) continue; // ignore unknown scale keys (including generic options)
     let {value: y, reverse = defaultReverse, reduce = defaultReduce, limit = defaultLimit} = maybeValue(options[x]);
     if (reverse === undefined) reverse = y === "width" || y === "height"; // default to descending for lengths
     if (reduce == null || reduce === false) continue; // disabled reducer
@@ -57145,9 +59237,9 @@ function channelDomain(data, facets, channels, facetChannels, options) {
           (I) => reducer.reduceIndex(I, YV),
           (i) => XV[i]
         );
-        domain = sort_sort(domain, reverse ? descendingGroup : ascendingGroup);
+        domain = sort(domain, reverse ? descendingGroup : ascendingGroup);
         if (lo !== 0 || hi !== Infinity) domain = domain.slice(lo, hi);
-        return domain.map(options_first);
+        return domain.map(first);
       };
     }
   }
@@ -57196,7 +59288,7 @@ function descendingGroup([ak, av], [bk, bv]) {
   return descendingDefined(av, bv) || defined_ascendingDefined(ak, bk);
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/scales/schemes.js
+;// ./node_modules/@observablehq/plot/src/scales/schemes.js
 
 
 const ordinalSchemes = new Map([
@@ -57399,7 +59491,7 @@ function isDivergingScheme(scheme) {
   return scheme != null && divergingSchemes.has(`${scheme}`.toLowerCase());
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/scales/quantitative.js
+;// ./node_modules/@observablehq/plot/src/scales/quantitative.js
 
 
 
@@ -57440,14 +59532,14 @@ function createScaleQ(
     round,
     scheme,
     interval,
-    range = scales_registry.get(key) === radius
+    range = registry.get(key) === radius
       ? inferRadialRange(channels, domain)
-      : scales_registry.get(key) === scales_length
+      : registry.get(key) === scales_length
       ? inferLengthRange(channels, domain)
-      : scales_registry.get(key) === opacity
+      : registry.get(key) === opacity
       ? quantitative_unit
       : undefined,
-    interpolate = scales_registry.get(key) === scales_color
+    interpolate = registry.get(key) === scales_color
       ? scheme == null && range !== undefined
         ? rgb
         : quantitativeScheme(scheme !== undefined ? scheme : type === "cyclical" ? "rainbow" : "turbo")
@@ -57548,7 +59640,7 @@ function createScaleQuantile(
     range =
       interpolate !== undefined
         ? quantize(interpolate, n)
-        : scales_registry.get(key) === scales_color
+        : registry.get(key) === scales_color
         ? ordinalRange(scheme, n)
         : undefined;
   }
@@ -57581,7 +59673,7 @@ function createScaleQuantize(
     range =
       interpolate !== undefined
         ? quantize(interpolate, n)
-        : scales_registry.get(key) === scales_color
+        : registry.get(key) === scales_color
         ? ordinalRange(scheme, n)
         : undefined;
   } else {
@@ -57602,7 +59694,7 @@ function createScaleThreshold(
     interpolate,
     range = interpolate !== undefined
       ? quantize(interpolate, domain.length + 1)
-      : scales_registry.get(key) === scales_color
+      : registry.get(key) === scales_color
       ? ordinalRange(scheme, domain.length + 1)
       : undefined,
     reverse
@@ -57629,7 +59721,7 @@ function isOrdered(domain, sign) {
 }
 
 function createScaleIdentity() {
-  return {type: "identity", scale: src_identity_identity()};
+  return {type: "identity", scale: identity_identity()};
 }
 
 function inferDomain(channels, f = defined_finite) {
@@ -57642,7 +59734,7 @@ function inferDomain(channels, f = defined_finite) {
 }
 
 function inferAutoDomain(key, channels) {
-  const type = scales_registry.get(key);
+  const type = registry.get(key);
   return (type === radius || type === opacity || type === scales_length ? inferZeroDomain : inferDomain)(channels);
 }
 
@@ -57697,7 +59789,7 @@ function interpolatePiecewise(interpolate) {
   return (i, j) => (t) => interpolate(i + t * (j - i));
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/scales/diverging.js
+;// ./node_modules/@observablehq/plot/src/scales/diverging.js
 
 
 
@@ -57719,7 +59811,7 @@ function createScaleD(
     scheme,
     range,
     symmetric = true,
-    interpolate = scales_registry.get(key) === scales_color
+    interpolate = registry.get(key) === scales_color
       ? scheme == null && range !== undefined
         ? rgb
         : quantitativeScheme(scheme !== undefined ? scheme : "rdbu")
@@ -57850,7 +59942,7 @@ function diverging_transformSymlog(constant) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/scales/temporal.js
+;// ./node_modules/@observablehq/plot/src/scales/temporal.js
 
 
 
@@ -57866,7 +59958,7 @@ function createScaleUtc(key, channels, options) {
   return createScaleT(key, utcTime(), channels, options);
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/scales/ordinal.js
+;// ./node_modules/@observablehq/plot/src/scales/ordinal.js
 
 
 
@@ -57899,10 +59991,10 @@ function createScaleOrdinal(key, channels, {type, interval, domain, range, schem
   interval = maybeRangeInterval(interval, type);
   if (domain === undefined) domain = ordinal_inferDomain(channels, interval, key);
   let hint;
-  if (scales_registry.get(key) === symbol) {
+  if (registry.get(key) === symbol) {
     hint = inferSymbolHint(channels);
     range = range === undefined ? inferSymbolRange(hint) : options_map(range, maybeSymbol);
-  } else if (scales_registry.get(key) === scales_color) {
+  } else if (registry.get(key) === scales_color) {
     if (range === undefined && (type === "ordinal" || type === ordinalImplicit)) {
       range = maybeBooleanRange(domain, scheme);
       if (range !== undefined) scheme = undefined; // Don’t re-apply scheme.
@@ -57969,10 +60061,10 @@ function ordinal_inferDomain(channels, interval, key) {
     const [min, max] = extent(values).map(interval.floor, interval);
     return interval.range(min, interval.offset(max));
   }
-  if (values.size > 10e3 && scales_registry.get(key) === position) {
+  if (values.size > 10e3 && registry.get(key) === position) {
     throw new Error(`implicit ordinal domain of ${key} scale has more than 10,000 values`);
   }
-  return sort_sort(values, defined_ascendingDefined);
+  return sort(values, defined_ascendingDefined);
 }
 
 // If all channels provide a consistent hint, propagate it to the scale.
@@ -57999,7 +60091,7 @@ function inferSymbolRange(hint) {
   return isNoneish(hint.fill) ? symbolsStroke : symbolsFill;
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/warnings.js
+;// ./node_modules/@observablehq/plot/src/warnings.js
 let warnings = 0;
 
 function consumeWarnings() {
@@ -58013,7 +60105,9 @@ function warnings_warn(message) {
   ++warnings;
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/scales.js
+;// ./node_modules/@observablehq/plot/src/scales.js
+/* unused harmony import specifier */ var scales_isScaleOptions;
+/* unused harmony import specifier */ var scales_registry;
 
 
 
@@ -58048,7 +60142,7 @@ function createScales(
   for (const [key, channels] of channelsByScale) {
     const scaleOptions = options[key];
     const scale = createScale(key, channels, {
-      round: scales_registry.get(key) === position ? round : undefined, // only for position
+      round: registry.get(key) === position ? round : undefined, // only for position
       nice,
       clamp,
       zero,
@@ -58226,7 +60320,7 @@ function piecewiseRange(scale) {
   return Array.from({length}, (_, i) => start + (i / (length - 1)) * (end - start));
 }
 
-function scales_normalizeScale(key, scale, hint) {
+function normalizeScale(key, scale, hint) {
   return createScale(key, hint === undefined ? undefined : [{hint}], {...scale});
 }
 
@@ -58293,12 +60387,12 @@ function createScale(key, channels = [], options = {}) {
     case "pow":
     case "log":
     case "symlog":
-      options = coerceType(channels, options, options_coerceNumbers);
+      options = coerceType(channels, options, coerceNumbers);
       break;
     case "identity":
-      switch (scales_registry.get(key)) {
+      switch (registry.get(key)) {
         case position:
-          options = coerceType(channels, options, options_coerceNumbers);
+          options = coerceType(channels, options, coerceNumbers);
           break;
         case symbol:
           options = coerceType(channels, options, coerceSymbols);
@@ -58353,7 +60447,7 @@ function createScale(key, channels = [], options = {}) {
     case "band":
       return createScaleBand(key, channels, options);
     case "identity":
-      return scales_registry.get(key) === position ? createScaleIdentity() : {type: "identity"};
+      return registry.get(key) === position ? createScaleIdentity() : {type: "identity"};
     case undefined:
       return;
     default:
@@ -58394,7 +60488,7 @@ function inferScaleType(key, channels, {type, domain, range, scheme, pivot, proj
   if (domain === undefined && !channels.some(({value}) => value !== undefined)) return;
 
   // Some scales have default types.
-  const kind = scales_registry.get(key);
+  const kind = registry.get(key);
   if (kind === radius) return "sqrt";
   if (kind === opacity || kind === scales_length) return "linear";
   if (kind === symbol) return "ordinal";
@@ -58492,10 +60586,10 @@ function coerceSymbols(values) {
 function scales_scale(options = {}) {
   let scale;
   for (const key in options) {
-    if (!registry.has(key)) continue; // ignore unknown properties
-    if (!isScaleOptions(options[key])) continue; // e.g., ignore {color: "red"}
+    if (!scales_registry.has(key)) continue; // ignore unknown properties
+    if (!scales_isScaleOptions(options[key])) continue; // e.g., ignore {color: "red"}
     if (scale !== undefined) throw new Error("ambiguous scale definition; multiple scales found");
-    scale = exposeScale(scales_normalizeScale(key, options[key]));
+    scale = exposeScale(normalizeScale(key, options[key]));
   }
   if (scale === undefined) throw new Error("invalid scale definition; no scale found");
   return scale;
@@ -58503,7 +60597,7 @@ function scales_scale(options = {}) {
 
 function exposeScales(scaleDescriptors) {
   return (key) => {
-    if (!scales_registry.has((key = `${key}`))) throw new Error(`unknown scale: ${key}`);
+    if (!registry.has((key = `${key}`))) throw new Error(`unknown scale: ${key}`);
     return key in scaleDescriptors ? exposeScale(scaleDescriptors[key]) : undefined;
   };
 }
@@ -58552,7 +60646,7 @@ function exposeScale({scale, type, domain, range, interpolate, interval, transfo
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/facet.js
+;// ./node_modules/@observablehq/plot/src/facet.js
 
 
 
@@ -58629,7 +60723,7 @@ function facetTranslate(fx, fy, {marginTop, marginLeft}) {
 // facets in the original index. TODO Memoize to avoid repeated work?
 function facetExclude(index) {
   const ex = [];
-  const e = new Uint32Array(sum_sum(index, (d) => d.length));
+  const e = new Uint32Array(sum(index, (d) => d.length));
   for (const i of index) {
     let n = 0;
     for (const j of index) {
@@ -58736,7 +60830,9 @@ function facetFilter(facets, {channels: {fx, fy}, groups}) {
     : facets.map(({y}) => groups.get(y) ?? []);
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/projection.js
+;// ./node_modules/@observablehq/plot/src/projection.js
+/* unused harmony import specifier */ var projection_valueObject;
+/* unused harmony import specifier */ var projection_coerceNumbers;
 
 
 
@@ -58980,10 +61076,10 @@ function applyPosition(channels, scales, context) {
   let position = {};
   if (x) position.x = x;
   if (y) position.y = y;
-  position = valueObject(position, scales);
+  position = projection_valueObject(position, scales);
   if (context.projection) maybeProject("x", "y", channels, position, context);
-  if (x) position.x = coerceNumbers(position.x);
-  if (y) position.y = coerceNumbers(position.y);
+  if (x) position.x = projection_coerceNumbers(position.x);
+  if (y) position.y = projection_coerceNumbers(position.y);
   return position;
 }
 
@@ -58992,11 +61088,11 @@ function hasGeometry(marks) {
   return false;
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/context.js
+;// ./node_modules/@observablehq/plot/src/context.js
 
 
 
-function context_createContext(options = {}, dimensions, className) {
+function createContext(options = {}, dimensions, className) {
   const {document = typeof window !== "undefined" ? window.document : undefined} = options;
   return {document, className, projection: createProjection(options, dimensions)};
 }
@@ -59005,7 +61101,7 @@ function context_create(name, {document}) {
   return src_select(creator(name).call(document.documentElement));
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/style.js
+;// ./node_modules/@observablehq/plot/src/style.js
 
 
 
@@ -59083,9 +61179,9 @@ function styles(
     if (isNoneish(defaultStroke) && !isNoneish(stroke)) defaultFill = "none";
   }
 
-  const [vfill, cfill] = options_maybeColorChannel(fill, defaultFill);
+  const [vfill, cfill] = maybeColorChannel(fill, defaultFill);
   const [vfillOpacity, cfillOpacity] = maybeNumberChannel(fillOpacity, defaultFillOpacity);
-  const [vstroke, cstroke] = options_maybeColorChannel(stroke, defaultStroke);
+  const [vstroke, cstroke] = maybeColorChannel(stroke, defaultStroke);
   const [vstrokeOpacity, cstrokeOpacity] = maybeNumberChannel(strokeOpacity, defaultStrokeOpacity);
   const [vopacity, copacity] = maybeNumberChannel(opacity);
 
@@ -59450,7 +61546,9 @@ function applyFrameAnchor({frameAnchor}, {width, height, marginTop, marginRight,
   ];
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/transforms/basic.js
+;// ./node_modules/@observablehq/plot/src/transforms/basic.js
+/* unused harmony import specifier */ var randomLcg;
+/* unused harmony import specifier */ var basic_isDomainSort;
 
 
 
@@ -59461,13 +61559,13 @@ function basic_basic({filter: f1, sort: s1, reverse: r1, transform: t1, initiali
   if (t1 === undefined) {
     // explicit transform overrides filter, sort, and reverse
     if (f1 != null) t1 = filterTransform(f1);
-    if (s1 != null && !options_isDomainSort(s1)) t1 = composeTransform(t1, sortTransform(s1));
+    if (s1 != null && !isDomainSort(s1)) t1 = composeTransform(t1, sortTransform(s1));
     if (r1) t1 = composeTransform(t1, reverseTransform);
   }
   if (transform != null && i1 != null) throw new Error("transforms cannot be applied after initializers");
   return {
     ...options,
-    ...((s1 === null || options_isDomainSort(s1)) && {sort: s1}),
+    ...((s1 === null || isDomainSort(s1)) && {sort: s1}),
     transform: composeTransform(t1, transform)
   };
 }
@@ -59478,12 +61576,12 @@ function initializer({filter: f1, sort: s1, reverse: r1, initializer: i1, ...opt
   if (i1 === undefined) {
     // explicit initializer overrides filter, sort, and reverse
     if (f1 != null) i1 = filterTransform(f1);
-    if (s1 != null && !options_isDomainSort(s1)) i1 = composeInitializer(i1, sortTransform(s1));
+    if (s1 != null && !isDomainSort(s1)) i1 = composeInitializer(i1, sortTransform(s1));
     if (r1) i1 = composeInitializer(i1, reverseTransform);
   }
   return {
     ...options,
-    ...((s1 === null || options_isDomainSort(s1)) && {sort: s1}),
+    ...((s1 === null || isDomainSort(s1)) && {sort: s1}),
     initializer: composeInitializer(i1, initializer)
   };
 }
@@ -59518,7 +61616,7 @@ function basic_filter(test, options) {
 
 function filterTransform(value) {
   return (data, facets) => {
-    const V = options_valueof(data, value);
+    const V = valueof(data, value);
     return {data, facets: facets.map((I) => I.filter((i) => V[i]))};
   };
 }
@@ -59526,7 +61624,7 @@ function filterTransform(value) {
 function basic_reverse({sort, ...options} = {}) {
   return {
     ...apply(options, reverseTransform),
-    sort: isDomainSort(sort) ? sort : null
+    sort: basic_isDomainSort(sort) ? sort : null
   };
 }
 
@@ -59537,14 +61635,14 @@ function reverseTransform(data, facets) {
 function basic_shuffle({seed, sort, ...options} = {}) {
   return {
     ...apply(options, sortValue(seed == null ? Math.random : randomLcg(seed))),
-    sort: isDomainSort(sort) ? sort : null
+    sort: basic_isDomainSort(sort) ? sort : null
   };
 }
 
 function basic_sort(order, {sort, ...options} = {}) {
   return {
     ...(isOptions(order) && order.channel !== undefined ? initializer : apply)(options, sortTransform(order)),
-    sort: options_isDomainSort(sort) ? sort : null
+    sort: isDomainSort(sort) ? sort : null
   };
 }
 
@@ -59577,7 +61675,7 @@ function sortValue(value) {
   return (data, facets, channels) => {
     let V;
     if (channel === undefined) {
-      V = options_valueof(data, value);
+      V = valueof(data, value);
     } else {
       if (channels === undefined) throw new Error("channel sort requires an initializer");
       V = channels[channel];
@@ -59589,7 +61687,7 @@ function sortValue(value) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/mark.js
+;// ./node_modules/@observablehq/plot/src/mark.js
 
 
 
@@ -59618,7 +61716,7 @@ class Mark {
       channels: extraChannels
     } = options;
     this.data = data;
-    this.sort = options_isDomainSort(sort) ? sort : null;
+    this.sort = isDomainSort(sort) ? sort : null;
     this.initializer = initializer(options).initializer;
     this.transform = this.initializer ? options.transform : basic_basic(options).transform;
     if (facet === null || facet === false) {
@@ -59701,7 +61799,7 @@ class Mark {
     maybeProject("x2", "y2", channels, values, context);
   }
   scale(channels, scales, context) {
-    const values = channel_valueObject(channels, scales);
+    const values = valueObject(channels, scales);
     if (context.projection) this.project(channels, values, context);
     return values;
   }
@@ -59712,18 +61810,18 @@ function marks(...marks) {
   return marks;
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/math.js
+;// ./node_modules/@observablehq/plot/src/math.js
 const src_math_radians = Math.PI / 180;
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/transforms/inset.js
+;// ./node_modules/@observablehq/plot/src/transforms/inset.js
 
 
-function inset_maybeInsetX({inset, insetLeft, insetRight, ...options} = {}) {
+function maybeInsetX({inset, insetLeft, insetRight, ...options} = {}) {
   [insetLeft, insetRight] = maybeInset(inset, insetLeft, insetRight);
   return {inset, insetLeft, insetRight, ...options};
 }
 
-function inset_maybeInsetY({inset, insetTop, insetBottom, ...options} = {}) {
+function maybeInsetY({inset, insetTop, insetBottom, ...options} = {}) {
   [insetTop, insetBottom] = maybeInset(inset, insetTop, insetBottom);
   return {inset, insetTop, insetBottom, ...options};
 }
@@ -59736,7 +61834,9 @@ function maybeInset(inset, inset1, inset2) {
     : [inset1, inset2];
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/transforms/interval.js
+;// ./node_modules/@observablehq/plot/src/transforms/interval.js
+/* unused harmony import specifier */ var interval_maybeInsetX;
+/* unused harmony import specifier */ var interval_maybeInsetY;
 
 
 
@@ -59753,10 +61853,10 @@ function maybeIntervalK(k, maybeInsetK, options, trivial) {
   const {[k]: v, [`${k}1`]: v1, [`${k}2`]: v2} = options;
   const {value, interval} = maybeIntervalValue(v, options);
   if (value == null || (interval == null && !trivial)) return options;
-  const label = options_labelof(v);
+  const label = labelof(v);
   if (interval == null) {
     let V;
-    const kv = {transform: (data) => V || (V = options_valueof(data, value)), label};
+    const kv = {transform: (data) => V || (V = valueof(data, value)), label};
     return {
       ...options,
       [k]: undefined,
@@ -59767,7 +61867,7 @@ function maybeIntervalK(k, maybeInsetK, options, trivial) {
   let D1, V1;
   function transform(data) {
     if (V1 !== undefined && data === D1) return V1; // memoize
-    return (V1 = options_map(options_valueof((D1 = data), value), (v) => interval.floor(v)));
+    return (V1 = options_map(valueof((D1 = data), value), (v) => interval.floor(v)));
   }
   return maybeInsetK({
     ...options,
@@ -59784,9 +61884,9 @@ function maybeIntervalMidK(k, maybeInsetK, options) {
   return maybeInsetK({
     ...options,
     [k]: {
-      label: options_labelof(v),
+      label: labelof(v),
       transform: (data) => {
-        const V1 = options_map(options_valueof(data, value), (v) => interval.floor(v));
+        const V1 = options_map(valueof(data, value), (v) => interval.floor(v));
         const V2 = V1.map((v) => interval.offset(v));
         return V1.map(
           isTemporal(V1)
@@ -59802,30 +61902,30 @@ function maybeIntervalMidK(k, maybeInsetK, options) {
 }
 
 function maybeTrivialIntervalX(options = {}) {
-  return maybeIntervalK("x", maybeInsetX, options, true);
+  return maybeIntervalK("x", interval_maybeInsetX, options, true);
 }
 
 function maybeTrivialIntervalY(options = {}) {
-  return maybeIntervalK("y", maybeInsetY, options, true);
+  return maybeIntervalK("y", interval_maybeInsetY, options, true);
 }
 
 function maybeIntervalX(options = {}) {
-  return maybeIntervalK("x", inset_maybeInsetX, options);
+  return maybeIntervalK("x", maybeInsetX, options);
 }
 
 function maybeIntervalY(options = {}) {
-  return maybeIntervalK("y", inset_maybeInsetY, options);
+  return maybeIntervalK("y", maybeInsetY, options);
 }
 
-function interval_maybeIntervalMidX(options = {}) {
-  return maybeIntervalMidK("x", inset_maybeInsetX, options);
+function maybeIntervalMidX(options = {}) {
+  return maybeIntervalMidK("x", maybeInsetX, options);
 }
 
-function interval_maybeIntervalMidY(options = {}) {
-  return maybeIntervalMidK("y", inset_maybeInsetY, options);
+function maybeIntervalMidY(options = {}) {
+  return maybeIntervalMidK("y", maybeInsetY, options);
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/marks/rule.js
+;// ./node_modules/@observablehq/plot/src/marks/rule.js
 
 
 
@@ -59963,7 +62063,7 @@ function maybeOptionalZero(x, x1, x2) {
   return [x1, x2];
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/template.js
+;// ./node_modules/@observablehq/plot/src/template.js
 function template(strings, ...parts) {
   let n = parts.length;
 
@@ -59990,7 +62090,7 @@ function template(strings, ...parts) {
   };
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/marks/text.js
+;// ./node_modules/@observablehq/plot/src/marks/text.js
 
 
 
@@ -60015,7 +62115,7 @@ class text_Text extends Mark {
     const {
       x,
       y,
-      text = isIterable(data) && isTextual(data) ? options_identity : options_indexOf,
+      text = isIterable(data) && isTextual(data) ? options_identity : indexOf,
       frameAnchor,
       textAnchor = /right$/i.test(frameAnchor) ? "end" : /left$/i.test(frameAnchor) ? "start" : "middle",
       lineAnchor = /^top/i.test(frameAnchor) ? "top" : /^bottom/i.test(frameAnchor) ? "bottom" : "middle",
@@ -60135,18 +62235,18 @@ function applyMultilineText(selection, mark, T, TL) {
 
 function text_text(data, options = {}) {
   let {x, y, ...remainingOptions} = options;
-  if (options.frameAnchor === undefined) [x, y] = options_maybeTuple(x, y);
+  if (options.frameAnchor === undefined) [x, y] = maybeTuple(x, y);
   return new text_Text(data, {...remainingOptions, x, y});
 }
 
 function textX(data, options = {}) {
   const {x = options_identity, ...remainingOptions} = options;
-  return new text_Text(data, interval_maybeIntervalMidY({...remainingOptions, x}));
+  return new text_Text(data, maybeIntervalMidY({...remainingOptions, x}));
 }
 
 function textY(data, options = {}) {
   const {y = options_identity, ...remainingOptions} = options;
-  return new text_Text(data, interval_maybeIntervalMidX({...remainingOptions, y}));
+  return new text_Text(data, maybeIntervalMidX({...remainingOptions, y}));
 }
 
 function applyIndirectTextStyles(selection, mark, T) {
@@ -60502,7 +62602,7 @@ function isPictographic(text, i) {
   return isAscii(text, i) ? false : ((rePictographic.lastIndex = i), rePictographic.test(text));
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/marks/vector.js
+;// ./node_modules/@observablehq/plot/src/marks/vector.js
 
 
 
@@ -60638,7 +62738,7 @@ class Vector extends Mark {
 
 function vector(data, options = {}) {
   let {x, y, ...rest} = options;
-  if (options.frameAnchor === undefined) [x, y] = options_maybeTuple(x, y);
+  if (options.frameAnchor === undefined) [x, y] = maybeTuple(x, y);
   return new Vector(data, {...rest, x, y});
 }
 
@@ -60665,7 +62765,7 @@ function spike(data, options = {}) {
   return vector(data, {...rest, shape, stroke, strokeWidth, fill, fillOpacity, anchor});
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/marks/axis.js
+;// ./node_modules/@observablehq/plot/src/marks/axis.js
 
 
 
@@ -61157,7 +63257,7 @@ function labelOptions(
   initializer
 ) {
   // Only propagate these options if constant.
-  [, fill] = options_maybeColorChannel(fill);
+  [, fill] = maybeColorChannel(fill);
   [, fillOpacity] = maybeNumberChannel(fillOpacity);
   return {
     facet: "super",
@@ -61221,7 +63321,7 @@ function axisMark(mark, k, ariaLabel, data, options, initialize) {
         data,
         facets,
         channels: Object.fromEntries(
-          Object.entries(channels).map(([name, channel]) => [name, {...channel, value: options_valueof(data, channel.value)}])
+          Object.entries(channels).map(([name, channel]) => [name, {...channel, value: valueof(data, channel.value)}])
         )
       };
     })
@@ -61309,7 +63409,7 @@ function inferAxisLabel(key, scale, labelAnchor) {
     : label;
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/transforms/identity.js
+;// ./node_modules/@observablehq/plot/src/transforms/identity.js
 
 
 function maybeIdentityX(options = {}) {
@@ -61322,7 +63422,7 @@ function maybeIdentityY(options = {}) {
   return y1 === undefined && y2 === undefined && y === undefined ? {...options, y: options_identity} : options;
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/transforms/stack.js
+;// ./node_modules/@observablehq/plot/src/transforms/stack.js
 
 
 
@@ -61392,16 +63492,16 @@ function stack_mergeOptions(options) {
 
 function stack_stack(x, y = options_one, ky, {offset, order, reverse}, options) {
   const z = maybeZ(options);
-  const [X, setX] = options_maybeColumn(x);
-  const [Y1, setY1] = options_column(y);
-  const [Y2, setY2] = options_column(y);
+  const [X, setX] = maybeColumn(x);
+  const [Y1, setY1] = column(y);
+  const [Y2, setY2] = column(y);
   offset = maybeOffset(offset);
   order = maybeOrder(order, offset, ky);
   return [
     basic_basic(options, (data, facets) => {
-      const X = x == null ? undefined : setX(options_valueof(data, x));
-      const Y = options_valueof(data, y, Float64Array);
-      const Z = options_valueof(data, z);
+      const X = x == null ? undefined : setX(valueof(data, x));
+      const Y = valueof(data, y, Float64Array);
+      const Z = valueof(data, z);
       const O = order && order(data, X, Y, Z);
       const n = data.length;
       const Y1 = setY1(new Float64Array(n));
@@ -61512,8 +63612,8 @@ function offsetWiggle(facetstacks, Y1, Y2, Z) {
         Y1[i] += y;
         Y2[i] += y;
       }
-      const s1 = sum_sum(Fi);
-      if (s1) y -= sum_sum(Fi, (d, i) => (Df[i] / 2 + Cf1[i]) * d) / s1;
+      const s1 = sum(Fi);
+      if (s1) y -= sum(Fi, (d, i) => (Df[i] / 2 + Cf1[i]) * d) / s1;
     }
     offsetZero(stacks, Y1, Y2);
   }
@@ -61585,7 +63685,7 @@ function orderSum(data, X, Y, Z) {
     Z,
     groupSort(
       options_range(data),
-      (I) => sum_sum(I, (i) => Y[i]),
+      (I) => sum(I, (i) => Y[i]),
       (i) => Z[i]
     )
   );
@@ -61614,7 +63714,7 @@ function orderInsideOut(data, X, Y, Z) {
   );
   const sums = rollup(
     I,
-    (I) => sum_sum(I, (i) => Y[i]),
+    (I) => sum(I, (i) => Y[i]),
     (i) => Z[i]
   );
   const Kp = [],
@@ -61633,7 +63733,7 @@ function orderInsideOut(data, X, Y, Z) {
 }
 
 function orderFunction(f) {
-  return (data) => options_valueof(data, f);
+  return (data) => valueof(data, f);
 }
 
 function orderGiven(domain) {
@@ -61655,7 +63755,7 @@ function applyOrder(stacks, O) {
   }
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/marks/bar.js
+;// ./node_modules/@observablehq/plot/src/marks/bar.js
 
 
 
@@ -61780,15 +63880,15 @@ class BarY extends AbstractBar {
   }
 }
 
-function barX(data, options = {y: options_indexOf, x2: options_identity}) {
+function barX(data, options = {y: indexOf, x2: options_identity}) {
   return new BarX(data, maybeStackX(maybeIntervalX(maybeIdentityX(options))));
 }
 
-function barY(data, options = {x: options_indexOf, y2: options_identity}) {
+function barY(data, options = {x: indexOf, y2: options_identity}) {
   return new BarY(data, maybeStackY(maybeIntervalY(maybeIdentityY(options))));
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/dimensions.js
+;// ./node_modules/@observablehq/plot/src/dimensions.js
 
 
 
@@ -61939,7 +64039,7 @@ function aspectRatioLength(k, scale) {
   return Math.abs(transform(max) - transform(min));
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/axes.js
+;// ./node_modules/@observablehq/plot/src/axes.js
 
 
 
@@ -61963,7 +64063,7 @@ function maybeAutoTickFormat(tickFormat, domain) {
     : (typeof tickFormat === "string" ? (isTemporal(domain) ? utcFormat : defaultLocale_format) : options_constant)(tickFormat);
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/legends/ramp.js
+;// ./node_modules/@observablehq/plot/src/legends/ramp.js
 
 
 
@@ -61989,7 +64089,7 @@ function legendRamp(color, options) {
     opacity,
     className
   } = options;
-  const context = context_createContext(options);
+  const context = createContext(options);
   className = maybeClassName(className);
   opacity = maybeNumberChannel(opacity)[1];
   if (tickFormat === null) tickFormat = () => null;
@@ -62151,7 +64251,7 @@ function legendRamp(color, options) {
   return svg.node();
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/legends/swatches.js
+;// ./node_modules/@observablehq/plot/src/legends/swatches.js
 
 
 
@@ -62195,8 +64295,8 @@ function legendSymbols(
   } = {},
   scale
 ) {
-  const [vf, cf] = options_maybeColorChannel(fill);
-  const [vs, cs] = options_maybeColorChannel(stroke);
+  const [vf, cf] = maybeColorChannel(fill);
+  const [vs, cs] = maybeColorChannel(stroke);
   const sf = maybeScale(scale, vf);
   const ss = maybeScale(scale, vs);
   const size = r * r * Math.PI;
@@ -62237,7 +64337,7 @@ function legendItems(scale, options = {}, swatch) {
     style,
     width
   } = options;
-  const context = context_createContext(options);
+  const context = createContext(options);
   className = maybeClassName(className);
   tickFormat = maybeAutoTickFormat(tickFormat, scale.domain);
 
@@ -62322,7 +64422,10 @@ ${extraStyle}`
     .node();
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/legends.js
+;// ./node_modules/@observablehq/plot/src/legends.js
+/* unused harmony import specifier */ var legends_createContext;
+/* unused harmony import specifier */ var legends_isScaleOptions;
+/* unused harmony import specifier */ var legends_normalizeScale;
 
 
 
@@ -62339,17 +64442,17 @@ const legendRegistry = new Map([
 function legend(options = {}) {
   for (const [key, value] of legendRegistry) {
     const scale = options[key];
-    if (isScaleOptions(scale)) {
+    if (legends_isScaleOptions(scale)) {
       // e.g., ignore {color: "red"}
-      const context = createContext(options);
+      const context = legends_createContext(options);
       let hint;
       // For symbol legends, pass a hint to the symbol scale.
       if (key === "symbol") {
-        const {fill, stroke = fill === undefined && isScaleOptions(options.color) ? "color" : undefined} = options;
+        const {fill, stroke = fill === undefined && legends_isScaleOptions(options.color) ? "color" : undefined} = options;
         hint = {fill, stroke};
       }
-      return value(normalizeScale(key, scale, hint), legendOptions(context, scale, options), (key) =>
-        isScaleOptions(options[key]) ? normalizeScale(key, options[key]) : null
+      return value(legends_normalizeScale(key, scale, hint), legendOptions(context, scale, options), (key) =>
+        legends_isScaleOptions(options[key]) ? legends_normalizeScale(key, options[key]) : null
       );
     }
   }
@@ -62405,7 +64508,7 @@ function createLegends(scales, context, options) {
   return legends;
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/marks/frame.js
+;// ./node_modules/@observablehq/plot/src/marks/frame.js
 
 
 
@@ -62482,7 +64585,7 @@ function frame_frame(options) {
   return new Frame(options);
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/plot.js
+;// ./node_modules/@observablehq/plot/src/plot.js
 
 
 
@@ -62594,8 +64697,8 @@ function plot(options = {}) {
   // channels to the empty array; this will guarantee that a corresponding scale
   // will be created later (even if there are no other channels). Ignore facet
   // scale declarations, which are handled above.
-  for (const key of scales_registry.keys()) {
-    if (options_isScaleOptions(options[key]) && key !== "fx" && key !== "fy") {
+  for (const key of registry.keys()) {
+    if (isScaleOptions(options[key]) && key !== "fx" && key !== "fy") {
       channelsByScale.set(key, []);
     }
   }
@@ -62626,7 +64729,7 @@ function plot(options = {}) {
   const {fx, fy} = scales;
   const subdimensions = fx || fy ? innerDimensions(scaleDescriptors, dimensions) : dimensions;
   const superdimensions = fx || fy ? actualDimensions(scales, dimensions) : dimensions;
-  const context = context_createContext(options, subdimensions, className);
+  const context = createContext(options, subdimensions, className);
 
   // Reinitialize; for deriving channels dependent on other channels.
   const newByScale = new Set();
@@ -62650,7 +64753,7 @@ function plot(options = {}) {
           // channels as-is rather than creating new scales, and assume that
           // they already have the scale’s transform applied, if any (e.g., when
           // generating ticks for the axis mark).
-          if (scale != null && scales_registry.get(scale) !== position) {
+          if (scale != null && registry.get(scale) !== position) {
             applyScaleTransform(channel, options);
             newByScale.add(scale);
           }
@@ -62950,8 +65053,8 @@ function inferAxes(marks, channelsByScale, options) {
   } = options;
 
   // Disable axes if the corresponding scale is not present.
-  if (projection || (!options_isScaleOptions(x) && !hasScaleChannel("x", marks))) xAxis = xGrid = null;
-  if (projection || (!options_isScaleOptions(y) && !hasScaleChannel("y", marks))) yAxis = yGrid = null;
+  if (projection || (!isScaleOptions(x) && !hasScaleChannel("x", marks))) xAxis = xGrid = null;
+  if (projection || (!isScaleOptions(y) && !hasScaleChannel("y", marks))) yAxis = yGrid = null;
   if (!channelsByScale.has("fx")) fxAxis = fxGrid = null;
   if (!channelsByScale.has("fy")) fyAxis = fyGrid = null;
 
@@ -63132,9 +65235,11 @@ function outerRange(scale) {
   return [x1, x2 + scale.bandwidth()];
 }
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphOptions.vue?vue&type=template&id=a93ca02c&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphOptions.vue?vue&type=template&id=a93ca02c&scoped=true
+/* unused harmony import specifier */ var BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_popScopeId;
 
-const BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_withScopeId = n => (_pushScopeId("data-v-a93ca02c"), n = n(), _popScopeId(), n);
+const BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_withScopeId = n => (BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_pushScopeId("data-v-a93ca02c"), n = n(), BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_popScopeId(), n);
 const BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_hoisted_1 = {
   class: "AG-bar-graph-options"
 };
@@ -63201,7 +65306,7 @@ function BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_render(_ctx, _
     onInput: _cache[9] || (_cache[9] = (...args) => $options.updateParameters && $options.updateParameters(...args))
   }, null, 544), [[vModelText, $data.x_label_size, void 0, {
     number: true
-  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("bar_x_label_wrap")) + ": ", 1), runtime_core_esm_bundler_createVNode(_component_radio_component, {
+  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("bar_x_label_wrap")) + ": ", 1), createVNode(_component_radio_component, {
     modelValue: $data.x_label_limit,
     "onUpdate:modelValue": [_cache[10] || (_cache[10] = $event => $data.x_label_limit = $event), $options.updateParameters],
     values: ['truncate', 'wrap', 'none'],
@@ -63259,7 +65364,7 @@ function BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_render(_ctx, _
     onInput: _cache[22] || (_cache[22] = (...args) => $options.updateParameters && $options.updateParameters(...args))
   }, null, 544), [[vModelText, $data.y_label_size, void 0, {
     number: true
-  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("bar_y_label_wrap")) + ": ", 1), runtime_core_esm_bundler_createVNode(_component_radio_component, {
+  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("bar_y_label_wrap")) + ": ", 1), createVNode(_component_radio_component, {
     modelValue: $data.y_label_limit,
     "onUpdate:modelValue": [_cache[23] || (_cache[23] = $event => $data.y_label_limit = $event), $options.updateParameters],
     values: ['truncate', 'wrap', 'none'],
@@ -63304,9 +65409,14 @@ function BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_render(_ctx, _
     number: true
   }]])])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraphOptions.vue?vue&type=template&id=a93ca02c&scoped=true
+;// ./src/components/BarGraph/BarGraphOptions.vue?vue&type=template&id=a93ca02c&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphOptions.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphOptions.vue?vue&type=script&lang=js
+
+
+
+
+
 
 
 
@@ -63514,14 +65624,14 @@ function BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_render(_ctx, _
     this.updateParameters();
   }
 });
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraphOptions.vue?vue&type=script&lang=js
+;// ./src/components/BarGraph/BarGraphOptions.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphOptions.vue?vue&type=style&index=0&id=a93ca02c&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraphOptions.vue?vue&type=style&index=0&id=a93ca02c&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraphOptions.vue?vue&type=style&index=0&id=a93ca02c&scoped=true&lang=css
+;// ./src/components/BarGraph/BarGraphOptions.vue?vue&type=style&index=0&id=a93ca02c&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraphOptions.vue
+;// ./src/components/BarGraph/BarGraphOptions.vue
 
 
 
@@ -63529,12 +65639,14 @@ function BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_render(_ctx, _
 ;
 
 
-const BarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(BarGraphOptionsvue_type_script_lang_js, [['render',BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_render],['__scopeId',"data-v-a93ca02c"]])
+const BarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(BarGraphOptionsvue_type_script_lang_js, [['render',BarGraphOptionsvue_type_template_id_a93ca02c_scoped_true_render],['__scopeId',"data-v-a93ca02c"]])
 
 /* harmony default export */ var BarGraphOptions = (BarGraphOptions_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/PieGraphOptions.vue?vue&type=template&id=6665c51e&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/PieGraphOptions.vue?vue&type=template&id=6665c51e&scoped=true
+/* unused harmony import specifier */ var PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_popScopeId;
 
-const PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_withScopeId = n => (_pushScopeId("data-v-6665c51e"), n = n(), _popScopeId(), n);
+const PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_withScopeId = n => (PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_pushScopeId("data-v-6665c51e"), n = n(), PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_popScopeId(), n);
 const PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_hoisted_1 = {
   class: "AG-pie-graph-options"
 };
@@ -63626,9 +65738,9 @@ function PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_render(_ctx, _
     number: true
   }]])])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/BarGraph/PieGraphOptions.vue?vue&type=template&id=6665c51e&scoped=true
+;// ./src/components/BarGraph/PieGraphOptions.vue?vue&type=template&id=6665c51e&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/PieGraphOptions.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/PieGraphOptions.vue?vue&type=script&lang=js
 /* harmony default export */ var PieGraphOptionsvue_type_script_lang_js = ({
   name: "PieGraphOptions",
   inject: ["module"],
@@ -63668,14 +65780,14 @@ function PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_render(_ctx, _
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/BarGraph/PieGraphOptions.vue?vue&type=script&lang=js
+;// ./src/components/BarGraph/PieGraphOptions.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/PieGraphOptions.vue?vue&type=style&index=0&id=6665c51e&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/PieGraphOptions.vue?vue&type=style&index=0&id=6665c51e&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/BarGraph/PieGraphOptions.vue?vue&type=style&index=0&id=6665c51e&scoped=true&lang=css
+;// ./src/components/BarGraph/PieGraphOptions.vue?vue&type=style&index=0&id=6665c51e&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/BarGraph/PieGraphOptions.vue
+;// ./src/components/BarGraph/PieGraphOptions.vue
 
 
 
@@ -63683,10 +65795,15 @@ function PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_render(_ctx, _
 ;
 
 
-const PieGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(PieGraphOptionsvue_type_script_lang_js, [['render',PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_render],['__scopeId',"data-v-6665c51e"]])
+const PieGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(PieGraphOptionsvue_type_script_lang_js, [['render',PieGraphOptionsvue_type_template_id_6665c51e_scoped_true_render],['__scopeId',"data-v-6665c51e"]])
 
 /* harmony default export */ var PieGraphOptions = (PieGraphOptions_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraph.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraph.vue?vue&type=script&lang=js
+
+
+
+
+
 
 
 
@@ -63950,7 +66067,6 @@ const PieGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(Pi
           marks: [yAxisTitle, yAxisLabels, xAxisTitle, xAxisLabels, bars, barLabels
           // legend
           ],
-
           marginLeft: parameters.left_margin ? parameters.left_margin : 80,
           marginBottom: bottom_margin ? bottom_margin : 20
         });
@@ -64128,14 +66244,14 @@ const PieGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(Pi
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraph.vue?vue&type=script&lang=js
+;// ./src/components/BarGraph/BarGraph.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraph.vue?vue&type=style&index=0&id=4239eb62&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/BarGraph/BarGraph.vue?vue&type=style&index=0&id=4239eb62&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraph.vue?vue&type=style&index=0&id=4239eb62&scoped=true&lang=css
+;// ./src/components/BarGraph/BarGraph.vue?vue&type=style&index=0&id=4239eb62&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/BarGraph/BarGraph.vue
+;// ./src/components/BarGraph/BarGraph.vue
 
 
 
@@ -64143,12 +66259,14 @@ const PieGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(Pi
 ;
 
 
-const BarGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(BarGraphvue_type_script_lang_js, [['render',BarGraphvue_type_template_id_4239eb62_scoped_true_render],['__scopeId',"data-v-4239eb62"]])
+const BarGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(BarGraphvue_type_script_lang_js, [['render',BarGraphvue_type_template_id_4239eb62_scoped_true_render],['__scopeId',"data-v-4239eb62"]])
 
 /* harmony default export */ var BarGraph = (BarGraph_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=template&id=3584a69a&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=template&id=3584a69a&scoped=true
+/* unused harmony import specifier */ var GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_popScopeId;
 
-const GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_withScopeId = n => (_pushScopeId("data-v-3584a69a"), n = n(), _popScopeId(), n);
+const GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_withScopeId = n => (GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_pushScopeId("data-v-3584a69a"), n = n(), GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_popScopeId(), n);
 const GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_hoisted_1 = {
   key: 0
 };
@@ -64168,11 +66286,11 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
   const _component_categorical_field_selector = resolveComponent("categorical-field-selector");
   const _component_numeric_field_selector = resolveComponent("numeric-field-selector");
   const _component_palette_selector = resolveComponent("palette-selector");
-  return openBlock(), createElementBlock("form", null, [runtime_core_esm_bundler_createVNode(_component_instrument_selector, {
+  return openBlock(), createElementBlock("form", null, [createVNode(_component_instrument_selector, {
     modelValue: $data.formData.instrument,
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.formData.instrument = $event),
     availableInstruments: $options.availableInstruments
-  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_hoisted_1, [createBaseVNode("div", null, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_hoisted_1, [createBaseVNode("div", null, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('title'),
     "help-text": $options.module.tt('title_help')
   }, {
@@ -64181,7 +66299,7 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
       "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.formData.title = $event)
     }, null, 512), [[vModelText, $data.formData.title]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('description'),
     "help-text": $options.module.tt('description_help')
   }, {
@@ -64190,11 +66308,11 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
       "onUpdate:modelValue": _cache[2] || (_cache[2] = $event => $data.formData.description = $event)
     }, null, 512), [[vModelText, $data.formData.description]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('grouped_graph_type'),
     "help-text": $options.module.tt('grouped_graph_type_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.graph_type,
       "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => $data.formData.graph_type = $event),
       name: 'graph_type',
@@ -64203,21 +66321,21 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
       labels: [$options.module.tt('grouped_stacked_stacked'), $options.module.tt('grouped_grouped')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_hoisted_2, [createBaseVNode("div", GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_hoisted_3, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_hoisted_2, [createBaseVNode("div", GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_hoisted_3, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('grouped_categorical_field_one'),
     "help-text": $options.module.tt('grouped_categorical_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_categorical_field_selector, {
+    default: withCtx(() => [createVNode(_component_categorical_field_selector, {
       modelValue: $data.formData.categorical_field_one,
       "onUpdate:modelValue": _cache[4] || (_cache[4] = $event => $data.formData.categorical_field_one = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
     }, null, 8, ["modelValue", "fields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('grouped_na_category'),
     "help-text": $options.module.tt('grouped_na_category_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_category_one,
       "onUpdate:modelValue": _cache[5] || (_cache[5] = $event => $data.formData.na_category_one = $event),
       name: 'na_category_one',
@@ -64226,11 +66344,11 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
       labels: [$options.module.tt('grouped_keep'), $options.module.tt('grouped_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('grouped_unused_categories_one'),
     "help-text": $options.module.tt('grouped_unused_categories_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.unused_categories_one,
       "onUpdate:modelValue": _cache[6] || (_cache[6] = $event => $data.formData.unused_categories_one = $event),
       name: 'unused_categories_one',
@@ -64239,21 +66357,21 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
       labels: [$options.module.tt('grouped_keep'), $options.module.tt('grouped_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_hoisted_4, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_hoisted_4, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('grouped_categorical_field_two'),
     "help-text": $options.module.tt('grouped_categorical_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_categorical_field_selector, {
+    default: withCtx(() => [createVNode(_component_categorical_field_selector, {
       modelValue: $data.formData.categorical_field_two,
       "onUpdate:modelValue": _cache[7] || (_cache[7] = $event => $data.formData.categorical_field_two = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
     }, null, 8, ["modelValue", "fields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('grouped_na_category'),
     "help-text": $options.module.tt('grouped_na_category_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_category_two,
       "onUpdate:modelValue": _cache[8] || (_cache[8] = $event => $data.formData.na_category_two = $event),
       name: 'na_category_two',
@@ -64262,11 +66380,11 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
       labels: [$options.module.tt('grouped_keep'), $options.module.tt('grouped_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('grouped_unused_categories_two'),
     "help-text": $options.module.tt('grouped_unused_categories_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.unused_categories_two,
       "onUpdate:modelValue": _cache[9] || (_cache[9] = $event => $data.formData.unused_categories_two = $event),
       name: 'unused_categories_two',
@@ -64275,11 +66393,11 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
       labels: [$options.module.tt('grouped_keep'), $options.module.tt('grouped_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])])]), createBaseVNode("div", null, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])])]), createBaseVNode("div", null, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('grouped_numeric_field'),
     "help-text": $options.module.tt('grouped_numeric_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_numeric_field_selector, {
+    default: withCtx(() => [createVNode(_component_numeric_field_selector, {
       modelValue: $data.formData.numeric_field,
       "onUpdate:modelValue": _cache[10] || (_cache[10] = $event => $data.formData.numeric_field = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
@@ -64290,7 +66408,7 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
     "label-text": $options.module.tt('grouped_na_numeric'),
     "help-text": $options.module.tt('grouped_na_numeric_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_numeric,
       "onUpdate:modelValue": _cache[11] || (_cache[11] = $event => $data.formData.na_numeric = $event),
       name: 'na_numeric',
@@ -64308,7 +66426,7 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
     "label-text": $options.module.tt('grouped_aggregation_function'),
     "help-text": $options.module.tt('grouped_aggregation_function_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.aggregation_function,
       "onUpdate:modelValue": _cache[13] || (_cache[13] = $event => $data.formData.aggregation_function = $event),
       name: 'aggregation_function',
@@ -64317,20 +66435,20 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
       labels: [$options.module.tt('count'), $options.module.tt('sum'), $options.module.tt('mean'), $options.module.tt('min'), $options.module.tt('max')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('palette'),
     "help-text": $options.module.tt('palette_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_palette_selector, {
+    default: withCtx(() => [createVNode(_component_palette_selector, {
       modelValue: $data.formData.palette_brewer,
       "onUpdate:modelValue": _cache[14] || (_cache[14] = $event => $data.formData.palette_brewer = $event)
     }, null, 8, ["modelValue"])]),
     _: 1
   }, 8, ["label-text", "help-text"])])])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=template&id=3584a69a&scoped=true
+;// ./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=template&id=3584a69a&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=script&lang=js
 
 
 
@@ -64415,7 +66533,6 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
       this.$emit("isReady", newVal);
       // console.log('isReady', newVal);
     },
-
     formData: {
       handler(newVal) {
         newVal.is_count = newVal.numeric_field === "";
@@ -64456,14 +66573,14 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=script&lang=js
+;// ./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=style&index=0&id=3584a69a&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=style&index=0&id=3584a69a&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=style&index=0&id=3584a69a&scoped=true&lang=css
+;// ./src/components/GroupedBarGraph/GroupedBarGraphForm.vue?vue&type=style&index=0&id=3584a69a&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraphForm.vue
+;// ./src/components/GroupedBarGraph/GroupedBarGraphForm.vue
 
 
 
@@ -64471,12 +66588,14 @@ function GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render(_ct
 ;
 
 
-const GroupedBarGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(GroupedBarGraphFormvue_type_script_lang_js, [['render',GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render],['__scopeId',"data-v-3584a69a"]])
+const GroupedBarGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(GroupedBarGraphFormvue_type_script_lang_js, [['render',GroupedBarGraphFormvue_type_template_id_3584a69a_scoped_true_render],['__scopeId',"data-v-3584a69a"]])
 
 /* harmony default export */ var GroupedBarGraphForm = (GroupedBarGraphForm_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=template&id=02553c9f&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=template&id=02553c9f&scoped=true
+/* unused harmony import specifier */ var GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_popScopeId;
 
-const GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_withScopeId = n => (_pushScopeId("data-v-02553c9f"), n = n(), _popScopeId(), n);
+const GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_withScopeId = n => (GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_pushScopeId("data-v-02553c9f"), n = n(), GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_popScopeId(), n);
 const GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_hoisted_1 = {
   class: "AG-graph-container"
 };
@@ -64497,11 +66616,15 @@ function GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_render(_ctx, _
     onUpdateParameters: _cache[0] || (_cache[0] = $event => $options.updateParameters($event))
   }, null, 40, ["parameters"])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=template&id=02553c9f&scoped=true
+;// ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=template&id=02553c9f&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=template&id=354765b0&scoped=true
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.iterator.reduce.js
+var esnext_iterator_reduce = __webpack_require__(9471);
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=template&id=354765b0&scoped=true
+/* unused harmony import specifier */ var GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_popScopeId;
 
-const GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_withScopeId = n => (_pushScopeId("data-v-354765b0"), n = n(), _popScopeId(), n);
+const GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_withScopeId = n => (GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_pushScopeId("data-v-354765b0"), n = n(), GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_popScopeId(), n);
 const GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_hoisted_1 = {
   class: "AG-bar-graph-options"
 };
@@ -64568,7 +66691,7 @@ function GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_render(
     onInput: _cache[9] || (_cache[9] = (...args) => $options.updateParameters && $options.updateParameters(...args))
   }, null, 544), [[vModelText, $data.x_label_size, void 0, {
     number: true
-  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("grouped_x_label_wrap")) + ": ", 1), runtime_core_esm_bundler_createVNode(_component_radio_component, {
+  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("grouped_x_label_wrap")) + ": ", 1), createVNode(_component_radio_component, {
     modelValue: $data.color_tick_limit,
     "onUpdate:modelValue": [_cache[10] || (_cache[10] = $event => $data.color_tick_limit = $event), $options.updateParameters],
     values: ['truncate', 'wrap', 'none'],
@@ -64601,7 +66724,7 @@ function GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_render(
     onInput: _cache[16] || (_cache[16] = (...args) => $options.updateParameters && $options.updateParameters(...args))
   }, null, 544), [[vModelText, $data.color_label_size, void 0, {
     number: true
-  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("grouped_color_label_wrap")) + ": ", 1), runtime_core_esm_bundler_createVNode(_component_radio_component, {
+  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("grouped_color_label_wrap")) + ": ", 1), createVNode(_component_radio_component, {
     modelValue: $data.x_label_limit,
     "onUpdate:modelValue": [_cache[17] || (_cache[17] = $event => $data.x_label_limit = $event), $options.updateParameters],
     values: ['truncate', 'wrap', 'none'],
@@ -64659,7 +66782,7 @@ function GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_render(
     onInput: _cache[29] || (_cache[29] = (...args) => $options.updateParameters && $options.updateParameters(...args))
   }, null, 544), [[vModelText, $data.y_label_size, void 0, {
     number: true
-  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("grouped_y_label_wrap")) + ": ", 1), runtime_core_esm_bundler_createVNode(_component_radio_component, {
+  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("grouped_y_label_wrap")) + ": ", 1), createVNode(_component_radio_component, {
     modelValue: $data.y_label_limit,
     "onUpdate:modelValue": [_cache[30] || (_cache[30] = $event => $data.y_label_limit = $event), $options.updateParameters],
     values: ['truncate', 'wrap', 'none'],
@@ -64704,9 +66827,14 @@ function GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_render(
     number: true
   }]])])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=template&id=354765b0&scoped=true
+;// ./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=template&id=354765b0&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=script&lang=js
+
+
+
+
+
 
 
 
@@ -64949,14 +67077,14 @@ function GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_render(
     this.updateParameters();
   }
 });
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=script&lang=js
+;// ./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=style&index=0&id=354765b0&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=style&index=0&id=354765b0&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=style&index=0&id=354765b0&scoped=true&lang=css
+;// ./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue?vue&type=style&index=0&id=354765b0&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue
+;// ./src/components/GroupedBarGraph/GroupedBarGraphOptions.vue
 
 
 
@@ -64964,12 +67092,14 @@ function GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_render(
 ;
 
 
-const GroupedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(GroupedBarGraphOptionsvue_type_script_lang_js, [['render',GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_render],['__scopeId',"data-v-354765b0"]])
+const GroupedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(GroupedBarGraphOptionsvue_type_script_lang_js, [['render',GroupedBarGraphOptionsvue_type_template_id_354765b0_scoped_true_render],['__scopeId',"data-v-354765b0"]])
 
 /* harmony default export */ var GroupedBarGraphOptions = (GroupedBarGraphOptions_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=template&id=6699a075&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=template&id=6699a075&scoped=true
+/* unused harmony import specifier */ var StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_popScopeId;
 
-const StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_withScopeId = n => (_pushScopeId("data-v-6699a075"), n = n(), _popScopeId(), n);
+const StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_withScopeId = n => (StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_pushScopeId("data-v-6699a075"), n = n(), StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_popScopeId(), n);
 const StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_hoisted_1 = {
   class: "AG-bar-graph-options"
 };
@@ -65036,7 +67166,7 @@ function StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_render(
     onInput: _cache[9] || (_cache[9] = (...args) => $options.updateParameters && $options.updateParameters(...args))
   }, null, 544), [[vModelText, $data.x_label_size, void 0, {
     number: true
-  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("stacked_x_label_wrap")) + ": ", 1), runtime_core_esm_bundler_createVNode(_component_radio_component, {
+  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("stacked_x_label_wrap")) + ": ", 1), createVNode(_component_radio_component, {
     modelValue: $data.x_label_limit,
     "onUpdate:modelValue": [_cache[10] || (_cache[10] = $event => $data.x_label_limit = $event), $options.updateParameters],
     values: ['truncate', 'wrap', 'none'],
@@ -65094,7 +67224,7 @@ function StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_render(
     onInput: _cache[22] || (_cache[22] = (...args) => $options.updateParameters && $options.updateParameters(...args))
   }, null, 544), [[vModelText, $data.y_label_size, void 0, {
     number: true
-  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("stacked_y_label_wrap")) + ": ", 1), runtime_core_esm_bundler_createVNode(_component_radio_component, {
+  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("stacked_y_label_wrap")) + ": ", 1), createVNode(_component_radio_component, {
     modelValue: $data.y_label_limit,
     "onUpdate:modelValue": [_cache[23] || (_cache[23] = $event => $data.y_label_limit = $event), $options.updateParameters],
     values: ['truncate', 'wrap', 'none'],
@@ -65139,9 +67269,14 @@ function StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_render(
     number: true
   }]])])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=template&id=6699a075&scoped=true
+;// ./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=template&id=6699a075&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=script&lang=js
+
+
+
+
+
 
 
 
@@ -65373,14 +67508,14 @@ function StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_render(
     this.updateParameters();
   }
 });
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=script&lang=js
+;// ./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=style&index=0&id=6699a075&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=style&index=0&id=6699a075&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=style&index=0&id=6699a075&scoped=true&lang=css
+;// ./src/components/GroupedBarGraph/StackedBarGraphOptions.vue?vue&type=style&index=0&id=6699a075&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/StackedBarGraphOptions.vue
+;// ./src/components/GroupedBarGraph/StackedBarGraphOptions.vue
 
 
 
@@ -65388,10 +67523,17 @@ function StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_render(
 ;
 
 
-const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(StackedBarGraphOptionsvue_type_script_lang_js, [['render',StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_render],['__scopeId',"data-v-6699a075"]])
+const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(StackedBarGraphOptionsvue_type_script_lang_js, [['render',StackedBarGraphOptionsvue_type_template_id_6699a075_scoped_true_render],['__scopeId',"data-v-6699a075"]])
 
 /* harmony default export */ var StackedBarGraphOptions = (StackedBarGraphOptions_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=script&lang=js
+
+
+
+
+
+
+
 
 
 
@@ -65799,14 +67941,14 @@ const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default *
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=script&lang=js
+;// ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=style&index=0&id=02553c9f&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=style&index=0&id=02553c9f&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=style&index=0&id=02553c9f&scoped=true&lang=css
+;// ./src/components/GroupedBarGraph/GroupedBarGraph.vue?vue&type=style&index=0&id=02553c9f&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/GroupedBarGraph/GroupedBarGraph.vue
+;// ./src/components/GroupedBarGraph/GroupedBarGraph.vue
 
 
 
@@ -65814,12 +67956,14 @@ const StackedBarGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default *
 ;
 
 
-const GroupedBarGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(GroupedBarGraphvue_type_script_lang_js, [['render',GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_render],['__scopeId',"data-v-02553c9f"]])
+const GroupedBarGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(GroupedBarGraphvue_type_script_lang_js, [['render',GroupedBarGraphvue_type_template_id_02553c9f_scoped_true_render],['__scopeId',"data-v-02553c9f"]])
 
 /* harmony default export */ var GroupedBarGraph = (GroupedBarGraph_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphForm.vue?vue&type=template&id=aa231426&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphForm.vue?vue&type=template&id=aa231426&scoped=true
+/* unused harmony import specifier */ var LikertGraphFormvue_type_template_id_aa231426_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var LikertGraphFormvue_type_template_id_aa231426_scoped_true_popScopeId;
 
-const LikertGraphFormvue_type_template_id_aa231426_scoped_true_withScopeId = n => (_pushScopeId("data-v-aa231426"), n = n(), _popScopeId(), n);
+const LikertGraphFormvue_type_template_id_aa231426_scoped_true_withScopeId = n => (LikertGraphFormvue_type_template_id_aa231426_scoped_true_pushScopeId("data-v-aa231426"), n = n(), LikertGraphFormvue_type_template_id_aa231426_scoped_true_popScopeId(), n);
 const LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_1 = {
   key: 0
 };
@@ -65839,11 +67983,11 @@ function LikertGraphFormvue_type_template_id_aa231426_scoped_true_render(_ctx, _
   const _component_radio_component = resolveComponent("radio-component");
   const _component_likert_category_checkbox = resolveComponent("likert-category-checkbox");
   const _component_palette_selector = resolveComponent("palette-selector");
-  return openBlock(), createElementBlock("form", null, [runtime_core_esm_bundler_createVNode(_component_instrument_selector, {
+  return openBlock(), createElementBlock("form", null, [createVNode(_component_instrument_selector, {
     modelValue: $data.formData.instrument,
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.formData.instrument = $event),
     availableInstruments: $options.availableInstruments
-  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_1, [createBaseVNode("div", LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_2, [createBaseVNode("div", LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_3, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_1, [createBaseVNode("div", LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_2, [createBaseVNode("div", LikertGraphFormvue_type_template_id_aa231426_scoped_true_hoisted_3, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('title'),
     "help-text": $options.module.tt('title_help')
   }, {
@@ -65852,7 +67996,7 @@ function LikertGraphFormvue_type_template_id_aa231426_scoped_true_render(_ctx, _
       "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.formData.title = $event)
     }, null, 512), [[vModelText, $data.formData.title]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('description'),
     "help-text": $options.module.tt('description_help')
   }, {
@@ -65861,21 +68005,21 @@ function LikertGraphFormvue_type_template_id_aa231426_scoped_true_render(_ctx, _
       "onUpdate:modelValue": _cache[2] || (_cache[2] = $event => $data.formData.description = $event)
     }, null, 512), [[vModelText, $data.formData.description]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('likert_choices'),
     "help-text": $options.module.tt('likert_choices_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_likert_choices_selector, {
+    default: withCtx(() => [createVNode(_component_likert_choices_selector, {
       modelValue: $data.formData.likert_choices,
       "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => $data.formData.likert_choices = $event),
       options: Object.keys($options.likertChoices)
     }, null, 8, ["modelValue", "options"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('likert_na_category'),
     "help-text": $options.module.tt('likert_na_category_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_category,
       "onUpdate:modelValue": _cache[4] || (_cache[4] = $event => $data.formData.na_category = $event),
       name: 'na_category',
@@ -65889,26 +68033,26 @@ function LikertGraphFormvue_type_template_id_aa231426_scoped_true_render(_ctx, _
     "label-text": $options.module.tt('likert_category_checkbox'),
     "help-text": $options.module.tt('likert_category_checkbox_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_likert_category_checkbox, {
+    default: withCtx(() => [createVNode(_component_likert_category_checkbox, {
       modelValue: $data.formData.category_fields,
       "onUpdate:modelValue": _cache[5] || (_cache[5] = $event => $data.formData.category_fields = $event),
       categoricalFields: $options.selectedOptionFields
     }, null, 8, ["modelValue", "categoricalFields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('palette'),
     "help-text": $options.module.tt('palette_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_palette_selector, {
+    default: withCtx(() => [createVNode(_component_palette_selector, {
       modelValue: $data.formData.palette_brewer,
       "onUpdate:modelValue": _cache[6] || (_cache[6] = $event => $data.formData.palette_brewer = $event)
     }, null, 8, ["modelValue"])]),
     _: 1
   }, 8, ["label-text", "help-text"])])])])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphForm.vue?vue&type=template&id=aa231426&scoped=true
+;// ./src/components/Likert/LikertGraphForm.vue?vue&type=template&id=aa231426&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=template&id=f03bfc2a
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=template&id=f03bfc2a
 
 const LikertChoicesSelectorvue_type_template_id_f03bfc2a_hoisted_1 = {
   value: "",
@@ -65918,16 +68062,16 @@ const LikertChoicesSelectorvue_type_template_id_f03bfc2a_hoisted_2 = ["value"];
 function LikertChoicesSelectorvue_type_template_id_f03bfc2a_render(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", null, [withDirectives(createBaseVNode("select", {
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.selectedChoices = $event)
-  }, [createBaseVNode("option", LikertChoicesSelectorvue_type_template_id_f03bfc2a_hoisted_1, toDisplayString($options.module.tt('likert_select_choices')), 1), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($props.options, (option, index) => {
+  }, [createBaseVNode("option", LikertChoicesSelectorvue_type_template_id_f03bfc2a_hoisted_1, toDisplayString($options.module.tt('likert_select_choices')), 1), (openBlock(true), createElementBlock(Fragment, null, renderList($props.options, (option, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: option
     }, toDisplayString(option), 9, LikertChoicesSelectorvue_type_template_id_f03bfc2a_hoisted_2);
   }), 128))], 512), [[vModelSelect, $data.selectedChoices]])]);
 }
-;// CONCATENATED MODULE: ./src/components/Likert/LikertChoicesSelector.vue?vue&type=template&id=f03bfc2a
+;// ./src/components/Likert/LikertChoicesSelector.vue?vue&type=template&id=f03bfc2a
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=script&lang=js
 /* harmony default export */ var LikertChoicesSelectorvue_type_script_lang_js = ({
   name: 'LikertChoicesSelector',
   props: {
@@ -65952,14 +68096,14 @@ function LikertChoicesSelectorvue_type_template_id_f03bfc2a_render(_ctx, _cache,
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Likert/LikertChoicesSelector.vue?vue&type=script&lang=js
+;// ./src/components/Likert/LikertChoicesSelector.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=style&index=0&id=f03bfc2a&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=style&index=0&id=f03bfc2a&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Likert/LikertChoicesSelector.vue?vue&type=style&index=0&id=f03bfc2a&lang=css
+;// ./src/components/Likert/LikertChoicesSelector.vue?vue&type=style&index=0&id=f03bfc2a&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Likert/LikertChoicesSelector.vue
+;// ./src/components/Likert/LikertChoicesSelector.vue
 
 
 
@@ -65967,14 +68111,14 @@ function LikertChoicesSelectorvue_type_template_id_f03bfc2a_render(_ctx, _cache,
 ;
 
 
-const LikertChoicesSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(LikertChoicesSelectorvue_type_script_lang_js, [['render',LikertChoicesSelectorvue_type_template_id_f03bfc2a_render]])
+const LikertChoicesSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(LikertChoicesSelectorvue_type_script_lang_js, [['render',LikertChoicesSelectorvue_type_template_id_f03bfc2a_render]])
 
 /* harmony default export */ var LikertChoicesSelector = (LikertChoicesSelector_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertCategoryCheckbox.vue?vue&type=template&id=6222f952
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertCategoryCheckbox.vue?vue&type=template&id=6222f952
 
 const LikertCategoryCheckboxvue_type_template_id_6222f952_hoisted_1 = ["value"];
 function LikertCategoryCheckboxvue_type_template_id_6222f952_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock("div", null, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($props.categoricalFields, field => {
+  return openBlock(), createElementBlock("div", null, [(openBlock(true), createElementBlock(Fragment, null, renderList($props.categoricalFields, field => {
     return openBlock(), createElementBlock("div", {
       key: field.field_name
     }, [withDirectives(createBaseVNode("input", {
@@ -65989,7 +68133,9 @@ function LikertCategoryCheckboxvue_type_template_id_6222f952_render(_ctx, _cache
     onChange: _cache[3] || (_cache[3] = (...args) => $options.selectAllToggle && $options.selectAllToggle(...args))
   }, null, 544), [[vModelCheckbox, $data.selectAll]])]);
 }
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertCategoryCheckbox.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertCategoryCheckbox.vue?vue&type=script&lang=js
+
+
 /* harmony default export */ var LikertCategoryCheckboxvue_type_script_lang_js = ({
   name: 'LikertCategoryCheckbox',
   inject: ['module'],
@@ -66041,18 +68187,23 @@ function LikertCategoryCheckboxvue_type_template_id_6222f952_render(_ctx, _cache
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Likert/LikertCategoryCheckbox.vue?vue&type=script&lang=js
+;// ./src/components/Likert/LikertCategoryCheckbox.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./src/components/Likert/LikertCategoryCheckbox.vue
+;// ./src/components/Likert/LikertCategoryCheckbox.vue
 
 
 
 
 ;
-const LikertCategoryCheckbox_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(LikertCategoryCheckboxvue_type_script_lang_js, [['render',LikertCategoryCheckboxvue_type_template_id_6222f952_render]])
+const LikertCategoryCheckbox_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(LikertCategoryCheckboxvue_type_script_lang_js, [['render',LikertCategoryCheckboxvue_type_template_id_6222f952_render]])
 
 /* harmony default export */ var LikertCategoryCheckbox = (LikertCategoryCheckbox_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphForm.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphForm.vue?vue&type=script&lang=js
+
+
+
+
+
 
 
 
@@ -66181,7 +68332,6 @@ const LikertCategoryCheckbox_exports_ = /*#__PURE__*/(0,exportHelper/* default *
       this.$emit("isReady", newVal);
       // console.log('isReady', newVal);
     },
-
     formData: {
       handler(newVal) {
         newVal.is_count = newVal.numeric_field === "";
@@ -66243,14 +68393,14 @@ const LikertCategoryCheckbox_exports_ = /*#__PURE__*/(0,exportHelper/* default *
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphForm.vue?vue&type=script&lang=js
+;// ./src/components/Likert/LikertGraphForm.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphForm.vue?vue&type=style&index=0&id=aa231426&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphForm.vue?vue&type=style&index=0&id=aa231426&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphForm.vue?vue&type=style&index=0&id=aa231426&scoped=true&lang=css
+;// ./src/components/Likert/LikertGraphForm.vue?vue&type=style&index=0&id=aa231426&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphForm.vue
+;// ./src/components/Likert/LikertGraphForm.vue
 
 
 
@@ -66258,12 +68408,14 @@ const LikertCategoryCheckbox_exports_ = /*#__PURE__*/(0,exportHelper/* default *
 ;
 
 
-const LikertGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(LikertGraphFormvue_type_script_lang_js, [['render',LikertGraphFormvue_type_template_id_aa231426_scoped_true_render],['__scopeId',"data-v-aa231426"]])
+const LikertGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(LikertGraphFormvue_type_script_lang_js, [['render',LikertGraphFormvue_type_template_id_aa231426_scoped_true_render],['__scopeId',"data-v-aa231426"]])
 
 /* harmony default export */ var LikertGraphForm = (LikertGraphForm_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraph.vue?vue&type=template&id=261fa47e&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraph.vue?vue&type=template&id=261fa47e&scoped=true
+/* unused harmony import specifier */ var LikertGraphvue_type_template_id_261fa47e_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var LikertGraphvue_type_template_id_261fa47e_scoped_true_popScopeId;
 
-const LikertGraphvue_type_template_id_261fa47e_scoped_true_withScopeId = n => (_pushScopeId("data-v-261fa47e"), n = n(), _popScopeId(), n);
+const LikertGraphvue_type_template_id_261fa47e_scoped_true_withScopeId = n => (LikertGraphvue_type_template_id_261fa47e_scoped_true_pushScopeId("data-v-261fa47e"), n = n(), LikertGraphvue_type_template_id_261fa47e_scoped_true_popScopeId(), n);
 const LikertGraphvue_type_template_id_261fa47e_scoped_true_hoisted_1 = {
   class: "AG-graph-container"
 };
@@ -66284,11 +68436,13 @@ function LikertGraphvue_type_template_id_261fa47e_scoped_true_render(_ctx, _cach
     onUpdateParameters: _cache[0] || (_cache[0] = $event => $options.updateParameters($event))
   }, null, 40, ["parameters"])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraph.vue?vue&type=template&id=261fa47e&scoped=true
+;// ./src/components/Likert/LikertGraph.vue?vue&type=template&id=261fa47e&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphOptions.vue?vue&type=template&id=b0fab938&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphOptions.vue?vue&type=template&id=b0fab938&scoped=true
+/* unused harmony import specifier */ var LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_popScopeId;
 
-const LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_withScopeId = n => (_pushScopeId("data-v-b0fab938"), n = n(), _popScopeId(), n);
+const LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_withScopeId = n => (LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_pushScopeId("data-v-b0fab938"), n = n(), LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_popScopeId(), n);
 const LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_hoisted_1 = {
   class: "AG-bar-graph-options"
 };
@@ -66332,7 +68486,7 @@ function LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_render(_ctx
     onInput: _cache[5] || (_cache[5] = (...args) => $options.updateParameters && $options.updateParameters(...args))
   }, null, 544), [[vModelText, $data.y_label_size, void 0, {
     number: true
-  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("likert_y_label_wrap")) + ": ", 1), runtime_core_esm_bundler_createVNode(_component_radio_component, {
+  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("likert_y_label_wrap")) + ": ", 1), createVNode(_component_radio_component, {
     modelValue: $data.y_label_limit,
     "onUpdate:modelValue": [_cache[6] || (_cache[6] = $event => $data.y_label_limit = $event), $options.updateParameters],
     values: ['truncate', 'wrap', 'none'],
@@ -66367,9 +68521,11 @@ function LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_render(_ctx
     number: true
   }]])])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphOptions.vue?vue&type=template&id=b0fab938&scoped=true
+;// ./src/components/Likert/LikertGraphOptions.vue?vue&type=template&id=b0fab938&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphOptions.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphOptions.vue?vue&type=script&lang=js
+
+
 
 
 /* harmony default export */ var LikertGraphOptionsvue_type_script_lang_js = ({
@@ -66449,14 +68605,14 @@ function LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_render(_ctx
     this.updateParameters();
   }
 });
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphOptions.vue?vue&type=script&lang=js
+;// ./src/components/Likert/LikertGraphOptions.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphOptions.vue?vue&type=style&index=0&id=b0fab938&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraphOptions.vue?vue&type=style&index=0&id=b0fab938&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphOptions.vue?vue&type=style&index=0&id=b0fab938&scoped=true&lang=css
+;// ./src/components/Likert/LikertGraphOptions.vue?vue&type=style&index=0&id=b0fab938&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraphOptions.vue
+;// ./src/components/Likert/LikertGraphOptions.vue
 
 
 
@@ -66464,10 +68620,15 @@ function LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_render(_ctx
 ;
 
 
-const LikertGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(LikertGraphOptionsvue_type_script_lang_js, [['render',LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_render],['__scopeId',"data-v-b0fab938"]])
+const LikertGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(LikertGraphOptionsvue_type_script_lang_js, [['render',LikertGraphOptionsvue_type_template_id_b0fab938_scoped_true_render],['__scopeId',"data-v-b0fab938"]])
 
 /* harmony default export */ var LikertGraphOptions = (LikertGraphOptions_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraph.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraph.vue?vue&type=script&lang=js
+
+
+
+
+
 
 
 
@@ -66607,7 +68768,7 @@ const LikertGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)
       const offset = function (facetstacks, X1, X2, Z) {
         for (const stacks of facetstacks) {
           for (const stack of stacks) {
-            const k = sum_sum(stack, i => (X2[i] - X1[i]) * (1 - map[Z[i]])) / 2;
+            const k = sum(stack, i => (X2[i] - X1[i]) * (1 - map[Z[i]])) / 2;
             for (const i of stack) {
               X1[i] -= k;
               X2[i] -= k;
@@ -66684,14 +68845,14 @@ const LikertGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraph.vue?vue&type=script&lang=js
+;// ./src/components/Likert/LikertGraph.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraph.vue?vue&type=style&index=0&id=261fa47e&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertGraph.vue?vue&type=style&index=0&id=261fa47e&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraph.vue?vue&type=style&index=0&id=261fa47e&scoped=true&lang=css
+;// ./src/components/Likert/LikertGraph.vue?vue&type=style&index=0&id=261fa47e&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Likert/LikertGraph.vue
+;// ./src/components/Likert/LikertGraph.vue
 
 
 
@@ -66699,12 +68860,14 @@ const LikertGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)
 ;
 
 
-const LikertGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(LikertGraphvue_type_script_lang_js, [['render',LikertGraphvue_type_template_id_261fa47e_scoped_true_render],['__scopeId',"data-v-261fa47e"]])
+const LikertGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(LikertGraphvue_type_script_lang_js, [['render',LikertGraphvue_type_template_id_261fa47e_scoped_true_render],['__scopeId',"data-v-261fa47e"]])
 
 /* harmony default export */ var LikertGraph = (LikertGraph_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=template&id=34c5231c&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=template&id=34c5231c&scoped=true
+/* unused harmony import specifier */ var ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_popScopeId;
 
-const ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_withScopeId = n => (_pushScopeId("data-v-34c5231c"), n = n(), _popScopeId(), n);
+const ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_withScopeId = n => (ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_pushScopeId("data-v-34c5231c"), n = n(), ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_popScopeId(), n);
 const ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_hoisted_1 = {
   key: 0
 };
@@ -66723,11 +68886,11 @@ function ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_render(_ctx, _
   const _component_scatter_field_selector = resolveComponent("scatter-field-selector");
   const _component_radio_component = resolveComponent("radio-component");
   const _component_palette_selector = resolveComponent("palette-selector");
-  return openBlock(), createElementBlock("form", null, [runtime_core_esm_bundler_createVNode(_component_instrument_selector, {
+  return openBlock(), createElementBlock("form", null, [createVNode(_component_instrument_selector, {
     modelValue: $data.formData.instrument,
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.formData.instrument = $event),
     availableInstruments: $options.availableInstruments
-  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_hoisted_1, [createBaseVNode("div", ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_hoisted_2, [createBaseVNode("div", ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_hoisted_3, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_hoisted_1, [createBaseVNode("div", ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_hoisted_2, [createBaseVNode("div", ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_hoisted_3, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('title'),
     "help-text": $options.module.tt('title_help')
   }, {
@@ -66736,7 +68899,7 @@ function ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_render(_ctx, _
       "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.formData.title = $event)
     }, null, 512), [[vModelText, $data.formData.title]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('description'),
     "help-text": $options.module.tt('description_help')
   }, {
@@ -66745,21 +68908,21 @@ function ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_render(_ctx, _
       "onUpdate:modelValue": _cache[2] || (_cache[2] = $event => $data.formData.description = $event)
     }, null, 512), [[vModelText, $data.formData.description]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('scatter_field_x'),
     "help-text": $options.module.tt('scatter_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_scatter_field_selector, {
+    default: withCtx(() => [createVNode(_component_scatter_field_selector, {
       modelValue: $data.formData.numeric_field,
       "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => $data.formData.numeric_field = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
     }, null, 8, ["modelValue", "fields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_hoisted_4, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_hoisted_4, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('scatter_field_y'),
     "help-text": $options.module.tt('scatter_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_scatter_field_selector, {
+    default: withCtx(() => [createVNode(_component_scatter_field_selector, {
       modelValue: $data.formData.numeric_field_y,
       "onUpdate:modelValue": _cache[4] || (_cache[4] = $event => $data.formData.numeric_field_y = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
@@ -66770,7 +68933,7 @@ function ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_render(_ctx, _
     "label-text": $options.module.tt('scatter_na_numeric'),
     "help-text": $options.module.tt('scatter_na_numeric_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_numeric,
       "onUpdate:modelValue": _cache[5] || (_cache[5] = $event => $data.formData.na_numeric = $event),
       name: 'na_numeric',
@@ -66784,7 +68947,7 @@ function ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_render(_ctx, _
     "label-text": $options.module.tt('scatter_type'),
     "help-text": $options.module.tt('scatter_type_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.scatter_type,
       "onUpdate:modelValue": _cache[6] || (_cache[6] = $event => $data.formData.scatter_type = $event),
       name: 'scatter_type',
@@ -66793,22 +68956,24 @@ function ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_render(_ctx, _
       labels: [$options.module.tt('scatter_dots'), $options.module.tt('scatter_dots_lines')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('palette'),
     "help-text": $options.module.tt('palette_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_palette_selector, {
+    default: withCtx(() => [createVNode(_component_palette_selector, {
       modelValue: $data.formData.palette_brewer,
       "onUpdate:modelValue": _cache[7] || (_cache[7] = $event => $data.formData.palette_brewer = $event)
     }, null, 8, ["modelValue"])]),
     _: 1
   }, 8, ["label-text", "help-text"])])])])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=template&id=34c5231c&scoped=true
+;// ./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=template&id=34c5231c&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=template&id=09712275&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=template&id=09712275&scoped=true
+/* unused harmony import specifier */ var ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_popScopeId;
 
-const ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_withScopeId = n => (_pushScopeId("data-v-09712275"), n = n(), _popScopeId(), n);
+const ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_withScopeId = n => (ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_pushScopeId("data-v-09712275"), n = n(), ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_popScopeId(), n);
 const ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_hoisted_1 = {
   value: null,
   selected: true
@@ -66823,7 +68988,7 @@ function ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_render(_c
   }, [createBaseVNode("option", ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_hoisted_1, " -- " + toDisplayString($options.module.tt('sfs_select_a_field')) + " -- ", 1), $options.numericFields.length ? (openBlock(), createElementBlock("optgroup", {
     key: 0,
     label: $options.module.tt('sfs_numeric')
-  }, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.numericFields, (field, index) => {
+  }, [(openBlock(true), createElementBlock(Fragment, null, renderList($options.numericFields, (field, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: field.field_name,
@@ -66832,7 +68997,7 @@ function ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_render(_c
   }), 128))], 8, ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_hoisted_2)) : createCommentVNode("", true), $options.dateFields.length ? (openBlock(), createElementBlock("optgroup", {
     key: 1,
     label: $options.module.tt('sfs_date')
-  }, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.dateFields, (field, index) => {
+  }, [(openBlock(true), createElementBlock(Fragment, null, renderList($options.dateFields, (field, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: field.field_name,
@@ -66840,9 +69005,9 @@ function ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_render(_c
     }, toDisplayString($data.stripHtml(field.field_label)), 9, ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_hoisted_5);
   }), 128))], 8, ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_hoisted_4)) : createCommentVNode("", true)], 512), [[vModelSelect, $data.currentField]])]);
 }
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=template&id=09712275&scoped=true
+;// ./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=template&id=09712275&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=script&lang=js
 
 /* harmony default export */ var ScatterFieldSelectorvue_type_script_lang_js = ({
   name: 'ScatterFieldSelector',
@@ -66877,14 +69042,14 @@ function ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_render(_c
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=script&lang=js
+;// ./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=style&index=0&id=09712275&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=style&index=0&id=09712275&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=style&index=0&id=09712275&scoped=true&lang=css
+;// ./src/components/ScatterPlot/ScatterFieldSelector.vue?vue&type=style&index=0&id=09712275&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterFieldSelector.vue
+;// ./src/components/ScatterPlot/ScatterFieldSelector.vue
 
 
 
@@ -66892,10 +69057,12 @@ function ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_render(_c
 ;
 
 
-const ScatterFieldSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(ScatterFieldSelectorvue_type_script_lang_js, [['render',ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_render],['__scopeId',"data-v-09712275"]])
+const ScatterFieldSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(ScatterFieldSelectorvue_type_script_lang_js, [['render',ScatterFieldSelectorvue_type_template_id_09712275_scoped_true_render],['__scopeId',"data-v-09712275"]])
 
 /* harmony default export */ var ScatterFieldSelector = (ScatterFieldSelector_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=script&lang=js
+
+
 
 
 
@@ -66968,7 +69135,6 @@ const ScatterFieldSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.
       this.$emit("isReady", newVal);
       // console.log('isReady', newVal);
     },
-
     formData: {
       handler(newVal) {
         newVal.is_count = newVal.numeric_field === "";
@@ -67000,14 +69166,14 @@ const ScatterFieldSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=script&lang=js
+;// ./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=style&index=0&id=34c5231c&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=style&index=0&id=34c5231c&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=style&index=0&id=34c5231c&scoped=true&lang=css
+;// ./src/components/ScatterPlot/ScatterPlotForm.vue?vue&type=style&index=0&id=34c5231c&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlotForm.vue
+;// ./src/components/ScatterPlot/ScatterPlotForm.vue
 
 
 
@@ -67015,12 +69181,14 @@ const ScatterFieldSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.
 ;
 
 
-const ScatterPlotForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(ScatterPlotFormvue_type_script_lang_js, [['render',ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_render],['__scopeId',"data-v-34c5231c"]])
+const ScatterPlotForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(ScatterPlotFormvue_type_script_lang_js, [['render',ScatterPlotFormvue_type_template_id_34c5231c_scoped_true_render],['__scopeId',"data-v-34c5231c"]])
 
 /* harmony default export */ var ScatterPlotForm = (ScatterPlotForm_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlot.vue?vue&type=template&id=72dfe1a6&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlot.vue?vue&type=template&id=72dfe1a6&scoped=true
+/* unused harmony import specifier */ var ScatterPlotvue_type_template_id_72dfe1a6_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var ScatterPlotvue_type_template_id_72dfe1a6_scoped_true_popScopeId;
 
-const ScatterPlotvue_type_template_id_72dfe1a6_scoped_true_withScopeId = n => (_pushScopeId("data-v-72dfe1a6"), n = n(), _popScopeId(), n);
+const ScatterPlotvue_type_template_id_72dfe1a6_scoped_true_withScopeId = n => (ScatterPlotvue_type_template_id_72dfe1a6_scoped_true_pushScopeId("data-v-72dfe1a6"), n = n(), ScatterPlotvue_type_template_id_72dfe1a6_scoped_true_popScopeId(), n);
 const ScatterPlotvue_type_template_id_72dfe1a6_scoped_true_hoisted_1 = {
   class: "AG-graph-container"
 };
@@ -67041,9 +69209,12 @@ function ScatterPlotvue_type_template_id_72dfe1a6_scoped_true_render(_ctx, _cach
     onUpdateParameters: _cache[0] || (_cache[0] = $event => $options.updateParameters($event))
   }, null, 40, ["parameters"])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlot.vue?vue&type=template&id=72dfe1a6&scoped=true
+;// ./src/components/ScatterPlot/ScatterPlot.vue?vue&type=template&id=72dfe1a6&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/marks/dot.js
+;// ./node_modules/@observablehq/plot/src/marks/dot.js
+/* unused harmony import specifier */ var dot_identity;
+/* unused harmony import specifier */ var dot_maybeIntervalMidY;
+/* unused harmony import specifier */ var dot_maybeIntervalMidX;
 
 
 
@@ -67174,18 +69345,18 @@ class Dot extends Mark {
 
 function dot(data, options = {}) {
   let {x, y, ...remainingOptions} = options;
-  if (options.frameAnchor === undefined) [x, y] = options_maybeTuple(x, y);
+  if (options.frameAnchor === undefined) [x, y] = maybeTuple(x, y);
   return new Dot(data, {...remainingOptions, x, y});
 }
 
 function dotX(data, options = {}) {
-  const {x = identity, ...remainingOptions} = options;
-  return new Dot(data, maybeIntervalMidY({...remainingOptions, x}));
+  const {x = dot_identity, ...remainingOptions} = options;
+  return new Dot(data, dot_maybeIntervalMidY({...remainingOptions, x}));
 }
 
 function dotY(data, options = {}) {
-  const {y = identity, ...remainingOptions} = options;
-  return new Dot(data, maybeIntervalMidX({...remainingOptions, y}));
+  const {y = dot_identity, ...remainingOptions} = options;
+  return new Dot(data, dot_maybeIntervalMidX({...remainingOptions, y}));
 }
 
 function dot_circle(data, options) {
@@ -67196,7 +69367,7 @@ function hexagon(data, options) {
   return dot(data, {...options, symbol: "hexagon"});
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/curve.js
+;// ./node_modules/@observablehq/plot/src/curve.js
 
 
 const curves = new Map([
@@ -67251,7 +69422,7 @@ function curveAuto(context) {
   return curve_linear(context);
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/marker.js
+;// ./node_modules/@observablehq/plot/src/marker.js
 
 
 function markers(mark, {marker, markerStart = marker, markerMid = marker, markerEnd = marker} = {}) {
@@ -67364,7 +69535,11 @@ function applyMarkersColor(path, {markerStart, markerMid, markerEnd, stroke}, st
   if (markerEnd) path.attr("marker-end", applyMarker(markerEnd));
 }
 
-;// CONCATENATED MODULE: ./node_modules/@observablehq/plot/src/marks/line.js
+;// ./node_modules/@observablehq/plot/src/marks/line.js
+/* unused harmony import specifier */ var line_identity;
+/* unused harmony import specifier */ var line_indexOf;
+/* unused harmony import specifier */ var maybeDenseIntervalY;
+/* unused harmony import specifier */ var maybeDenseIntervalX;
 
 
 
@@ -67442,8 +69617,8 @@ class Line extends Mark {
 
 function sphereLine(projection, X, Y) {
   const path = src_path(projection);
-  X = options_coerceNumbers(X);
-  Y = options_coerceNumbers(Y);
+  X = coerceNumbers(X);
+  Y = coerceNumbers(Y);
   return (I) => {
     let line = [];
     const lines = [line];
@@ -67462,21 +69637,21 @@ function sphereLine(projection, X, Y) {
 
 function line_line(data, options = {}) {
   let {x, y, ...remainingOptions} = options;
-  [x, y] = options_maybeTuple(x, y);
+  [x, y] = maybeTuple(x, y);
   return new Line(data, {...remainingOptions, x, y});
 }
 
 function lineX(data, options = {}) {
-  const {x = identity, y = indexOf, ...remainingOptions} = options;
+  const {x = line_identity, y = line_indexOf, ...remainingOptions} = options;
   return new Line(data, maybeDenseIntervalY({...remainingOptions, x, y}));
 }
 
 function lineY(data, options = {}) {
-  const {x = indexOf, y = identity, ...remainingOptions} = options;
+  const {x = line_indexOf, y = line_identity, ...remainingOptions} = options;
   return new Line(data, maybeDenseIntervalX({...remainingOptions, x, y}));
 }
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=template&id=877c0ece&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=template&id=877c0ece&scoped=true
 
 const ScatterPlotOptionsvue_type_template_id_877c0ece_scoped_true_withScopeId = n => (pushScopeId("data-v-877c0ece"), n = n(), popScopeId(), n);
 const ScatterPlotOptionsvue_type_template_id_877c0ece_scoped_true_hoisted_1 = {
@@ -67591,7 +69766,7 @@ function ScatterPlotOptionsvue_type_template_id_877c0ece_scoped_true_render(_ctx
     onInput: _cache[19] || (_cache[19] = (...args) => $options.updateParameters && $options.updateParameters(...args))
   }, null, 544), [[vModelText, $data.y_label_size, void 0, {
     number: true
-  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("scatter_marker_shape")) + ": ", 1), runtime_core_esm_bundler_createVNode(_component_radio_component, {
+  }]])]), createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("scatter_marker_shape")) + ": ", 1), createVNode(_component_radio_component, {
     modelValue: $data.marker_type,
     "onUpdate:modelValue": [_cache[20] || (_cache[20] = $event => $data.marker_type = $event), $options.updateParameters],
     values: ['circle', 'square', 'triangle'],
@@ -67636,9 +69811,9 @@ function ScatterPlotOptionsvue_type_template_id_877c0ece_scoped_true_render(_ctx
     number: true
   }]])])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=template&id=877c0ece&scoped=true
+;// ./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=template&id=877c0ece&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=script&lang=js
 // import { parseChoicesOrCalculations, isCheckboxField, getCheckboxReport, truncateString, wrapString} from '@/utils.js';
 
 // import * as d3 from 'd3';
@@ -67793,7 +69968,6 @@ function ScatterPlotOptionsvue_type_template_id_877c0ece_scoped_true_render(_ctx
       // show_legend,
     };
   },
-
   methods: {
     updateParameters() {
       // console.log('updateParameters', this.show_legend);
@@ -67819,7 +69993,6 @@ function ScatterPlotOptionsvue_type_template_id_877c0ece_scoped_true_render(_ctx
       });
     }
   },
-
   mounted() {
     this.$nextTick(function () {
       this.$refs.x_title_size.value = this.x_title_size;
@@ -67845,14 +70018,14 @@ function ScatterPlotOptionsvue_type_template_id_877c0ece_scoped_true_render(_ctx
     this.updateParameters();
   }
 });
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=script&lang=js
+;// ./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=style&index=0&id=877c0ece&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=style&index=0&id=877c0ece&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=style&index=0&id=877c0ece&scoped=true&lang=css
+;// ./src/components/ScatterPlot/ScatterPlotOptions.vue?vue&type=style&index=0&id=877c0ece&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlotOptions.vue
+;// ./src/components/ScatterPlot/ScatterPlotOptions.vue
 
 
 
@@ -67860,10 +70033,14 @@ function ScatterPlotOptionsvue_type_template_id_877c0ece_scoped_true_render(_ctx
 ;
 
 
-const ScatterPlotOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(ScatterPlotOptionsvue_type_script_lang_js, [['render',ScatterPlotOptionsvue_type_template_id_877c0ece_scoped_true_render],['__scopeId',"data-v-877c0ece"]])
+const ScatterPlotOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(ScatterPlotOptionsvue_type_script_lang_js, [['render',ScatterPlotOptionsvue_type_template_id_877c0ece_scoped_true_render],['__scopeId',"data-v-877c0ece"]])
 
 /* harmony default export */ var ScatterPlotOptions = (ScatterPlotOptions_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlot.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlot.vue?vue&type=script&lang=js
+
+
+
+
 
 
 
@@ -68273,7 +70450,6 @@ function sortValuesByDate(xValues, yValues) {
           domain: domainX
           //tickRotate: x_rotate,
         },
-
         y: {
           label: '',
           domain: domainY
@@ -68312,14 +70488,14 @@ function sortValuesByDate(xValues, yValues) {
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlot.vue?vue&type=script&lang=js
+;// ./src/components/ScatterPlot/ScatterPlot.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlot.vue?vue&type=style&index=0&id=72dfe1a6&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ScatterPlot/ScatterPlot.vue?vue&type=style&index=0&id=72dfe1a6&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlot.vue?vue&type=style&index=0&id=72dfe1a6&scoped=true&lang=css
+;// ./src/components/ScatterPlot/ScatterPlot.vue?vue&type=style&index=0&id=72dfe1a6&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/ScatterPlot/ScatterPlot.vue
+;// ./src/components/ScatterPlot/ScatterPlot.vue
 
 
 
@@ -68327,12 +70503,14 @@ function sortValuesByDate(xValues, yValues) {
 ;
 
 
-const ScatterPlot_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(ScatterPlotvue_type_script_lang_js, [['render',ScatterPlotvue_type_template_id_72dfe1a6_scoped_true_render],['__scopeId',"data-v-72dfe1a6"]])
+const ScatterPlot_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(ScatterPlotvue_type_script_lang_js, [['render',ScatterPlotvue_type_template_id_72dfe1a6_scoped_true_render],['__scopeId',"data-v-72dfe1a6"]])
 
 /* harmony default export */ var ScatterPlot = (ScatterPlot_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableComponent.vue?vue&type=template&id=63c8ea48&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableComponent.vue?vue&type=template&id=63c8ea48&scoped=true
+/* unused harmony import specifier */ var TableComponentvue_type_template_id_63c8ea48_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var TableComponentvue_type_template_id_63c8ea48_scoped_true_popScopeId;
 
-const TableComponentvue_type_template_id_63c8ea48_scoped_true_withScopeId = n => (_pushScopeId("data-v-63c8ea48"), n = n(), _popScopeId(), n);
+const TableComponentvue_type_template_id_63c8ea48_scoped_true_withScopeId = n => (TableComponentvue_type_template_id_63c8ea48_scoped_true_pushScopeId("data-v-63c8ea48"), n = n(), TableComponentvue_type_template_id_63c8ea48_scoped_true_popScopeId(), n);
 const TableComponentvue_type_template_id_63c8ea48_scoped_true_hoisted_1 = {
   class: "AG-graph-container"
 };
@@ -68353,11 +70531,13 @@ function TableComponentvue_type_template_id_63c8ea48_scoped_true_render(_ctx, _c
     parameters: $props.parameters
   }, null, 8, ["parameters"])) : createCommentVNode("", true), createBaseVNode("div", TableComponentvue_type_template_id_63c8ea48_scoped_true_hoisted_3, [createBaseVNode("p", null, toDisplayString($props.parameters.description || ""), 1)])]);
 }
-;// CONCATENATED MODULE: ./src/components/Tables/TableComponent.vue?vue&type=template&id=63c8ea48&scoped=true
+;// ./src/components/Tables/TableComponent.vue?vue&type=template&id=63c8ea48&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/SummaryTable.vue?vue&type=template&id=7e0a28d6&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/SummaryTable.vue?vue&type=template&id=7e0a28d6&scoped=true
+/* unused harmony import specifier */ var SummaryTablevue_type_template_id_7e0a28d6_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var SummaryTablevue_type_template_id_7e0a28d6_scoped_true_popScopeId;
 
-const SummaryTablevue_type_template_id_7e0a28d6_scoped_true_withScopeId = n => (_pushScopeId("data-v-7e0a28d6"), n = n(), _popScopeId(), n);
+const SummaryTablevue_type_template_id_7e0a28d6_scoped_true_withScopeId = n => (SummaryTablevue_type_template_id_7e0a28d6_scoped_true_pushScopeId("data-v-7e0a28d6"), n = n(), SummaryTablevue_type_template_id_7e0a28d6_scoped_true_popScopeId(), n);
 const SummaryTablevue_type_template_id_7e0a28d6_scoped_true_hoisted_1 = {
   class: "tableContainer"
 };
@@ -68374,15 +70554,21 @@ const SummaryTablevue_type_template_id_7e0a28d6_scoped_true_hoisted_5 = {
   key: 2
 };
 function SummaryTablevue_type_template_id_7e0a28d6_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock("div", SummaryTablevue_type_template_id_7e0a28d6_scoped_true_hoisted_1, [createBaseVNode("table", null, [createBaseVNode("tr", SummaryTablevue_type_template_id_7e0a28d6_scoped_true_hoisted_2, [createBaseVNode("th", null, [createBaseVNode("p", null, toDisplayString($data.category), 1)]), createBaseVNode("th", null, [createBaseVNode("p", null, toDisplayString($data.numeric), 1)])]), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($data.tableData, (row, index) => {
+  return openBlock(), createElementBlock("div", SummaryTablevue_type_template_id_7e0a28d6_scoped_true_hoisted_1, [createBaseVNode("table", null, [createBaseVNode("tr", SummaryTablevue_type_template_id_7e0a28d6_scoped_true_hoisted_2, [createBaseVNode("th", null, [createBaseVNode("p", null, toDisplayString($data.category), 1)]), createBaseVNode("th", null, [createBaseVNode("p", null, toDisplayString($data.numeric), 1)])]), (openBlock(true), createElementBlock(Fragment, null, renderList($data.tableData, (row, index) => {
     return openBlock(), createElementBlock("tr", {
       key: index
     }, [createBaseVNode("td", null, [createBaseVNode("p", null, toDisplayString(row['category']), 1)]), createBaseVNode("td", null, [$data.percents_or_totals == 'totals' ? (openBlock(), createElementBlock("p", SummaryTablevue_type_template_id_7e0a28d6_scoped_true_hoisted_3, toDisplayString(row['count']), 1)) : $data.percents_or_totals == 'percents' ? (openBlock(), createElementBlock("p", SummaryTablevue_type_template_id_7e0a28d6_scoped_true_hoisted_4, toDisplayString($data.d3.format(".0%")(row['percent'])), 1)) : $data.percents_or_totals == 'both' ? (openBlock(), createElementBlock("p", SummaryTablevue_type_template_id_7e0a28d6_scoped_true_hoisted_5, toDisplayString(row['count']) + " (" + toDisplayString($data.d3.format(".0%")(row['percent'])) + ")", 1)) : createCommentVNode("", true)])]);
   }), 128))])]);
 }
-;// CONCATENATED MODULE: ./src/components/Tables/SummaryTable.vue?vue&type=template&id=7e0a28d6&scoped=true
+;// ./src/components/Tables/SummaryTable.vue?vue&type=template&id=7e0a28d6&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/SummaryTable.vue?vue&type=script&lang=js
+// EXTERNAL MODULE: ./node_modules/core-js/modules/esnext.iterator.for-each.js
+var esnext_iterator_for_each = __webpack_require__(9838);
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/SummaryTable.vue?vue&type=script&lang=js
+
+
+
+
 
 
 
@@ -68455,7 +70641,7 @@ function SummaryTablevue_type_template_id_7e0a28d6_scoped_true_render(_ctx, _cac
     var countsArray = Array.from(counts, ([category, count]) => ({
       category: choices[category],
       count,
-      percent: count / sum_sum(Array.from(counts, ([, count]) => count))
+      percent: count / sum(Array.from(counts, ([, count]) => count))
     }));
 
     // If there are choices that are not in the report and unused categories is set to keep add them to the counts array
@@ -68474,7 +70660,7 @@ function SummaryTablevue_type_template_id_7e0a28d6_scoped_true_render(_ctx, _cac
     // Add a total row to the counts array that takes the sum of the counts
     countsArray.push({
       category: this.module.tt("table_total"),
-      count: sum_sum(countsArray, d => d.count),
+      count: sum(countsArray, d => d.count),
       percent: 1
     });
 
@@ -68483,7 +70669,6 @@ function SummaryTablevue_type_template_id_7e0a28d6_scoped_true_render(_ctx, _cac
     countsArray.forEach(item => {
       item.count = item.count.toLocaleString(); // Add formatted count as a new property
     });
-
     return {
       tableData: countsArray,
       category: this.data_dictionary[this.parameters.categorical_field].field_label,
@@ -68493,14 +70678,14 @@ function SummaryTablevue_type_template_id_7e0a28d6_scoped_true_render(_ctx, _cac
     };
   }
 });
-;// CONCATENATED MODULE: ./src/components/Tables/SummaryTable.vue?vue&type=script&lang=js
+;// ./src/components/Tables/SummaryTable.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/SummaryTable.vue?vue&type=style&index=0&id=7e0a28d6&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/SummaryTable.vue?vue&type=style&index=0&id=7e0a28d6&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Tables/SummaryTable.vue?vue&type=style&index=0&id=7e0a28d6&scoped=true&lang=css
+;// ./src/components/Tables/SummaryTable.vue?vue&type=style&index=0&id=7e0a28d6&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Tables/SummaryTable.vue
+;// ./src/components/Tables/SummaryTable.vue
 
 
 
@@ -68508,10 +70693,10 @@ function SummaryTablevue_type_template_id_7e0a28d6_scoped_true_render(_ctx, _cac
 ;
 
 
-const SummaryTable_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(SummaryTablevue_type_script_lang_js, [['render',SummaryTablevue_type_template_id_7e0a28d6_scoped_true_render],['__scopeId',"data-v-7e0a28d6"]])
+const SummaryTable_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(SummaryTablevue_type_script_lang_js, [['render',SummaryTablevue_type_template_id_7e0a28d6_scoped_true_render],['__scopeId',"data-v-7e0a28d6"]])
 
 /* harmony default export */ var SummaryTable = (SummaryTable_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/CrosstabTable.vue?vue&type=template&id=6d371eb1&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/CrosstabTable.vue?vue&type=template&id=6d371eb1&scoped=true
 
 const CrosstabTablevue_type_template_id_6d371eb1_scoped_true_withScopeId = n => (pushScopeId("data-v-6d371eb1"), n = n(), popScopeId(), n);
 const CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_1 = {
@@ -68568,28 +70753,39 @@ function CrosstabTablevue_type_template_id_6d371eb1_scoped_true_render(_ctx, _ca
   return openBlock(), createElementBlock("div", null, [createBaseVNode("table", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_1, [createBaseVNode("tr", null, [CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_2, createBaseVNode("th", {
     class: "header",
     colspan: $data.column_categories.length
-  }, toDisplayString($data.category_two), 9, CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_3)]), createBaseVNode("tr", null, [createBaseVNode("th", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_4, toDisplayString($data.category_one), 1), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($data.column_categories, (category, index) => {
+  }, toDisplayString($data.category_two), 9, CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_3)]), createBaseVNode("tr", null, [createBaseVNode("th", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_4, toDisplayString($data.category_one), 1), (openBlock(true), createElementBlock(Fragment, null, renderList($data.column_categories, (category, index) => {
     return openBlock(), createElementBlock("td", {
       key: index
     }, toDisplayString($data.choices_two[category]), 1);
-  }), 128)), createBaseVNode("th", null, toDisplayString($options.module.tt('table_total')), 1)]), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($data.tableData, (row, row_categories, index) => {
+  }), 128)), createBaseVNode("th", null, toDisplayString($options.module.tt('table_total')), 1)]), (openBlock(true), createElementBlock(Fragment, null, renderList($data.tableData, (row, row_categories, index) => {
     return openBlock(), createElementBlock("tr", {
       key: index
-    }, [createBaseVNode("td", null, [createBaseVNode("p", null, toDisplayString($data.choices_one[row_categories]), 1)]), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList(row, (value, column) => {
+    }, [createBaseVNode("td", null, [createBaseVNode("p", null, toDisplayString($data.choices_one[row_categories]), 1)]), (openBlock(true), createElementBlock(Fragment, null, renderList(row, (value, column) => {
       return openBlock(), createElementBlock("td", {
         key: column
       }, [$data.percents_or_totals == 'totals' ? (openBlock(), createElementBlock("p", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_5, toDisplayString(value[1].value), 1)) : $data.percents_or_totals == 'percents' ? (openBlock(), createElementBlock("p", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_6, toDisplayString($data.d3.format(".0%")(value[1][$data.attributeType])), 1)) : $data.percents_or_totals == 'both' ? (openBlock(), createElementBlock("p", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_7, toDisplayString(value[1].value) + " (" + toDisplayString($data.d3.format(".0%")(value[1][$data.attributeType])) + ")", 1)) : createCommentVNode("", true)]);
     }), 128)), createBaseVNode("td", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_8, [$data.percents_or_totals == 'totals' ? (openBlock(), createElementBlock("p", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_9, toDisplayString($data.totalColumn[row_categories].value), 1)) : $data.percents_or_totals == 'percents' ? (openBlock(), createElementBlock("p", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_10, toDisplayString($data.d3.format(".0%")($data.totalColumn[row_categories][$data.attributeType])), 1)) : $data.percents_or_totals == 'both' ? (openBlock(), createElementBlock("p", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_11, toDisplayString($data.totalColumn[row_categories].value) + " (" + toDisplayString($data.d3.format(".0%")($data.totalColumn[row_categories][$data.attributeType])) + ")", 1)) : createCommentVNode("", true)])]);
-  }), 128)), createBaseVNode("tr", null, [createBaseVNode("th", null, toDisplayString($options.module.tt('table_total')), 1), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($data.column_categories, (category, index) => {
+  }), 128)), createBaseVNode("tr", null, [createBaseVNode("th", null, toDisplayString($options.module.tt('table_total')), 1), (openBlock(true), createElementBlock(Fragment, null, renderList($data.column_categories, (category, index) => {
     return openBlock(), createElementBlock("td", {
       class: "row-total",
       key: index
     }, [$data.percents_or_totals == 'totals' ? (openBlock(), createElementBlock("p", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_12, toDisplayString($data.totalRow[category].value), 1)) : $data.percents_or_totals == 'percents' ? (openBlock(), createElementBlock("p", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_13, toDisplayString($data.d3.format(".0%")($data.totalRow[category][$data.attributeType])), 1)) : $data.percents_or_totals == 'both' ? (openBlock(), createElementBlock("p", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_14, toDisplayString($data.totalRow[category].value) + " (" + toDisplayString($data.d3.format(".0%")($data.totalRow[category][$data.attributeType])) + ")", 1)) : createCommentVNode("", true)]);
   }), 128)), createBaseVNode("td", CrosstabTablevue_type_template_id_6d371eb1_scoped_true_hoisted_15, [$data.percents_or_totals == 'totals' ? (openBlock(), createElementBlock("p", _hoisted_16, toDisplayString($data.grandTotal), 1)) : $data.percents_or_totals == 'percents' ? (openBlock(), createElementBlock("p", _hoisted_17, toDisplayString($data.d3.format(".0%")(1)), 1)) : $data.percents_or_totals == 'both' ? (openBlock(), createElementBlock("p", _hoisted_18, toDisplayString($data.grandTotal) + " (" + toDisplayString($data.d3.format(".0%")(1)) + ")", 1)) : createCommentVNode("", true)])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/Tables/CrosstabTable.vue?vue&type=template&id=6d371eb1&scoped=true
+;// ./src/components/Tables/CrosstabTable.vue?vue&type=template&id=6d371eb1&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/CrosstabTable.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/CrosstabTable.vue?vue&type=script&lang=js
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* harmony default export */ var CrosstabTablevue_type_script_lang_js = ({
@@ -68760,7 +70956,6 @@ function CrosstabTablevue_type_template_id_6d371eb1_scoped_true_render(_ctx, _ca
           totalPercent: 0
         }); // Format '0' as '0' with commas
       }
-
       totalColumn[row] = {
         value: rowTotal.toLocaleString(),
         rowPercent: 1,
@@ -68812,14 +71007,14 @@ function CrosstabTablevue_type_template_id_6d371eb1_scoped_true_render(_ctx, _ca
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Tables/CrosstabTable.vue?vue&type=script&lang=js
+;// ./src/components/Tables/CrosstabTable.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/CrosstabTable.vue?vue&type=style&index=0&id=6d371eb1&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/CrosstabTable.vue?vue&type=style&index=0&id=6d371eb1&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Tables/CrosstabTable.vue?vue&type=style&index=0&id=6d371eb1&scoped=true&lang=css
+;// ./src/components/Tables/CrosstabTable.vue?vue&type=style&index=0&id=6d371eb1&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Tables/CrosstabTable.vue
+;// ./src/components/Tables/CrosstabTable.vue
 
 
 
@@ -68827,10 +71022,10 @@ function CrosstabTablevue_type_template_id_6d371eb1_scoped_true_render(_ctx, _ca
 ;
 
 
-const CrosstabTable_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(CrosstabTablevue_type_script_lang_js, [['render',CrosstabTablevue_type_template_id_6d371eb1_scoped_true_render],['__scopeId',"data-v-6d371eb1"]])
+const CrosstabTable_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(CrosstabTablevue_type_script_lang_js, [['render',CrosstabTablevue_type_template_id_6d371eb1_scoped_true_render],['__scopeId',"data-v-6d371eb1"]])
 
 /* harmony default export */ var CrosstabTable = (CrosstabTable_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableComponent.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableComponent.vue?vue&type=script&lang=js
 
 
 /* harmony default export */ var TableComponentvue_type_script_lang_js = ({
@@ -68857,14 +71052,14 @@ const CrosstabTable_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(Cros
     };
   }
 });
-;// CONCATENATED MODULE: ./src/components/Tables/TableComponent.vue?vue&type=script&lang=js
+;// ./src/components/Tables/TableComponent.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableComponent.vue?vue&type=style&index=0&id=63c8ea48&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableComponent.vue?vue&type=style&index=0&id=63c8ea48&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Tables/TableComponent.vue?vue&type=style&index=0&id=63c8ea48&scoped=true&lang=css
+;// ./src/components/Tables/TableComponent.vue?vue&type=style&index=0&id=63c8ea48&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Tables/TableComponent.vue
+;// ./src/components/Tables/TableComponent.vue
 
 
 
@@ -68872,12 +71067,14 @@ const CrosstabTable_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(Cros
 ;
 
 
-const TableComponent_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(TableComponentvue_type_script_lang_js, [['render',TableComponentvue_type_template_id_63c8ea48_scoped_true_render],['__scopeId',"data-v-63c8ea48"]])
+const TableComponent_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(TableComponentvue_type_script_lang_js, [['render',TableComponentvue_type_template_id_63c8ea48_scoped_true_render],['__scopeId',"data-v-63c8ea48"]])
 
 /* harmony default export */ var TableComponent = (TableComponent_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableForm.vue?vue&type=template&id=7809ae16&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableForm.vue?vue&type=template&id=7809ae16&scoped=true
+/* unused harmony import specifier */ var TableFormvue_type_template_id_7809ae16_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var TableFormvue_type_template_id_7809ae16_scoped_true_popScopeId;
 
-const TableFormvue_type_template_id_7809ae16_scoped_true_withScopeId = n => (_pushScopeId("data-v-7809ae16"), n = n(), _popScopeId(), n);
+const TableFormvue_type_template_id_7809ae16_scoped_true_withScopeId = n => (TableFormvue_type_template_id_7809ae16_scoped_true_pushScopeId("data-v-7809ae16"), n = n(), TableFormvue_type_template_id_7809ae16_scoped_true_popScopeId(), n);
 const TableFormvue_type_template_id_7809ae16_scoped_true_hoisted_1 = {
   key: 0
 };
@@ -68896,11 +71093,11 @@ function TableFormvue_type_template_id_7809ae16_scoped_true_render(_ctx, _cache,
   const _component_radio_component = resolveComponent("radio-component");
   const _component_summary_table_form = resolveComponent("summary-table-form");
   const _component_crosstab_table_form = resolveComponent("crosstab-table-form");
-  return openBlock(), createElementBlock("form", null, [runtime_core_esm_bundler_createVNode(_component_instrument_selector, {
+  return openBlock(), createElementBlock("form", null, [createVNode(_component_instrument_selector, {
     modelValue: $data.formData.instrument,
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.formData.instrument = $event),
     availableInstruments: $options.availableInstruments
-  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", TableFormvue_type_template_id_7809ae16_scoped_true_hoisted_1, [createBaseVNode("div", TableFormvue_type_template_id_7809ae16_scoped_true_hoisted_2, [createBaseVNode("div", TableFormvue_type_template_id_7809ae16_scoped_true_hoisted_3, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", TableFormvue_type_template_id_7809ae16_scoped_true_hoisted_1, [createBaseVNode("div", TableFormvue_type_template_id_7809ae16_scoped_true_hoisted_2, [createBaseVNode("div", TableFormvue_type_template_id_7809ae16_scoped_true_hoisted_3, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('title'),
     "help-text": $options.module.tt('title_help')
   }, {
@@ -68909,7 +71106,7 @@ function TableFormvue_type_template_id_7809ae16_scoped_true_render(_ctx, _cache,
       "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.formData.title = $event)
     }, null, 512), [[vModelText, $data.formData.title]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('description'),
     "help-text": $options.module.tt('description_help')
   }, {
@@ -68918,11 +71115,11 @@ function TableFormvue_type_template_id_7809ae16_scoped_true_render(_ctx, _cache,
       "onUpdate:modelValue": _cache[2] || (_cache[2] = $event => $data.formData.description = $event)
     }, null, 512), [[vModelText, $data.formData.description]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_type'),
     "help-text": $options.module.tt('table_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.table_type,
       "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => $data.formData.table_type = $event),
       name: 'graph_type',
@@ -68945,9 +71142,9 @@ function TableFormvue_type_template_id_7809ae16_scoped_true_render(_ctx, _cache,
     onIsReady: _cache[7] || (_cache[7] = $event => _ctx.$emit('isReady', $event))
   }, null, 8, ["cellData"])) : createCommentVNode("", true)])])])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/Tables/TableForm.vue?vue&type=template&id=7809ae16&scoped=true
+;// ./src/components/Tables/TableForm.vue?vue&type=template&id=7809ae16&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/SummaryTableForm.vue?vue&type=template&id=f67c6786
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/SummaryTableForm.vue?vue&type=template&id=f67c6786
 
 const SummaryTableFormvue_type_template_id_f67c6786_hoisted_1 = {
   key: 0
@@ -68957,21 +71154,21 @@ function SummaryTableFormvue_type_template_id_f67c6786_render(_ctx, _cache, $pro
   const _component_helpful_parameter = resolveComponent("helpful-parameter");
   const _component_radio_component = resolveComponent("radio-component");
   const _component_numeric_field_selector = resolveComponent("numeric-field-selector");
-  return openBlock(), createElementBlock("div", null, [$props.graphType == 'table' ? (openBlock(), createElementBlock("div", SummaryTableFormvue_type_template_id_f67c6786_hoisted_1, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  return openBlock(), createElementBlock("div", null, [$props.graphType == 'table' ? (openBlock(), createElementBlock("div", SummaryTableFormvue_type_template_id_f67c6786_hoisted_1, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_categorical_field'),
     "help-text": $options.module.tt('table_categorical_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_categorical_field_selector, {
+    default: withCtx(() => [createVNode(_component_categorical_field_selector, {
       modelValue: $data.formData.categorical_field,
       "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.formData.categorical_field = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
     }, null, 8, ["modelValue", "fields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_na_category'),
     "help-text": $options.module.tt('table_na_category_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_category,
       "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.formData.na_category = $event),
       name: 'na_category',
@@ -68980,11 +71177,11 @@ function SummaryTableFormvue_type_template_id_f67c6786_render(_ctx, _cache, $pro
       labels: [$options.module.tt('table_keep'), $options.module.tt('table_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_unused_categories'),
     "help-text": $options.module.tt('table_unused_categories_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.unused_categories,
       "onUpdate:modelValue": _cache[2] || (_cache[2] = $event => $data.formData.unused_categories = $event),
       name: 'unused_categories',
@@ -68993,11 +71190,11 @@ function SummaryTableFormvue_type_template_id_f67c6786_render(_ctx, _cache, $pro
       labels: [$options.module.tt('table_keep'), $options.module.tt('table_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_numeric_field'),
     "help-text": $options.module.tt('table_numeric_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_numeric_field_selector, {
+    default: withCtx(() => [createVNode(_component_numeric_field_selector, {
       modelValue: $data.formData.numeric_field,
       "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => $data.formData.numeric_field = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
@@ -69008,7 +71205,7 @@ function SummaryTableFormvue_type_template_id_f67c6786_render(_ctx, _cache, $pro
     "label-text": $options.module.tt('table_na_numeric'),
     "help-text": $options.module.tt('table_na_numeric_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_numeric,
       "onUpdate:modelValue": _cache[4] || (_cache[4] = $event => $data.formData.na_numeric = $event),
       name: 'na_numeric',
@@ -69026,7 +71223,7 @@ function SummaryTableFormvue_type_template_id_f67c6786_render(_ctx, _cache, $pro
     "label-text": $options.module.tt('table_aggregation_function'),
     "help-text": $options.module.tt('table_aggregation_function_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.aggregation_function,
       "onUpdate:modelValue": _cache[6] || (_cache[6] = $event => $data.formData.aggregation_function = $event),
       name: 'aggregation_function',
@@ -69035,11 +71232,11 @@ function SummaryTableFormvue_type_template_id_f67c6786_render(_ctx, _cache, $pro
       labels: [$options.module.tt('count'), $options.module.tt('sum'), $options.module.tt('mean'), $options.module.tt('min'), $options.module.tt('max')]
     }, null, 8, ["modelValue", "defaultValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true)])) : createCommentVNode("", true), createBaseVNode("div", null, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true)])) : createCommentVNode("", true), createBaseVNode("div", null, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_percents_or_totals'),
     "help-text": $options.module.tt('table_percents_or_totals_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.percents_or_totals,
       "onUpdate:modelValue": _cache[7] || (_cache[7] = $event => $data.formData.percents_or_totals = $event),
       name: 'percents_or_totals',
@@ -69050,9 +71247,9 @@ function SummaryTableFormvue_type_template_id_f67c6786_render(_ctx, _cache, $pro
     _: 1
   }, 8, ["label-text", "help-text"])])]);
 }
-;// CONCATENATED MODULE: ./src/components/Tables/SummaryTableForm.vue?vue&type=template&id=f67c6786
+;// ./src/components/Tables/SummaryTableForm.vue?vue&type=template&id=f67c6786
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/SummaryTableForm.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/SummaryTableForm.vue?vue&type=script&lang=js
 
 
 
@@ -69099,18 +71296,18 @@ function SummaryTableFormvue_type_template_id_f67c6786_render(_ctx, _cache, $pro
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Tables/SummaryTableForm.vue?vue&type=script&lang=js
+;// ./src/components/Tables/SummaryTableForm.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./src/components/Tables/SummaryTableForm.vue
+;// ./src/components/Tables/SummaryTableForm.vue
 
 
 
 
 ;
-const SummaryTableForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(SummaryTableFormvue_type_script_lang_js, [['render',SummaryTableFormvue_type_template_id_f67c6786_render]])
+const SummaryTableForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(SummaryTableFormvue_type_script_lang_js, [['render',SummaryTableFormvue_type_template_id_f67c6786_render]])
 
 /* harmony default export */ var SummaryTableForm = (SummaryTableForm_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/CrosstabTableForm.vue?vue&type=template&id=71016aca
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/CrosstabTableForm.vue?vue&type=template&id=71016aca
 
 const CrosstabTableFormvue_type_template_id_71016aca_hoisted_1 = {
   key: 0
@@ -69120,21 +71317,21 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
   const _component_helpful_parameter = resolveComponent("helpful-parameter");
   const _component_radio_component = resolveComponent("radio-component");
   const _component_numeric_field_selector = resolveComponent("numeric-field-selector");
-  return openBlock(), createElementBlock("div", null, [$props.graphType == 'table' ? (openBlock(), createElementBlock("div", CrosstabTableFormvue_type_template_id_71016aca_hoisted_1, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  return openBlock(), createElementBlock("div", null, [$props.graphType == 'table' ? (openBlock(), createElementBlock("div", CrosstabTableFormvue_type_template_id_71016aca_hoisted_1, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_categorical_field_one'),
     "help-text": $options.module.tt('table_categorical_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_categorical_field_selector, {
+    default: withCtx(() => [createVNode(_component_categorical_field_selector, {
       modelValue: $data.formData.categorical_field_one,
       "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.formData.categorical_field_one = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
     }, null, 8, ["modelValue", "fields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_na_category'),
     "help-text": $options.module.tt('table_na_category_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_category_one,
       "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.formData.na_category_one = $event),
       name: 'na_category_one',
@@ -69143,11 +71340,11 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
       labels: [$options.module.tt('table_keep'), $options.module.tt('table_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_unused_categories_one'),
     "help-text": $options.module.tt('table_unused_categories_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.unused_categories_one,
       "onUpdate:modelValue": _cache[2] || (_cache[2] = $event => $data.formData.unused_categories_one = $event),
       name: 'unused_categories_one',
@@ -69156,21 +71353,21 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
       labels: [$options.module.tt('table_keep'), $options.module.tt('table_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_categorical_field_two'),
     "help-text": $options.module.tt('table_categorical_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_categorical_field_selector, {
+    default: withCtx(() => [createVNode(_component_categorical_field_selector, {
       modelValue: $data.formData.categorical_field_two,
       "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => $data.formData.categorical_field_two = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
     }, null, 8, ["modelValue", "fields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_na_category'),
     "help-text": $options.module.tt('table_na_category_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_category_two,
       "onUpdate:modelValue": _cache[4] || (_cache[4] = $event => $data.formData.na_category_two = $event),
       name: 'na_category_two',
@@ -69179,11 +71376,11 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
       labels: [$options.module.tt('table_keep'), $options.module.tt('table_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_unused_categories_two'),
     "help-text": $options.module.tt('table_unused_categories_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.unused_categories_two,
       "onUpdate:modelValue": _cache[5] || (_cache[5] = $event => $data.formData.unused_categories_two = $event),
       name: 'unused_categories_two',
@@ -69192,11 +71389,11 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
       labels: [$options.module.tt('table_keep'), $options.module.tt('table_drop')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_numeric_field'),
     "help-text": $options.module.tt('table_numeric_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_numeric_field_selector, {
+    default: withCtx(() => [createVNode(_component_numeric_field_selector, {
       modelValue: $data.formData.numeric_field,
       "onUpdate:modelValue": _cache[6] || (_cache[6] = $event => $data.formData.numeric_field = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
@@ -69207,7 +71404,7 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
     "label-text": $options.module.tt('table_na_numeric'),
     "help-text": $options.module.tt('table_na_numeric_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_numeric,
       "onUpdate:modelValue": _cache[7] || (_cache[7] = $event => $data.formData.na_numeric = $event),
       name: 'na_numeric',
@@ -69225,7 +71422,7 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
     "label-text": $options.module.tt('table_aggregation_function'),
     "help-text": $options.module.tt('table_aggregation_function_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.aggregation_function,
       "onUpdate:modelValue": _cache[9] || (_cache[9] = $event => $data.formData.aggregation_function = $event),
       name: 'aggregation_function',
@@ -69234,11 +71431,11 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
       labels: [$options.module.tt('count'), $options.module.tt('sum'), $options.module.tt('mean'), $options.module.tt('min'), $options.module.tt('max')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true)])) : createCommentVNode("", true), createBaseVNode("div", null, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true)])) : createCommentVNode("", true), createBaseVNode("div", null, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('table_percents_or_totals'),
     "help-text": $options.module.tt('table_percents_or_totals_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.percents_or_totals,
       "onUpdate:modelValue": _cache[10] || (_cache[10] = $event => $data.formData.percents_or_totals = $event),
       name: 'percents_or_totals',
@@ -69252,7 +71449,7 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
     "label-text": $options.module.tt('table_row_column_or_table'),
     "help-text": $options.module.tt('table_row_column_or_table_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.row_column_or_table,
       "onUpdate:modelValue": _cache[11] || (_cache[11] = $event => $data.formData.row_column_or_table = $event),
       name: 'row_column_or_table',
@@ -69263,9 +71460,9 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
     _: 1
   }, 8, ["label-text", "help-text"])) : createCommentVNode("", true)])]);
 }
-;// CONCATENATED MODULE: ./src/components/Tables/CrosstabTableForm.vue?vue&type=template&id=71016aca
+;// ./src/components/Tables/CrosstabTableForm.vue?vue&type=template&id=71016aca
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/CrosstabTableForm.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/CrosstabTableForm.vue?vue&type=script&lang=js
 
 
 
@@ -69312,18 +71509,20 @@ function CrosstabTableFormvue_type_template_id_71016aca_render(_ctx, _cache, $pr
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Tables/CrosstabTableForm.vue?vue&type=script&lang=js
+;// ./src/components/Tables/CrosstabTableForm.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./src/components/Tables/CrosstabTableForm.vue
+;// ./src/components/Tables/CrosstabTableForm.vue
 
 
 
 
 ;
-const CrosstabTableForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(CrosstabTableFormvue_type_script_lang_js, [['render',CrosstabTableFormvue_type_template_id_71016aca_render]])
+const CrosstabTableForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(CrosstabTableFormvue_type_script_lang_js, [['render',CrosstabTableFormvue_type_template_id_71016aca_render]])
 
 /* harmony default export */ var CrosstabTableForm = (CrosstabTableForm_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableForm.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableForm.vue?vue&type=script&lang=js
+
+
 
 
 
@@ -69467,14 +71666,14 @@ const CrosstabTableForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Tables/TableForm.vue?vue&type=script&lang=js
+;// ./src/components/Tables/TableForm.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableForm.vue?vue&type=style&index=0&id=7809ae16&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Tables/TableForm.vue?vue&type=style&index=0&id=7809ae16&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Tables/TableForm.vue?vue&type=style&index=0&id=7809ae16&scoped=true&lang=css
+;// ./src/components/Tables/TableForm.vue?vue&type=style&index=0&id=7809ae16&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Tables/TableForm.vue
+;// ./src/components/Tables/TableForm.vue
 
 
 
@@ -69482,12 +71681,14 @@ const CrosstabTableForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(
 ;
 
 
-const TableForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(TableFormvue_type_script_lang_js, [['render',TableFormvue_type_template_id_7809ae16_scoped_true_render],['__scopeId',"data-v-7809ae16"]])
+const TableForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(TableFormvue_type_script_lang_js, [['render',TableFormvue_type_template_id_7809ae16_scoped_true_render],['__scopeId',"data-v-7809ae16"]])
 
 /* harmony default export */ var TableForm = (TableForm_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/Maps.vue?vue&type=template&id=2f6076e8&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/Maps.vue?vue&type=template&id=2f6076e8&scoped=true
+/* unused harmony import specifier */ var Mapsvue_type_template_id_2f6076e8_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var Mapsvue_type_template_id_2f6076e8_scoped_true_popScopeId;
 
-const Mapsvue_type_template_id_2f6076e8_scoped_true_withScopeId = n => (_pushScopeId("data-v-2f6076e8"), n = n(), _popScopeId(), n);
+const Mapsvue_type_template_id_2f6076e8_scoped_true_withScopeId = n => (Mapsvue_type_template_id_2f6076e8_scoped_true_pushScopeId("data-v-2f6076e8"), n = n(), Mapsvue_type_template_id_2f6076e8_scoped_true_popScopeId(), n);
 const Mapsvue_type_template_id_2f6076e8_scoped_true_hoisted_1 = {
   class: "AG-graph-container"
 };
@@ -69508,15 +71709,17 @@ function Mapsvue_type_template_id_2f6076e8_scoped_true_render(_ctx, _cache, $pro
     onUpdateParameters: _cache[0] || (_cache[0] = $event => $options.updateParameters($event))
   }, null, 40, ["parameters"])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/Maps/Maps.vue?vue&type=template&id=2f6076e8&scoped=true
+;// ./src/components/Maps/Maps.vue?vue&type=template&id=2f6076e8&scoped=true
 
 // EXTERNAL MODULE: ./node_modules/leaflet/dist/leaflet-src.js
-var leaflet_src = __webpack_require__(5243);
+var leaflet_src = __webpack_require__(3481);
 // EXTERNAL MODULE: ./node_modules/leaflet.markercluster/dist/leaflet.markercluster-src.js
-var leaflet_markercluster_src = __webpack_require__(5732);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapOptions.vue?vue&type=template&id=711e9c73&scoped=true
+var leaflet_markercluster_src = __webpack_require__(9389);
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapOptions.vue?vue&type=template&id=711e9c73&scoped=true
+/* unused harmony import specifier */ var MapOptionsvue_type_template_id_711e9c73_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var MapOptionsvue_type_template_id_711e9c73_scoped_true_popScopeId;
 
-const MapOptionsvue_type_template_id_711e9c73_scoped_true_withScopeId = n => (_pushScopeId("data-v-711e9c73"), n = n(), _popScopeId(), n);
+const MapOptionsvue_type_template_id_711e9c73_scoped_true_withScopeId = n => (MapOptionsvue_type_template_id_711e9c73_scoped_true_pushScopeId("data-v-711e9c73"), n = n(), MapOptionsvue_type_template_id_711e9c73_scoped_true_popScopeId(), n);
 const MapOptionsvue_type_template_id_711e9c73_scoped_true_hoisted_1 = {
   class: "AG-bar-graph-options"
 };
@@ -69549,9 +71752,9 @@ function MapOptionsvue_type_template_id_711e9c73_scoped_true_render(_ctx, _cache
     number: true
   }]])])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/Maps/MapOptions.vue?vue&type=template&id=711e9c73&scoped=true
+;// ./src/components/Maps/MapOptions.vue?vue&type=template&id=711e9c73&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapOptions.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapOptions.vue?vue&type=script&lang=js
 // import { parseChoicesOrCalculations, isCheckboxField, getCheckboxReport, truncateString, wrapString} from '@/utils.js';
 // import * as d3 from 'd3'; 
 // import RadioComponent from '@/components/RadioComponent.vue';
@@ -69601,14 +71804,14 @@ function MapOptionsvue_type_template_id_711e9c73_scoped_true_render(_ctx, _cache
     this.updateParameters();
   }
 });
-;// CONCATENATED MODULE: ./src/components/Maps/MapOptions.vue?vue&type=script&lang=js
+;// ./src/components/Maps/MapOptions.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapOptions.vue?vue&type=style&index=0&id=711e9c73&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapOptions.vue?vue&type=style&index=0&id=711e9c73&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Maps/MapOptions.vue?vue&type=style&index=0&id=711e9c73&scoped=true&lang=css
+;// ./src/components/Maps/MapOptions.vue?vue&type=style&index=0&id=711e9c73&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Maps/MapOptions.vue
+;// ./src/components/Maps/MapOptions.vue
 
 
 
@@ -69616,10 +71819,21 @@ function MapOptionsvue_type_template_id_711e9c73_scoped_true_render(_ctx, _cache
 ;
 
 
-const MapOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(MapOptionsvue_type_script_lang_js, [['render',MapOptionsvue_type_template_id_711e9c73_scoped_true_render],['__scopeId',"data-v-711e9c73"]])
+const MapOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(MapOptionsvue_type_script_lang_js, [['render',MapOptionsvue_type_template_id_711e9c73_scoped_true_render],['__scopeId',"data-v-711e9c73"]])
 
 /* harmony default export */ var MapOptions = (MapOptions_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/Maps.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/Maps.vue?vue&type=script&lang=js
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -69854,14 +72068,14 @@ const MapOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(MapOpti
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Maps/Maps.vue?vue&type=script&lang=js
+;// ./src/components/Maps/Maps.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/Maps.vue?vue&type=style&index=0&id=2f6076e8&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/Maps.vue?vue&type=style&index=0&id=2f6076e8&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Maps/Maps.vue?vue&type=style&index=0&id=2f6076e8&scoped=true&lang=css
+;// ./src/components/Maps/Maps.vue?vue&type=style&index=0&id=2f6076e8&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Maps/Maps.vue
+;// ./src/components/Maps/Maps.vue
 
 
 
@@ -69869,12 +72083,14 @@ const MapOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(MapOpti
 ;
 
 
-const Maps_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(Mapsvue_type_script_lang_js, [['render',Mapsvue_type_template_id_2f6076e8_scoped_true_render],['__scopeId',"data-v-2f6076e8"]])
+const Maps_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(Mapsvue_type_script_lang_js, [['render',Mapsvue_type_template_id_2f6076e8_scoped_true_render],['__scopeId',"data-v-2f6076e8"]])
 
 /* harmony default export */ var Maps = (Maps_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapsForm.vue?vue&type=template&id=8484683c&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapsForm.vue?vue&type=template&id=8484683c&scoped=true
+/* unused harmony import specifier */ var MapsFormvue_type_template_id_8484683c_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var MapsFormvue_type_template_id_8484683c_scoped_true_popScopeId;
 
-const MapsFormvue_type_template_id_8484683c_scoped_true_withScopeId = n => (_pushScopeId("data-v-8484683c"), n = n(), _popScopeId(), n);
+const MapsFormvue_type_template_id_8484683c_scoped_true_withScopeId = n => (MapsFormvue_type_template_id_8484683c_scoped_true_pushScopeId("data-v-8484683c"), n = n(), MapsFormvue_type_template_id_8484683c_scoped_true_popScopeId(), n);
 const MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_1 = {
   key: 0
 };
@@ -69898,11 +72114,11 @@ function MapsFormvue_type_template_id_8484683c_scoped_true_render(_ctx, _cache, 
   const _component_unique_location_identifier = resolveComponent("unique-location-identifier");
   const _component_numeric_field_selector = resolveComponent("numeric-field-selector");
   const _component_palette_selector = resolveComponent("palette-selector");
-  return openBlock(), createElementBlock("form", null, [runtime_core_esm_bundler_createVNode(_component_instrument_selector, {
+  return openBlock(), createElementBlock("form", null, [createVNode(_component_instrument_selector, {
     modelValue: $data.formData.instrument,
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.formData.instrument = $event),
     availableInstruments: $options.availableInstruments
-  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_1, [createBaseVNode("div", MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_2, [createBaseVNode("div", MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_3, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_1, [createBaseVNode("div", MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_2, [createBaseVNode("div", MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_3, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('title'),
     "help-text": $options.module.tt('title_help')
   }, {
@@ -69911,7 +72127,7 @@ function MapsFormvue_type_template_id_8484683c_scoped_true_render(_ctx, _cache, 
       "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.formData.title = $event)
     }, null, 512), [[vModelText, $data.formData.title]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('description'),
     "help-text": $options.module.tt('description_help')
   }, {
@@ -69920,21 +72136,21 @@ function MapsFormvue_type_template_id_8484683c_scoped_true_render(_ctx, _cache, 
       "onUpdate:modelValue": _cache[2] || (_cache[2] = $event => $data.formData.description = $event)
     }, null, 512), [[vModelText, $data.formData.description]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('map_coordinate_selector'),
     "help-text": $options.module.tt('map_coordinate_selector_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_coordinate_selector, {
+    default: withCtx(() => [createVNode(_component_coordinate_selector, {
       modelValue: $data.formData.coordinate_selector,
       "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => $data.formData.coordinate_selector = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
     }, null, 8, ["modelValue", "fields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_4, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_4, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('map_cluster_by_location_or_counts'),
     "help-text": $options.module.tt('map_cluster_by_location_or_counts_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.cluster_by_location_or_counts,
       "onUpdate:modelValue": _cache[4] || (_cache[4] = $event => $data.formData.cluster_by_location_or_counts = $event),
       name: 'cluster_by_location_or_counts',
@@ -69943,22 +72159,22 @@ function MapsFormvue_type_template_id_8484683c_scoped_true_render(_ctx, _cache, 
       labels: [$options.module.tt('map_location'), $options.module.tt('map_counts')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), $data.formData.cluster_by_location_or_counts == 'location' ? (openBlock(), createElementBlock("div", MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_5, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), $data.formData.cluster_by_location_or_counts == 'location' ? (openBlock(), createElementBlock("div", MapsFormvue_type_template_id_8484683c_scoped_true_hoisted_5, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('map_location_identifier'),
     "help-text": $options.module.tt('map_location_identifier_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_unique_location_identifier, {
+    default: withCtx(() => [createVNode(_component_unique_location_identifier, {
       modelValue: $data.formData.location_identifier,
       "onUpdate:modelValue": _cache[5] || (_cache[5] = $event => $data.formData.location_identifier = $event),
       coordinateFields: $data.formData.coordinate_selector,
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
     }, null, 8, ["modelValue", "coordinateFields", "fields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('map_location_weight'),
     "help-text": $options.module.tt('map_location_weight_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_numeric_field_selector, {
+    default: withCtx(() => [createVNode(_component_numeric_field_selector, {
       modelValue: $data.formData.numeric_field,
       "onUpdate:modelValue": _cache[6] || (_cache[6] = $event => $data.formData.numeric_field = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
@@ -69969,7 +72185,7 @@ function MapsFormvue_type_template_id_8484683c_scoped_true_render(_ctx, _cache, 
     "label-text": $options.module.tt('map_na_numeric'),
     "help-text": $options.module.tt('map_na_numeric_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_numeric,
       "onUpdate:modelValue": _cache[7] || (_cache[7] = $event => $data.formData.na_numeric = $event),
       name: 'na_numeric',
@@ -69987,7 +72203,7 @@ function MapsFormvue_type_template_id_8484683c_scoped_true_render(_ctx, _cache, 
     "label-text": $options.module.tt('map_aggregation_function'),
     "help-text": $options.module.tt('map_aggregation_function_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.aggregation_function,
       "onUpdate:modelValue": _cache[9] || (_cache[9] = $event => $data.formData.aggregation_function = $event),
       name: 'aggregation_function',
@@ -69996,22 +72212,24 @@ function MapsFormvue_type_template_id_8484683c_scoped_true_render(_ctx, _cache, 
       labels: [$options.module.tt('count'), $options.module.tt('sum'), $options.module.tt('mean'), $options.module.tt('min'), $options.module.tt('max')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true)])) : createCommentVNode("", true), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true)])) : createCommentVNode("", true), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('palette'),
     "help-text": $options.module.tt('palette_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_palette_selector, {
+    default: withCtx(() => [createVNode(_component_palette_selector, {
       modelValue: $data.formData.palette_brewer,
       "onUpdate:modelValue": _cache[10] || (_cache[10] = $event => $data.formData.palette_brewer = $event)
     }, null, 8, ["modelValue"])]),
     _: 1
   }, 8, ["label-text", "help-text"])])])])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/Maps/MapsForm.vue?vue&type=template&id=8484683c&scoped=true
+;// ./src/components/Maps/MapsForm.vue?vue&type=template&id=8484683c&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/CoordinateSelector.vue?vue&type=template&id=8d533a9c&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/CoordinateSelector.vue?vue&type=template&id=8d533a9c&scoped=true
+/* unused harmony import specifier */ var CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_popScopeId;
 
-const CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_withScopeId = n => (_pushScopeId("data-v-8d533a9c"), n = n(), _popScopeId(), n);
+const CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_withScopeId = n => (CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_pushScopeId("data-v-8d533a9c"), n = n(), CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_popScopeId(), n);
 const CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_hoisted_1 = {
   value: null,
   selected: true
@@ -70025,7 +72243,7 @@ const CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_hoisted_4 = ["
 function CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", null, [createBaseVNode("h2", null, toDisplayString($options.module.tt('map_longitude')), 1), withDirectives(createBaseVNode("select", {
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.currentField = $event)
-  }, [createBaseVNode("option", CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_hoisted_1, " -- " + toDisplayString($options.module.tt('map_select_a_field')) + " -- ", 1), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.coordinateFields, (field, index) => {
+  }, [createBaseVNode("option", CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_hoisted_1, " -- " + toDisplayString($options.module.tt('map_select_a_field')) + " -- ", 1), (openBlock(true), createElementBlock(Fragment, null, renderList($options.coordinateFields, (field, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: JSON.stringify(field),
@@ -70033,7 +72251,7 @@ function CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_render(_ctx
     }, toDisplayString($data.stripHtml(field.longitude.field_label)), 9, CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_hoisted_2);
   }), 128))], 512), [[vModelSelect, $data.currentField]]), createBaseVNode("h2", null, toDisplayString($options.module.tt('map_latitude')), 1), withDirectives(createBaseVNode("select", {
     "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.currentField = $event)
-  }, [createBaseVNode("option", CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_hoisted_3, toDisplayString($options.module.tt('map_select_a_field')), 1), (openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.coordinateFields, (field, index) => {
+  }, [createBaseVNode("option", CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_hoisted_3, toDisplayString($options.module.tt('map_select_a_field')), 1), (openBlock(true), createElementBlock(Fragment, null, renderList($options.coordinateFields, (field, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: JSON.stringify(field),
@@ -70041,9 +72259,9 @@ function CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_render(_ctx
     }, toDisplayString($data.stripHtml(field.latitude.field_label)), 9, CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_hoisted_4);
   }), 128))], 512), [[vModelSelect, $data.currentField]])]);
 }
-;// CONCATENATED MODULE: ./src/components/Maps/CoordinateSelector.vue?vue&type=template&id=8d533a9c&scoped=true
+;// ./src/components/Maps/CoordinateSelector.vue?vue&type=template&id=8d533a9c&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/CoordinateSelector.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/CoordinateSelector.vue?vue&type=script&lang=js
 
 /* harmony default export */ var CoordinateSelectorvue_type_script_lang_js = ({
   name: 'CoordinateSelector',
@@ -70075,14 +72293,14 @@ function CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_render(_ctx
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Maps/CoordinateSelector.vue?vue&type=script&lang=js
+;// ./src/components/Maps/CoordinateSelector.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/CoordinateSelector.vue?vue&type=style&index=0&id=8d533a9c&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/CoordinateSelector.vue?vue&type=style&index=0&id=8d533a9c&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Maps/CoordinateSelector.vue?vue&type=style&index=0&id=8d533a9c&scoped=true&lang=css
+;// ./src/components/Maps/CoordinateSelector.vue?vue&type=style&index=0&id=8d533a9c&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Maps/CoordinateSelector.vue
+;// ./src/components/Maps/CoordinateSelector.vue
 
 
 
@@ -70090,12 +72308,14 @@ function CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_render(_ctx
 ;
 
 
-const CoordinateSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(CoordinateSelectorvue_type_script_lang_js, [['render',CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_render],['__scopeId',"data-v-8d533a9c"]])
+const CoordinateSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(CoordinateSelectorvue_type_script_lang_js, [['render',CoordinateSelectorvue_type_template_id_8d533a9c_scoped_true_render],['__scopeId',"data-v-8d533a9c"]])
 
 /* harmony default export */ var CoordinateSelector = (CoordinateSelector_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/UniqueLocationIdentifier.vue?vue&type=template&id=7ead66db&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/UniqueLocationIdentifier.vue?vue&type=template&id=7ead66db&scoped=true
+/* unused harmony import specifier */ var UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_popScopeId;
 
-const UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_withScopeId = n => (_pushScopeId("data-v-7ead66db"), n = n(), _popScopeId(), n);
+const UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_withScopeId = n => (UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_pushScopeId("data-v-7ead66db"), n = n(), UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_popScopeId(), n);
 const UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_hoisted_1 = ["label"];
 const UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_hoisted_2 = ["selected"];
 const UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_hoisted_3 = ["label"];
@@ -70110,7 +72330,7 @@ function UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_rende
     selected: $data.currentField == ''
   }, toDisplayString($options.module.tt('map_none')), 9, UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_hoisted_2)], 8, UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_hoisted_1), createBaseVNode("optgroup", {
     label: $options.module.tt('map_categories')
-  }, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.uniqueRadioFields, (field, index) => {
+  }, [(openBlock(true), createElementBlock(Fragment, null, renderList($options.uniqueRadioFields, (field, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: field.field_name,
@@ -70118,7 +72338,8 @@ function UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_rende
     }, toDisplayString($data.stripHtml(field.field_label)), 9, UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_hoisted_4);
   }), 128))], 8, UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_hoisted_3)], 512), [[vModelSelect, $data.currentField]])]);
 }
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/UniqueLocationIdentifier.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/UniqueLocationIdentifier.vue?vue&type=script&lang=js
+
 
 
 /* harmony default export */ var UniqueLocationIdentifiervue_type_script_lang_js = ({
@@ -70234,14 +72455,14 @@ function UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_rende
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Maps/UniqueLocationIdentifier.vue?vue&type=script&lang=js
+;// ./src/components/Maps/UniqueLocationIdentifier.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/UniqueLocationIdentifier.vue?vue&type=style&index=0&id=7ead66db&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/UniqueLocationIdentifier.vue?vue&type=style&index=0&id=7ead66db&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Maps/UniqueLocationIdentifier.vue?vue&type=style&index=0&id=7ead66db&scoped=true&lang=css
+;// ./src/components/Maps/UniqueLocationIdentifier.vue?vue&type=style&index=0&id=7ead66db&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Maps/UniqueLocationIdentifier.vue
+;// ./src/components/Maps/UniqueLocationIdentifier.vue
 
 
 
@@ -70249,10 +72470,10 @@ function UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_rende
 ;
 
 
-const UniqueLocationIdentifier_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(UniqueLocationIdentifiervue_type_script_lang_js, [['render',UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_render],['__scopeId',"data-v-7ead66db"]])
+const UniqueLocationIdentifier_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(UniqueLocationIdentifiervue_type_script_lang_js, [['render',UniqueLocationIdentifiervue_type_template_id_7ead66db_scoped_true_render],['__scopeId',"data-v-7ead66db"]])
 
 /* harmony default export */ var UniqueLocationIdentifier = (UniqueLocationIdentifier_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapsForm.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapsForm.vue?vue&type=script&lang=js
 
 
 
@@ -70347,7 +72568,6 @@ const UniqueLocationIdentifier_exports_ = /*#__PURE__*/(0,exportHelper/* default
       this.$emit("isReady", newVal);
       // console.log('isReady', newVal);
     },
-
     formData: {
       handler(newVal) {
         newVal.is_count = newVal.numeric_field === "";
@@ -70380,14 +72600,14 @@ const UniqueLocationIdentifier_exports_ = /*#__PURE__*/(0,exportHelper/* default
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Maps/MapsForm.vue?vue&type=script&lang=js
+;// ./src/components/Maps/MapsForm.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapsForm.vue?vue&type=style&index=0&id=8484683c&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Maps/MapsForm.vue?vue&type=style&index=0&id=8484683c&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Maps/MapsForm.vue?vue&type=style&index=0&id=8484683c&scoped=true&lang=css
+;// ./src/components/Maps/MapsForm.vue?vue&type=style&index=0&id=8484683c&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Maps/MapsForm.vue
+;// ./src/components/Maps/MapsForm.vue
 
 
 
@@ -70395,12 +72615,14 @@ const UniqueLocationIdentifier_exports_ = /*#__PURE__*/(0,exportHelper/* default
 ;
 
 
-const MapsForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(MapsFormvue_type_script_lang_js, [['render',MapsFormvue_type_template_id_8484683c_scoped_true_render],['__scopeId',"data-v-8484683c"]])
+const MapsForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(MapsFormvue_type_script_lang_js, [['render',MapsFormvue_type_template_id_8484683c_scoped_true_render],['__scopeId',"data-v-8484683c"]])
 
 /* harmony default export */ var MapsForm = (MapsForm_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphForm.vue?vue&type=template&id=13e3abdf&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphForm.vue?vue&type=template&id=13e3abdf&scoped=true
+/* unused harmony import specifier */ var NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_popScopeId;
 
-const NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_withScopeId = n => (_pushScopeId("data-v-13e3abdf"), n = n(), _popScopeId(), n);
+const NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_withScopeId = n => (NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_pushScopeId("data-v-13e3abdf"), n = n(), NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_popScopeId(), n);
 const NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_hoisted_1 = {
   key: 0
 };
@@ -70419,11 +72641,11 @@ function NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render(_ctx, 
   const _component_radio_component = resolveComponent("radio-component");
   const _component_numeric_field_selector = resolveComponent("numeric-field-selector");
   const _component_palette_selector = resolveComponent("palette-selector");
-  return openBlock(), createElementBlock("form", null, [runtime_core_esm_bundler_createVNode(_component_instrument_selector, {
+  return openBlock(), createElementBlock("form", null, [createVNode(_component_instrument_selector, {
     modelValue: $data.formData.instrument,
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.formData.instrument = $event),
     availableInstruments: $options.availableInstruments
-  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_hoisted_1, [createBaseVNode("div", NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_hoisted_2, [createBaseVNode("div", NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_hoisted_3, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, null, 8, ["modelValue", "availableInstruments"]), $data.formData.instrument !== null && typeof $data.formData.instrument === 'string' ? (openBlock(), createElementBlock("div", NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_hoisted_1, [createBaseVNode("div", NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_hoisted_2, [createBaseVNode("div", NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_hoisted_3, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('title'),
     "help-text": $options.module.tt('title_help')
   }, {
@@ -70432,11 +72654,11 @@ function NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render(_ctx, 
       "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => $data.formData.title = $event)
     }, null, 512), [[vModelText, $data.formData.title]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('graph_type'),
     "help-text": $options.module.tt('graph_type_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.graph_type,
       "onUpdate:modelValue": _cache[2] || (_cache[2] = $event => $data.formData.graph_type = $event),
       name: 'graph_type',
@@ -70445,7 +72667,7 @@ function NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render(_ctx, 
       labels: [$options.module.tt('network_graph')]
     }, null, 8, ["modelValue", "labels"])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('description'),
     "help-text": $options.module.tt('description_help')
   }, {
@@ -70454,21 +72676,21 @@ function NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render(_ctx, 
       "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => $data.formData.description = $event)
     }, null, 512), [[vModelText, $data.formData.description]])]),
     _: 1
-  }, 8, ["label-text", "help-text"]), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"]), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('numeric_field_x'),
     "help-text": $options.module.tt('numeric_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_numeric_field_selector, {
+    default: withCtx(() => [createVNode(_component_numeric_field_selector, {
       modelValue: $data.formData.numeric_field,
       "onUpdate:modelValue": _cache[4] || (_cache[4] = $event => $data.formData.numeric_field = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
     }, null, 8, ["modelValue", "fields"])]),
     _: 1
-  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_hoisted_4, [runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])]), createBaseVNode("div", NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_hoisted_4, [createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('numeric_field_y'),
     "help-text": $options.module.tt('numeric_field_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_numeric_field_selector, {
+    default: withCtx(() => [createVNode(_component_numeric_field_selector, {
       modelValue: $data.formData.numeric_field_y,
       "onUpdate:modelValue": _cache[5] || (_cache[5] = $event => $data.formData.numeric_field_y = $event),
       fields: $options.report_fields_by_repeat_instrument[$data.formData.instrument].fields
@@ -70479,7 +72701,7 @@ function NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render(_ctx, 
     "label-text": $options.module.tt('na_numeric'),
     "help-text": $options.module.tt('na_numeric_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_radio_component, {
+    default: withCtx(() => [createVNode(_component_radio_component, {
       modelValue: $data.formData.na_numeric,
       "onUpdate:modelValue": _cache[6] || (_cache[6] = $event => $data.formData.na_numeric = $event),
       name: 'na_numeric',
@@ -70492,20 +72714,22 @@ function NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render(_ctx, 
       "onUpdate:modelValue": _cache[7] || (_cache[7] = $event => $data.formData.na_numeric_value = $event)
     }, null, 512)), [[vModelText, $data.formData.na_numeric_value]]) : createCommentVNode("", true)]),
     _: 1
-  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true), runtime_core_esm_bundler_createVNode(_component_helpful_parameter, {
+  }, 8, ["label-text", "help-text"])) : createCommentVNode("", true), createVNode(_component_helpful_parameter, {
     "label-text": $options.module.tt('palette'),
     "help-text": $options.module.tt('palette_help')
   }, {
-    default: withCtx(() => [runtime_core_esm_bundler_createVNode(_component_palette_selector, {
+    default: withCtx(() => [createVNode(_component_palette_selector, {
       modelValue: $data.formData.palette_brewer,
       "onUpdate:modelValue": _cache[8] || (_cache[8] = $event => $data.formData.palette_brewer = $event)
     }, null, 8, ["modelValue"])]),
     _: 1
   }, 8, ["label-text", "help-text"])])])])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraphForm.vue?vue&type=template&id=13e3abdf&scoped=true
+;// ./src/components/Network/NetworkGraphForm.vue?vue&type=template&id=13e3abdf&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphForm.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphForm.vue?vue&type=script&lang=js
+
+
 
 
 
@@ -70586,7 +72810,6 @@ function NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render(_ctx, 
       this.$emit("isReady", newVal);
       // console.log('isReady', newVal);
     },
-
     formData: {
       handler(newVal) {
         newVal.is_count = newVal.numeric_field === "";
@@ -70618,14 +72841,14 @@ function NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render(_ctx, 
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraphForm.vue?vue&type=script&lang=js
+;// ./src/components/Network/NetworkGraphForm.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphForm.vue?vue&type=style&index=0&id=13e3abdf&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphForm.vue?vue&type=style&index=0&id=13e3abdf&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraphForm.vue?vue&type=style&index=0&id=13e3abdf&scoped=true&lang=css
+;// ./src/components/Network/NetworkGraphForm.vue?vue&type=style&index=0&id=13e3abdf&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraphForm.vue
+;// ./src/components/Network/NetworkGraphForm.vue
 
 
 
@@ -70633,12 +72856,14 @@ function NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render(_ctx, 
 ;
 
 
-const NetworkGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(NetworkGraphFormvue_type_script_lang_js, [['render',NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render],['__scopeId',"data-v-13e3abdf"]])
+const NetworkGraphForm_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(NetworkGraphFormvue_type_script_lang_js, [['render',NetworkGraphFormvue_type_template_id_13e3abdf_scoped_true_render],['__scopeId',"data-v-13e3abdf"]])
 
 /* harmony default export */ var NetworkGraphForm = (NetworkGraphForm_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraph.vue?vue&type=template&id=53521fd2&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraph.vue?vue&type=template&id=53521fd2&scoped=true
+/* unused harmony import specifier */ var NetworkGraphvue_type_template_id_53521fd2_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var NetworkGraphvue_type_template_id_53521fd2_scoped_true_popScopeId;
 
-const NetworkGraphvue_type_template_id_53521fd2_scoped_true_withScopeId = n => (_pushScopeId("data-v-53521fd2"), n = n(), _popScopeId(), n);
+const NetworkGraphvue_type_template_id_53521fd2_scoped_true_withScopeId = n => (NetworkGraphvue_type_template_id_53521fd2_scoped_true_pushScopeId("data-v-53521fd2"), n = n(), NetworkGraphvue_type_template_id_53521fd2_scoped_true_popScopeId(), n);
 const NetworkGraphvue_type_template_id_53521fd2_scoped_true_hoisted_1 = {
   class: "AG-graph-container"
 };
@@ -70659,11 +72884,13 @@ function NetworkGraphvue_type_template_id_53521fd2_scoped_true_render(_ctx, _cac
     onUpdateParameters: _cache[0] || (_cache[0] = $event => $options.updateParameters($event))
   }, null, 40, ["parameters"])) : createCommentVNode("", true)]);
 }
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraph.vue?vue&type=template&id=53521fd2&scoped=true
+;// ./src/components/Network/NetworkGraph.vue?vue&type=template&id=53521fd2&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphOptions.vue?vue&type=template&id=13ec2f37&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphOptions.vue?vue&type=template&id=13ec2f37&scoped=true
+/* unused harmony import specifier */ var NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_popScopeId;
 
-const NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_withScopeId = n => (_pushScopeId("data-v-13ec2f37"), n = n(), _popScopeId(), n);
+const NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_withScopeId = n => (NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_pushScopeId("data-v-13ec2f37"), n = n(), NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_popScopeId(), n);
 const NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_hoisted_1 = {
   class: "AG-network-plot-options"
 };
@@ -70738,7 +72965,7 @@ function NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_render(_ct
     onInput: _cache[11] || (_cache[11] = (...args) => $options.updateParameters && $options.updateParameters(...args))
   }, null, 544), [[vModelText, $data.x_title_offset, void 0, {
     number: true
-  }]])])]), createBaseVNode("div", NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_hoisted_6, [createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("edge_type")) + ": ", 1), runtime_core_esm_bundler_createVNode(_component_radio_component, {
+  }]])])]), createBaseVNode("div", NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_hoisted_6, [createBaseVNode("label", null, [createTextVNode(toDisplayString($options.module.tt("edge_type")) + ": ", 1), createVNode(_component_radio_component, {
     modelValue: $data.marker_type,
     "onUpdate:modelValue": [_cache[12] || (_cache[12] = $event => $data.marker_type = $event), $options.updateParameters],
     values: ['directed', 'undirected'],
@@ -70792,9 +73019,9 @@ function NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_render(_ct
     number: true
   }]])])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraphOptions.vue?vue&type=template&id=13ec2f37&scoped=true
+;// ./src/components/Network/NetworkGraphOptions.vue?vue&type=template&id=13ec2f37&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphOptions.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphOptions.vue?vue&type=script&lang=js
 // import { parseChoicesOrCalculations, isCheckboxField, getCheckboxReport, truncateString, wrapString} from '@/utils.js';
 
 // import * as d3 from 'd3';
@@ -70994,14 +73221,14 @@ function NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_render(_ct
     this.updateParameters();
   }
 });
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraphOptions.vue?vue&type=script&lang=js
+;// ./src/components/Network/NetworkGraphOptions.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphOptions.vue?vue&type=style&index=0&id=13ec2f37&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraphOptions.vue?vue&type=style&index=0&id=13ec2f37&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraphOptions.vue?vue&type=style&index=0&id=13ec2f37&scoped=true&lang=css
+;// ./src/components/Network/NetworkGraphOptions.vue?vue&type=style&index=0&id=13ec2f37&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraphOptions.vue
+;// ./src/components/Network/NetworkGraphOptions.vue
 
 
 
@@ -71009,10 +73236,14 @@ function NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_render(_ct
 ;
 
 
-const NetworkGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(NetworkGraphOptionsvue_type_script_lang_js, [['render',NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_render],['__scopeId',"data-v-13ec2f37"]])
+const NetworkGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(NetworkGraphOptionsvue_type_script_lang_js, [['render',NetworkGraphOptionsvue_type_template_id_13ec2f37_scoped_true_render],['__scopeId',"data-v-13ec2f37"]])
 
 /* harmony default export */ var NetworkGraphOptions = (NetworkGraphOptions_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraph.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraph.vue?vue&type=script&lang=js
+
+
+
+
 
 
 //import * as d3Force from 'd3-force';
@@ -71273,7 +73504,6 @@ const NetworkGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z
         //x: i,
         //y: xValues[i]
       }))];
-
       const edges = xValues.map((x, i) => ({
         source: x,
         target: yValues[i],
@@ -71465,14 +73695,14 @@ const NetworkGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraph.vue?vue&type=script&lang=js
+;// ./src/components/Network/NetworkGraph.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraph.vue?vue&type=style&index=0&id=53521fd2&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Network/NetworkGraph.vue?vue&type=style&index=0&id=53521fd2&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraph.vue?vue&type=style&index=0&id=53521fd2&scoped=true&lang=css
+;// ./src/components/Network/NetworkGraph.vue?vue&type=style&index=0&id=53521fd2&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/Network/NetworkGraph.vue
+;// ./src/components/Network/NetworkGraph.vue
 
 
 
@@ -71480,10 +73710,10 @@ const NetworkGraphOptions_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z
 ;
 
 
-const NetworkGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(NetworkGraphvue_type_script_lang_js, [['render',NetworkGraphvue_type_template_id_53521fd2_scoped_true_render],['__scopeId',"data-v-53521fd2"]])
+const NetworkGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(NetworkGraphvue_type_script_lang_js, [['render',NetworkGraphvue_type_template_id_53521fd2_scoped_true_render],['__scopeId',"data-v-53521fd2"]])
 
 /* harmony default export */ var NetworkGraph = (NetworkGraph_exports_);
-;// CONCATENATED MODULE: ./src/components/GraphTypes.js
+;// ./src/components/GraphTypes.js
 // GraphTypes.js
 
 
@@ -71537,9 +73767,11 @@ const NetworkGraph_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(Netwo
     graph: NetworkGraph
   }
 });
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ConfirmationModal.vue?vue&type=template&id=34197457&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ConfirmationModal.vue?vue&type=template&id=34197457&scoped=true
+/* unused harmony import specifier */ var ConfirmationModalvue_type_template_id_34197457_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var ConfirmationModalvue_type_template_id_34197457_scoped_true_popScopeId;
 
-const ConfirmationModalvue_type_template_id_34197457_scoped_true_withScopeId = n => (_pushScopeId("data-v-34197457"), n = n(), _popScopeId(), n);
+const ConfirmationModalvue_type_template_id_34197457_scoped_true_withScopeId = n => (ConfirmationModalvue_type_template_id_34197457_scoped_true_pushScopeId("data-v-34197457"), n = n(), ConfirmationModalvue_type_template_id_34197457_scoped_true_popScopeId(), n);
 const ConfirmationModalvue_type_template_id_34197457_scoped_true_hoisted_1 = {
   key: 0,
   class: "modal-mask"
@@ -71568,9 +73800,9 @@ function ConfirmationModalvue_type_template_id_34197457_scoped_true_render(_ctx,
     onClick: _cache[1] || (_cache[1] = (...args) => $options.cancel && $options.cancel(...args))
   }, toDisplayString($options.module.tt('confirmation_modal_cancel')), 1)])])])])) : createCommentVNode("", true);
 }
-;// CONCATENATED MODULE: ./src/components/ConfirmationModal.vue?vue&type=template&id=34197457&scoped=true
+;// ./src/components/ConfirmationModal.vue?vue&type=template&id=34197457&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ConfirmationModal.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ConfirmationModal.vue?vue&type=script&lang=js
 /* harmony default export */ var ConfirmationModalvue_type_script_lang_js = ({
   name: 'ConfirmationModal',
   inject: ['module'],
@@ -71603,14 +73835,14 @@ function ConfirmationModalvue_type_template_id_34197457_scoped_true_render(_ctx,
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/ConfirmationModal.vue?vue&type=script&lang=js
+;// ./src/components/ConfirmationModal.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ConfirmationModal.vue?vue&type=style&index=0&id=34197457&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/ConfirmationModal.vue?vue&type=style&index=0&id=34197457&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/ConfirmationModal.vue?vue&type=style&index=0&id=34197457&scoped=true&lang=css
+;// ./src/components/ConfirmationModal.vue?vue&type=style&index=0&id=34197457&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/ConfirmationModal.vue
+;// ./src/components/ConfirmationModal.vue
 
 
 
@@ -71618,10 +73850,12 @@ function ConfirmationModalvue_type_template_id_34197457_scoped_true_render(_ctx,
 ;
 
 
-const ConfirmationModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(ConfirmationModalvue_type_script_lang_js, [['render',ConfirmationModalvue_type_template_id_34197457_scoped_true_render],['__scopeId',"data-v-34197457"]])
+const ConfirmationModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(ConfirmationModalvue_type_script_lang_js, [['render',ConfirmationModalvue_type_template_id_34197457_scoped_true_render],['__scopeId',"data-v-34197457"]])
 
 /* harmony default export */ var ConfirmationModal = (ConfirmationModal_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorCell.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorCell.vue?vue&type=script&lang=js
+
+
 
 
 
@@ -71715,14 +73949,14 @@ const ConfirmationModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/EditorCell.vue?vue&type=script&lang=js
+;// ./src/components/EditorCell.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorCell.vue?vue&type=style&index=0&id=a3b896f0&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorCell.vue?vue&type=style&index=0&id=a3b896f0&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/EditorCell.vue?vue&type=style&index=0&id=a3b896f0&scoped=true&lang=css
+;// ./src/components/EditorCell.vue?vue&type=style&index=0&id=a3b896f0&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/EditorCell.vue
+;// ./src/components/EditorCell.vue
 
 
 
@@ -71730,10 +73964,10 @@ const ConfirmationModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(
 ;
 
 
-const EditorCell_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(EditorCellvue_type_script_lang_js, [['render',EditorCellvue_type_template_id_a3b896f0_scoped_true_render],['__scopeId',"data-v-a3b896f0"]])
+const EditorCell_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(EditorCellvue_type_script_lang_js, [['render',EditorCellvue_type_template_id_a3b896f0_scoped_true_render],['__scopeId',"data-v-a3b896f0"]])
 
 /* harmony default export */ var EditorCell = (EditorCell_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorRow.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorRow.vue?vue&type=script&lang=js
 
 /* harmony default export */ var EditorRowvue_type_script_lang_js = ({
   name: 'EditorRow',
@@ -71778,14 +74012,14 @@ const EditorCell_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(EditorC
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/EditorRow.vue?vue&type=script&lang=js
+;// ./src/components/EditorRow.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorRow.vue?vue&type=style&index=0&id=432f9633&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorRow.vue?vue&type=style&index=0&id=432f9633&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/EditorRow.vue?vue&type=style&index=0&id=432f9633&scoped=true&lang=css
+;// ./src/components/EditorRow.vue?vue&type=style&index=0&id=432f9633&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/EditorRow.vue
+;// ./src/components/EditorRow.vue
 
 
 
@@ -71793,10 +74027,10 @@ const EditorCell_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(EditorC
 ;
 
 
-const EditorRow_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(EditorRowvue_type_script_lang_js, [['render',EditorRowvue_type_template_id_432f9633_scoped_true_render],['__scopeId',"data-v-432f9633"]])
+const EditorRow_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(EditorRowvue_type_script_lang_js, [['render',EditorRowvue_type_template_id_432f9633_scoped_true_render],['__scopeId',"data-v-432f9633"]])
 
 /* harmony default export */ var EditorRow = (EditorRow_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorTable.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorTable.vue?vue&type=script&lang=js
 
 /* harmony default export */ var EditorTablevue_type_script_lang_js = ({
   name: 'EditorTable',
@@ -71832,14 +74066,14 @@ const EditorRow_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(EditorRo
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/EditorTable.vue?vue&type=script&lang=js
+;// ./src/components/EditorTable.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorTable.vue?vue&type=style&index=0&id=512b2a57&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/EditorTable.vue?vue&type=style&index=0&id=512b2a57&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/EditorTable.vue?vue&type=style&index=0&id=512b2a57&lang=css
+;// ./src/components/EditorTable.vue?vue&type=style&index=0&id=512b2a57&lang=css
 
-;// CONCATENATED MODULE: ./src/components/EditorTable.vue
+;// ./src/components/EditorTable.vue
 
 
 
@@ -71847,12 +74081,14 @@ const EditorRow_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(EditorRo
 ;
 
 
-const EditorTable_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(EditorTablevue_type_script_lang_js, [['render',EditorTablevue_type_template_id_512b2a57_render]])
+const EditorTable_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(EditorTablevue_type_script_lang_js, [['render',EditorTablevue_type_template_id_512b2a57_render]])
 
 /* harmony default export */ var EditorTable = (EditorTable_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/SavedModal.vue?vue&type=template&id=11fa2b08&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/SavedModal.vue?vue&type=template&id=11fa2b08&scoped=true
+/* unused harmony import specifier */ var SavedModalvue_type_template_id_11fa2b08_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var SavedModalvue_type_template_id_11fa2b08_scoped_true_popScopeId;
 
-const SavedModalvue_type_template_id_11fa2b08_scoped_true_withScopeId = n => (_pushScopeId("data-v-11fa2b08"), n = n(), _popScopeId(), n);
+const SavedModalvue_type_template_id_11fa2b08_scoped_true_withScopeId = n => (SavedModalvue_type_template_id_11fa2b08_scoped_true_pushScopeId("data-v-11fa2b08"), n = n(), SavedModalvue_type_template_id_11fa2b08_scoped_true_popScopeId(), n);
 const SavedModalvue_type_template_id_11fa2b08_scoped_true_hoisted_1 = {
   class: "modal-mask"
 };
@@ -71883,9 +74119,9 @@ function SavedModalvue_type_template_id_11fa2b08_scoped_true_render(_ctx, _cache
     onClick: _cache[2] || (_cache[2] = $event => $options.viewDash())
   }, toDisplayString($options.module.tt('saved_modal_view_dashboard')), 1)])])])]);
 }
-;// CONCATENATED MODULE: ./src/components/SavedModal.vue?vue&type=template&id=11fa2b08&scoped=true
+;// ./src/components/SavedModal.vue?vue&type=template&id=11fa2b08&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/SavedModal.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/SavedModal.vue?vue&type=script&lang=js
 /* harmony default export */ var SavedModalvue_type_script_lang_js = ({
   name: 'SavedModal',
   inject: ['module'],
@@ -71912,14 +74148,14 @@ function SavedModalvue_type_template_id_11fa2b08_scoped_true_render(_ctx, _cache
     }
   }
 });
-;// CONCATENATED MODULE: ./src/components/SavedModal.vue?vue&type=script&lang=js
+;// ./src/components/SavedModal.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/SavedModal.vue?vue&type=style&index=0&id=11fa2b08&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/SavedModal.vue?vue&type=style&index=0&id=11fa2b08&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/components/SavedModal.vue?vue&type=style&index=0&id=11fa2b08&scoped=true&lang=css
+;// ./src/components/SavedModal.vue?vue&type=style&index=0&id=11fa2b08&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/components/SavedModal.vue
+;// ./src/components/SavedModal.vue
 
 
 
@@ -71927,10 +74163,13 @@ function SavedModalvue_type_template_id_11fa2b08_scoped_true_render(_ctx, _cache
 ;
 
 
-const SavedModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(SavedModalvue_type_script_lang_js, [['render',SavedModalvue_type_template_id_11fa2b08_scoped_true_render],['__scopeId',"data-v-11fa2b08"]])
+const SavedModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(SavedModalvue_type_script_lang_js, [['render',SavedModalvue_type_template_id_11fa2b08_scoped_true_render],['__scopeId',"data-v-11fa2b08"]])
 
 /* harmony default export */ var SavedModal = (SavedModal_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardEditor.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardEditor.vue?vue&type=script&lang=js
+
+
+
 
 
 
@@ -72088,7 +74327,6 @@ const SavedModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(SavedMo
       return value; // numbers, null, booleans
     }
   },
-
   watch: {
     body: {
       handler: function (newBody) {
@@ -72098,18 +74336,18 @@ const SavedModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(SavedMo
     }
   }
 });
-;// CONCATENATED MODULE: ./src/DashboardEditor.vue?vue&type=script&lang=js
+;// ./src/DashboardEditor.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./src/DashboardEditor.vue
+;// ./src/DashboardEditor.vue
 
 
 
 
 ;
-const DashboardEditor_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(DashboardEditorvue_type_script_lang_js, [['render',DashboardEditorvue_type_template_id_129f0b6a_render]])
+const DashboardEditor_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(DashboardEditorvue_type_script_lang_js, [['render',DashboardEditorvue_type_template_id_129f0b6a_render]])
 
 /* harmony default export */ var DashboardEditor = (DashboardEditor_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardList.vue?vue&type=template&id=3ccf7c8e
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardList.vue?vue&type=template&id=3ccf7c8e
 
 const DashboardListvue_type_template_id_3ccf7c8e_hoisted_1 = {
   class: "table table-striped",
@@ -72124,7 +74362,7 @@ const DashboardListvue_type_template_id_3ccf7c8e_hoisted_5 = ["onClick"];
 const DashboardListvue_type_template_id_3ccf7c8e_hoisted_6 = ["onClick"];
 const DashboardListvue_type_template_id_3ccf7c8e_hoisted_7 = ["onClick"];
 function DashboardListvue_type_template_id_3ccf7c8e_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock("table", DashboardListvue_type_template_id_3ccf7c8e_hoisted_1, [createBaseVNode("thead", null, [createBaseVNode("tr", null, [createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_dashboard_title')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_report_name')), 1), DashboardListvue_type_template_id_3ccf7c8e_hoisted_2, createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_public_link')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_view')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_edit')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_delete')), 1)])]), createBaseVNode("tbody", null, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($data.localDashboards, (dashboard, index) => {
+  return openBlock(), createElementBlock("table", DashboardListvue_type_template_id_3ccf7c8e_hoisted_1, [createBaseVNode("thead", null, [createBaseVNode("tr", null, [createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_dashboard_title')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_report_name')), 1), DashboardListvue_type_template_id_3ccf7c8e_hoisted_2, createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_public_link')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_view')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_edit')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_delete')), 1)])]), createBaseVNode("tbody", null, [(openBlock(true), createElementBlock(Fragment, null, renderList($data.localDashboards, (dashboard, index) => {
     return openBlock(), createElementBlock("tr", {
       key: dashboard.dash_id
     }, [createBaseVNode("td", null, toDisplayString(dashboard.title), 1), createBaseVNode("td", null, toDisplayString($data.reportNames[dashboard.report_id]), 1), DashboardListvue_type_template_id_3ccf7c8e_hoisted_3, createBaseVNode("td", null, [dashboard.is_public ? (openBlock(), createElementBlock("a", {
@@ -72143,9 +74381,9 @@ function DashboardListvue_type_template_id_3ccf7c8e_render(_ctx, _cache, $props,
     }, toDisplayString($props.module.tt('dashboard_list_delete_button')), 9, DashboardListvue_type_template_id_3ccf7c8e_hoisted_7)])]);
   }), 128))])]);
 }
-;// CONCATENATED MODULE: ./src/DashboardList.vue?vue&type=template&id=3ccf7c8e
+;// ./src/DashboardList.vue?vue&type=template&id=3ccf7c8e
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardList.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardList.vue?vue&type=script&lang=js
 /* harmony default export */ var DashboardListvue_type_script_lang_js = ({
   name: "DashboardList",
   props: {
@@ -72228,20 +74466,22 @@ function DashboardListvue_type_template_id_3ccf7c8e_render(_ctx, _cache, $props,
     }
   }
 });
-;// CONCATENATED MODULE: ./src/DashboardList.vue?vue&type=script&lang=js
+;// ./src/DashboardList.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./src/DashboardList.vue
+;// ./src/DashboardList.vue
 
 
 
 
 ;
-const DashboardList_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(DashboardListvue_type_script_lang_js, [['render',DashboardListvue_type_template_id_3ccf7c8e_render]])
+const DashboardList_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(DashboardListvue_type_script_lang_js, [['render',DashboardListvue_type_template_id_3ccf7c8e_render]])
 
 /* harmony default export */ var DashboardList = (DashboardList_exports_);
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=template&id=0dd2a7f6&scoped=true
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=template&id=0dd2a7f6&scoped=true
+/* unused harmony import specifier */ var DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_popScopeId;
 
-const DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_withScopeId = n => (_pushScopeId("data-v-0dd2a7f6"), n = n(), _popScopeId(), n);
+const DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_withScopeId = n => (DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_pushScopeId("data-v-0dd2a7f6"), n = n(), DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_popScopeId(), n);
 const DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_1 = {
   class: "AG-viewer-title"
 };
@@ -72252,11 +74492,11 @@ const DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_3 = {
   class: "AG-viewer-col"
 };
 function DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock(runtime_core_esm_bundler_Fragment, null, [createBaseVNode("div", DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_1, [createBaseVNode("h1", null, toDisplayString($props.dashboard.title), 1)]), createBaseVNode("div", DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_2, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList($options.rows, (row, index) => {
+  return openBlock(), createElementBlock(Fragment, null, [createBaseVNode("div", DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_1, [createBaseVNode("h1", null, toDisplayString($props.dashboard.title), 1)]), createBaseVNode("div", DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_2, [(openBlock(true), createElementBlock(Fragment, null, renderList($options.rows, (row, index) => {
     return openBlock(), createElementBlock("div", {
       key: index,
       class: "AG-viewer-row"
-    }, [(openBlock(true), createElementBlock(runtime_core_esm_bundler_Fragment, null, renderList(row, (graph, index) => {
+    }, [(openBlock(true), createElementBlock(Fragment, null, renderList(row, (graph, index) => {
       return openBlock(), createElementBlock("div", {
         key: index
       }, [createBaseVNode("div", DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_hoisted_3, [(openBlock(), createBlock(resolveDynamicComponent($data.GraphTypes[graph.type].graph), {
@@ -72266,9 +74506,12 @@ function DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_render(_ctx, _
     }), 128))]);
   }), 128))])], 64);
 }
-;// CONCATENATED MODULE: ./src/DashboardViewer.vue?vue&type=template&id=0dd2a7f6&scoped=true
+;// ./src/DashboardViewer.vue?vue&type=template&id=0dd2a7f6&scoped=true
 
-;// CONCATENATED MODULE: ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=script&lang=js
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=script&lang=js
+
+
+
 
 /* harmony default export */ var DashboardViewervue_type_script_lang_js = ({
   name: "DashboardViewer",
@@ -72326,7 +74569,6 @@ function DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_render(_ctx, _
       return value; // numbers, null, booleans
     }
   },
-
   computed: {
     sanitized_data_dictionary() {
       const stripFields = ['label', 'note', 'description'];
@@ -72346,14 +74588,14 @@ function DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_render(_ctx, _
     };
   }
 });
-;// CONCATENATED MODULE: ./src/DashboardViewer.vue?vue&type=script&lang=js
+;// ./src/DashboardViewer.vue?vue&type=script&lang=js
  
-;// CONCATENATED MODULE: ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=style&index=0&id=0dd2a7f6&scoped=true&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=style&index=0&id=0dd2a7f6&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// CONCATENATED MODULE: ./src/DashboardViewer.vue?vue&type=style&index=0&id=0dd2a7f6&scoped=true&lang=css
+;// ./src/DashboardViewer.vue?vue&type=style&index=0&id=0dd2a7f6&scoped=true&lang=css
 
-;// CONCATENATED MODULE: ./src/DashboardViewer.vue
+;// ./src/DashboardViewer.vue
 
 
 
@@ -72361,10 +74603,10 @@ function DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_render(_ctx, _
 ;
 
 
-const DashboardViewer_exports_ = /*#__PURE__*/(0,exportHelper/* default */.Z)(DashboardViewervue_type_script_lang_js, [['render',DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_render],['__scopeId',"data-v-0dd2a7f6"]])
+const DashboardViewer_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(DashboardViewervue_type_script_lang_js, [['render',DashboardViewervue_type_template_id_0dd2a7f6_scoped_true_render],['__scopeId',"data-v-0dd2a7f6"]])
 
 /* harmony default export */ var DashboardViewer = (DashboardViewer_exports_);
-;// CONCATENATED MODULE: ./node_modules/@fortawesome/fontawesome-svg-core/index.mjs
+;// ./node_modules/@fortawesome/fontawesome-svg-core/index.mjs
 function fontawesome_svg_core_ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
 
@@ -75441,7 +77683,7 @@ var counter = api.counter;
 
 
 
-;// CONCATENATED MODULE: ./node_modules/@fortawesome/vue-fontawesome/index.es.js
+;// ./node_modules/@fortawesome/vue-fontawesome/index.es.js
 
 
 
@@ -75863,7 +78105,7 @@ function normalizeIconArgs(icon) {
   }
 }
 
-var FontAwesomeIcon = runtime_core_esm_bundler_defineComponent({
+var FontAwesomeIcon = defineComponent({
   name: 'FontAwesomeIcon',
   props: {
     border: {
@@ -76011,7 +78253,7 @@ var FontAwesomeIcon = runtime_core_esm_bundler_defineComponent({
   }
 });
 
-var FontAwesomeLayers = runtime_core_esm_bundler_defineComponent({
+var FontAwesomeLayers = defineComponent({
   name: 'FontAwesomeLayers',
   props: {
     fixedWidth: {
@@ -76033,7 +78275,7 @@ var FontAwesomeLayers = runtime_core_esm_bundler_defineComponent({
   }
 });
 
-var FontAwesomeLayersText = runtime_core_esm_bundler_defineComponent({
+var FontAwesomeLayersText = defineComponent({
   name: 'FontAwesomeLayersText',
   props: {
     value: {
@@ -76086,7 +78328,7 @@ var FontAwesomeLayersText = runtime_core_esm_bundler_defineComponent({
 
 
 
-;// CONCATENATED MODULE: ./src/main.js
+;// ./src/main.js
 // main.js
 
 
@@ -76124,7 +78366,7 @@ function createDashboardViewerApp(module, dashboard, report, data_dictionary, re
   app.component('font-awesome-icon', FontAwesomeIcon);
   return app;
 }
-;// CONCATENATED MODULE: ./node_modules/@vue/cli-service/lib/commands/build/entry-lib-no-default.js
+;// ./node_modules/@vue/cli-service/lib/commands/build/entry-lib-no-default.js
 
 
 

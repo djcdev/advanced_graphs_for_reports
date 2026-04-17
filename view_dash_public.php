@@ -1,6 +1,9 @@
 <?php
+namespace VIHA\AdvancedGraphsInteractive;
+
 use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
+use HtmlPage;
 
 $dash_id = $_GET['dash_id'];
 $project_id = $_GET['pid'];

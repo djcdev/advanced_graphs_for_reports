@@ -1,4 +1,6 @@
 <?php
+namespace VIHA\AdvancedGraphsInteractive;
+
 	use ExternalModules\AbstractExternalModule;
 	use ExternalModules\ExternalModules;
 

@@ -2,6 +2,12 @@
 	"name": "Advanced Graphs for Reports",
 	"namespace": "VIHA\\AdvancedGraphsInteractive",
 	"description": "A module for creating advanced graphs from a REDCap report using the Observable JavaScript library",
+	"permissions": [
+		"redcap_module_save_configuration",
+		"redcap_every_page_before_render",
+		"redcap_every_page_top",
+		"redcap_module_system_enable"
+	],
 	"versions": [{
 		"1.0": "Initial Development Version on EMs"
 	}],
@@ -53,12 +59,6 @@
 	"no-auth-pages": [
 		"view_dash_public.php", 
 		"advanced_graphs_ajax_public"
-	],
-	"permissions": [
-		"redcap_module_save_configuration",
-		"redcap_every_page_before_render",
-		"redcap_every_page_top",
-		"redcap_module_system_enable"
 	],
    "system-settings": [],
    "project-settings": []
