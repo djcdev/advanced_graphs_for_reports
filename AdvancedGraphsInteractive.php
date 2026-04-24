@@ -119,13 +119,14 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		$current_page_is_this_page = strpos($_SERVER["QUERY_STRING"],"page=edit_dash") > -1;
 		$current_page_is_export_report = strpos($_SERVER["PHP_SELF"],"/DataExport/") > -1 && strpos($_SERVER["QUERY_STRING"],"&report_id=") > -1 && strpos($_SERVER["QUERY_STRING"],"&addedit") <= -1;
 
-		$report_id = $_GET['report_id'];
+		$report_id = filter_input(INPUT_GET, 'report_id', FILTER_VALIDATE_INT);
 
 		if ($link['id'] == "edit_dash") {
-			$link['url'] .= "&dash_id=0&report_id=$report_id";
+			if ($report_id !== null && $report_id !== false) {
+				$link['url'] .= "&dash_id=0&report_id=$report_id";
+			}
 			if ($current_page_is_export_report)
 				return($link);
-
 
 			if ($current_page_is_this_page)
 				$link['url'] = "#";
@@ -296,7 +297,10 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		$result=str_replace("\\\"","\"",$result) ;
 		$result=str_replace("\\'","'",$result) ;
 		$result=str_replace("\\\\'","\\'",$result) ;
-		$result=str_replace("\\\\\"","\\\"",$result) ;	
+		$result=str_replace("\\\\\"","\\\"",$result) ;
+		if (is_string($result)) {
+			$result = htmlspecialchars($result, ENT_QUOTES);
+		}
 	return $result;
 	}
 
@@ -333,21 +337,22 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 
 	function renderDashEditor() {
 		// Return an error if PID is not set
-		if (!isset($_GET['pid'])) {
+		$pid = filter_input(INPUT_GET, 'pid', FILTER_VALIDATE_INT);
+		$dash_id = filter_input(INPUT_GET, 'dash_id', FILTER_VALIDATE_INT);
+		if ($pid === null || $pid === false) {
 			echo "<h1 style='color: red;'>Unable to obtain project ID</h1>";
 			return;
 		}
-
-		// Get PID and dash_id from url
-		$pid = $_GET['pid'];
-		$dash_id = $_GET['dash_id'];
+		if ($dash_id === null || $dash_id === false) {
+			$dash_id = 0;
+		}
 
 		// Parse live filters from referer
 		// $live_filters = $this->getLiveFiltersFromReferer();
 		parse_str(parse_url($_SERVER["HTTP_REFERER"], PHP_URL_QUERY), $live_filters);
 
 		// Get the active dashboard if there dash id is not null or 0
-		if (isset($_GET['dash_id']) && $_GET['dash_id'] != '0') {
+		if ($dash_id !== 0) {
 			$dashboard = $this->getDashboards($pid, $dash_id)[0];
 			$report_id = $dashboard['report_id'];
 			$live_filters = $dashboard['live_filters'];
@@ -355,7 +360,7 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 
 		// If the report_id is not set get it from the url
 		if (!isset($report_id))
-			$report_id = $_GET['report_id'];
+			$report_id = filter_input(INPUT_GET, 'report_id', FILTER_VALIDATE_INT);
 			
 		// If the report_id is still not set return an error
 		if (!isset($report_id)) {

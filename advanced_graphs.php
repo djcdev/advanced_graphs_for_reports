@@ -14,7 +14,12 @@ namespace VIHA\AdvancedGraphsInteractive;
 </style>
 <?php
 	// Get the project ID
-	$project_id = $_GET['pid'];
+	$project_id = filter_input(INPUT_GET, 'pid', FILTER_VALIDATE_INT);
+	if ($project_id === null || $project_id === false) {
+		echo "<h1 style='color: red;'>Unable to obtain project ID</h1>";
+		include APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
+		exit;
+	}
 
 	// Get the data dictionary
 	$dashboards = $module->getDashboards($project_id);

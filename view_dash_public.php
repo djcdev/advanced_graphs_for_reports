@@ -5,16 +5,20 @@ use ExternalModules\AbstractExternalModule;
 use ExternalModules\ExternalModules;
 use HtmlPage;
 
-$dash_id = $_GET['dash_id'];
-$project_id = $_GET['pid'];
+$project_id = filter_input(INPUT_GET, 'pid', FILTER_VALIDATE_INT);
+$dash_id = filter_input(INPUT_GET, 'dash_id', FILTER_VALIDATE_INT);
+if ($project_id === null || $project_id === false || $dash_id === null || $dash_id === false) {
+    echo "<h1 style='color: red;'>Invalid dashboard or project ID</h1>";
+    exit(0);
+}
 
-$dash_title = $module->getDashboardName($pid, $dash_id);
+$dash_title = $module->getDashboardName($project_id, $dash_id);
 
 // Page header
 $objHtmlPage = new HtmlPage();
 $objHtmlPage->setPageTitle(remBr(br2nl($app_title))." | REDCap");
 $objHtmlPage->PrintHeader(false);
-$dashboard = $module->getDashboards($pid, $dash_id)[0];
+$dashboard = $module->getDashboards($project_id, $dash_id)[0];
 
 
 if ($dashboard['is_public'] != "1") {

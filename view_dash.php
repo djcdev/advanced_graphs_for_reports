@@ -14,10 +14,16 @@ include APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 </style>
 <?php
 // Get the project ID
-$project_id = $_GET['pid'];
-
-// Get the dash ID from the URL
-$dash_id = $_GET['dash_id'];
+$project_id = filter_input(INPUT_GET, 'pid', FILTER_VALIDATE_INT);
+$dash_id = filter_input(INPUT_GET, 'dash_id', FILTER_VALIDATE_INT);
+if ($project_id === null || $project_id === false) {
+    echo "<h1 style='color: red;'>Unable to obtain project ID</h1>";
+    include APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
+    exit;
+}
+if ($dash_id === null || $dash_id === false) {
+    $dash_id = 0;
+}
 
 // Get the dashboard from
 if ($dash_id == 0) {
@@ -49,7 +55,7 @@ if (isset($dashboard['report_id'])) {
 
     // Get the report ID if there is one
     if (isset($query_parts['report_id'])) {
-        $report_id = $query_parts['report_id'];
+        $report_id = filter_var($query_parts['report_id'], FILTER_VALIDATE_INT);
     } else {
         $report_id = null;
     }
