@@ -359,13 +359,15 @@ export default {
                 return graph;
             } else if (parameters.graph_type == 'grouped') {
                 // Create a bar chart
+                // Facet each bar into its category panel (fx), and place it within
+                // the panel by type (x). Do NOT set facet: false here — that opts the
+                // mark out of faceting, so every panel draws every bar and the
+                // implicit stackY piles them on top of each other.
                 const groupedBars = Plot.barY(countsFlattened, {
-                    domain: barDomain,
+                    fx: d => d.category,
                     x: d => d.type,
                     y: 'value',
                     fill: d => colorScale(d.type),
-                    width: 0.8,
-                    facet: false
                 });
 
                 const color_label_length = parameters.color_label_length ? Number(parameters.color_label_length) : Math.max(...colorDomain.map(d => choices_two[d].toString().length));
@@ -394,10 +396,12 @@ export default {
                 barLabels = Plot.text(
                     countsFlattened,
                     {
+                        fx: d => d.category,
                         x: d => d.type,
                         y: d => d.value,
                         dx: 0,
                         dy: -bar_label_position, // Adjust the vertical position of the labels relative to the bars
+                        lineAnchor: "bottom", // Sit the label on top of the bar rather than centered on its edge
                         textAnchor: "middle",
                         fontSize: bar_label_size, // Set the font size for the bar labels
                         text: d => y_tick_format(d.value)
@@ -421,11 +425,9 @@ export default {
                         format: x_tick_format,
                         legend: show_legend
                     },
-                    facet: {
-                        data: countsFlattened,
-                        x: d => d.category,
-                    },
                     fx: {
+                        // Keep panels in choice order and honor unused_categories_one
+                        domain: barDomain,
                         tickFormat: x_tick_format,
                     },
                     marks: [
