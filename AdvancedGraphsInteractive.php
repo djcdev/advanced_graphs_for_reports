@@ -204,7 +204,14 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 			return json_encode($this->getDashboards($project_id));
 		}
 		else if ($action === 'deleteDashboard') {
-			return json_encode($this->deleteDash($payload["project_id"], $payload["dash_id"]));
+			$dash_id = filter_var($payload["dash_id"] ?? null, FILTER_VALIDATE_INT);
+			if ($dash_id === false || $dash_id === null) return json_encode(false);
+			return json_encode($this->deleteDash($project_id, $dash_id));
+		}
+		else if ($action === 'copyDashboard') {
+			$dash_id = filter_var($payload["dash_id"] ?? null, FILTER_VALIDATE_INT);
+			if ($dash_id === false || $dash_id === null) return json_encode(false);
+			return json_encode($this->copyDash($project_id, $dash_id));
 		}
 		else if ($action === 'getReportName') {
 			return $this->getReportName($payload["project_id"], $payload["report_id"]);
@@ -726,66 +733,54 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		return true;
 	}
 
-	// Copy the report and return the new dash_id
+	// Copy a dashboard, placing the copy directly after the original.
+	// Returns the new dashboard object, or false on failure.
 	public function copyDash($pid, $dash_id)
 	{
 		$dashboard_table_name = $this->dashboard_table_name;
-		// Set up all actions as a transaction to ensure everything is done here
-		$this->query("SET AUTOCOMMIT=0");
-		$this->query("BEGIN");
+
+		// Read the raw row (getDashboards() decodes body, which we don't want here)
+		$q = $this->query("select * from $dashboard_table_name where project_id = ? and dash_id = ?", [$pid, $dash_id]);
+		$dash = $q->fetch_assoc();
+		if (!$dash) return false;
+
+		$new_dash_order = ((int)$dash['dash_order']) + 1;
+		$new_title = $dash['title'] . " " . $this->tt("dashboard_copy_suffix");
+
 		$errors = 0;
-		// List of all db tables relating to reports, excluding redcap_project_dashboards
-		// $tables = array('redcap_project_dashboards_access_dags', 'redcap_project_dashboards_access_roles', 'redcap_project_dashboards_access_users');
-		// First, add row to redcap_project_dashboards and get new report id
-		$table = $this->getTableColumns($dashboard_table_name);
-		// Get report attributes
-		$dash = $this->getDashboards($pid, $dash_id)[0];
-		// Remove dash_id from arrays to prevent query issues
-		unset($dash['dash_id'], $table['dash_id'], $dash['hash'], $table['hash'], $dash['short_url'], $table['short_url']);
-		// Append "(copy)" to title to differeniate it from original
-		$dash['title'] .= " (copy)";
-		// Increment the report order so we can add new report directly after original
-		$dash['dash_order']++;
-		$dash_order = $dash['dash_order'];
+		$new_dash_id = null;
+		$this->query("START TRANSACTION", []);
+		try {
+			// Shift later dashboards down to make room for the copy
+			$sql = "update $dashboard_table_name set dash_order = dash_order + 1
+					where project_id = ? and dash_order >= ?";
+			if (!$this->query($sql, [$pid, $new_dash_order])) $errors++;
 
-		// Move all report orders up one to make room for new one
-		$sql = "update $dashboard_table_name set dash_order = dash_order + 1 where project_id = ?
-				and dash_order >= ? order by dash_order desc";
-		if (!$this->query($sql, [$pid, $dash_order])) $errors++;
+			// Insert the copy (always private)
+			$sql = "insert into $dashboard_table_name
+					(project_id, report_id, live_filters, title, body, dash_order, is_public)
+					values (?, ?, ?, ?, ?, ?, 0)";
+			$params = [$pid, $dash['report_id'], $dash['live_filters'], $new_title, $dash['body'], $new_dash_order];
+			if (!$this->query($sql, $params)) $errors++;
 
-		// Loop through report attributes and add to $table to input into query
-		foreach ($dash as $key=>$val) {
-			if (!array_key_exists($key, $table)) continue;
-			$table[$key] = $val;
+			$result = $this->query("SELECT LAST_INSERT_ID() as last_id", []);
+			if (!$result) $errors++;
+			else $new_dash_id = $result->fetch_assoc()['last_id'];
+		} catch (\Throwable $e) {
+			$this->log("Failed to copy dashboard $dash_id: " . $e->getMessage());
+			$errors++;
 		}
-		// set the dashboard as not public
-		$table['is_public'] = '0';
-		$table['user_access'] = "''";
-		// Insert into dashboards table
-		$sqlr = "insert into $dashboard_table_name (".implode(', ', array_keys($table)).") values (".prep_implode($table, true, true).")";
-		$q = $this->query($sqlr);
-		if (!$q) return db_error();
-		$new_dash_id = db_insert_id();
-		// Now loop through all other report tables and add
 
-		// Convert columns to comma-delimited string to input into query
-		// $table_cols = implode(', ', array_keys($table));
-		// // Insert into table
-		// $sql = "insert into advanced_graphs_dashboards select $new_dash_id, $table_cols from advanced_graphs_dashboards where dash_id = $dash_id";
-		// if (!db_query($sql)) $errors++;
-		// If errors, do not commit
-		$commit = ($errors > 0) ? "ROLLBACK" : "COMMIT";
-		$this->query($commit);
-
-		// Set back to initial value
-		$this->query("SET AUTOCOMMIT=1");
-		
-		if ($errors == 0) {
-			// Just in case, make sure that all report orders are correct
-			$this->checkDashOrder($pid);
+		if ($errors > 0) {
+			$this->query("ROLLBACK", []);
+			return false;
 		}
-		// Return dash_id of new report, else FALSE if errors occurred
-		return ($errors == 0) ? array('new_dash_id'=>$new_dash_id, 'html'=>$this->renderDashboardList()) : false;
+		$this->query("COMMIT", []);
+
+		// Just in case, make sure that all dashboard orders are correct
+		$this->checkDashOrder($pid);
+
+		return $this->getDashboards($pid, $new_dash_id)[0];
 	}
 
 	// Checks for errors in the dashboard order of all dashboards (in case their numbering gets off)

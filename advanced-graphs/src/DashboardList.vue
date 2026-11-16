@@ -8,6 +8,7 @@
         <th>{{ module.tt('dashboard_list_public_link') }}</th>
         <th>{{ module.tt('dashboard_list_view') }}</th>
         <th>{{ module.tt('dashboard_list_edit') }}</th>
+        <th>{{ module.tt('dashboard_list_copy') }}</th>
         <th>{{ module.tt('dashboard_list_delete') }}</th>
       </tr>
     </thead>
@@ -27,6 +28,11 @@
         <td>
           <button class="btn btn-warning" @click="editDashboard(dashboard)">
             {{ module.tt('dashboard_list_edit_button') }}
+          </button>
+        </td>
+        <td>
+          <button class="btn btn-secondary" :disabled="copying" @click="copyDashboard(index)">
+            {{ module.tt('dashboard_list_copy_button') }}
           </button>
         </td>
         <td>
@@ -56,6 +62,7 @@ export default {
     return {
       localDashboards: this.dashboards,
       reportNames: {},
+      copying: false,
     }
   },
   async created() {
@@ -118,11 +125,31 @@ export default {
       // Open the dashboard in a new tab
       window.open(url, '_blank');
     },
+    async copyDashboard(index) {
+      const dashboard = this.localDashboards[index];
+      this.copying = true;
+      try {
+        const result = await this.module.ajax('copyDashboard', { dash_id: dashboard.dash_id });
+        const newDashboard = typeof result === 'string' ? JSON.parse(result) : result;
+        if (newDashboard && newDashboard.dash_id) {
+          // The copy is ordered directly after the original
+          this.localDashboards.splice(index + 1, 0, newDashboard);
+        } else {
+          alert(this.module.tt('dashboard_list_copy_error'));
+        }
+      } catch (error) {
+        console.log(error);
+        alert(this.module.tt('dashboard_list_copy_error'));
+      } finally {
+        this.copying = false;
+      }
+    },
     async deleteDashboard(index) {
       const dashboard = this.localDashboards[index];
       try {
-        const result = await this.module.ajax('deleteDashboard', dashboard);
-        if (result) {
+        const response = await this.module.ajax('deleteDashboard', { dash_id: dashboard.dash_id });
+        const result = typeof response === 'string' ? JSON.parse(response) : response;
+        if (result === true) {
           this.localDashboards.splice(index, 1);
         } else {
           alert(this.module.tt('dashboard_list_delete_error'));

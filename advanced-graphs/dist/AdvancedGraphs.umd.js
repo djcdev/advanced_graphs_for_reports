@@ -74350,41 +74350,46 @@ const SavedModal_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(SavedMo
 const DashboardEditor_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(DashboardEditorvue_type_script_lang_js, [['render',DashboardEditorvue_type_template_id_129f0b6a_render]])
 
 /* harmony default export */ var DashboardEditor = (DashboardEditor_exports_);
-;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardList.vue?vue&type=template&id=3ccf7c8e
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardList.vue?vue&type=template&id=84756ffc
 
-const DashboardListvue_type_template_id_3ccf7c8e_hoisted_1 = {
+const DashboardListvue_type_template_id_84756ffc_hoisted_1 = {
   class: "table table-striped",
   style: {
     "width": "100%"
   }
 };
-const DashboardListvue_type_template_id_3ccf7c8e_hoisted_2 = /*#__PURE__*/createBaseVNode("th", null, null, -1);
-const DashboardListvue_type_template_id_3ccf7c8e_hoisted_3 = /*#__PURE__*/createBaseVNode("td", null, null, -1);
-const DashboardListvue_type_template_id_3ccf7c8e_hoisted_4 = ["href"];
-const DashboardListvue_type_template_id_3ccf7c8e_hoisted_5 = ["onClick"];
-const DashboardListvue_type_template_id_3ccf7c8e_hoisted_6 = ["onClick"];
-const DashboardListvue_type_template_id_3ccf7c8e_hoisted_7 = ["onClick"];
-function DashboardListvue_type_template_id_3ccf7c8e_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return openBlock(), createElementBlock("table", DashboardListvue_type_template_id_3ccf7c8e_hoisted_1, [createBaseVNode("thead", null, [createBaseVNode("tr", null, [createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_dashboard_title')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_report_name')), 1), DashboardListvue_type_template_id_3ccf7c8e_hoisted_2, createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_public_link')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_view')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_edit')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_delete')), 1)])]), createBaseVNode("tbody", null, [(openBlock(true), createElementBlock(Fragment, null, renderList($data.localDashboards, (dashboard, index) => {
+const DashboardListvue_type_template_id_84756ffc_hoisted_2 = /*#__PURE__*/createBaseVNode("th", null, null, -1);
+const DashboardListvue_type_template_id_84756ffc_hoisted_3 = /*#__PURE__*/createBaseVNode("td", null, null, -1);
+const DashboardListvue_type_template_id_84756ffc_hoisted_4 = ["href"];
+const DashboardListvue_type_template_id_84756ffc_hoisted_5 = ["onClick"];
+const DashboardListvue_type_template_id_84756ffc_hoisted_6 = ["onClick"];
+const DashboardListvue_type_template_id_84756ffc_hoisted_7 = ["disabled", "onClick"];
+const DashboardListvue_type_template_id_84756ffc_hoisted_8 = ["onClick"];
+function DashboardListvue_type_template_id_84756ffc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return openBlock(), createElementBlock("table", DashboardListvue_type_template_id_84756ffc_hoisted_1, [createBaseVNode("thead", null, [createBaseVNode("tr", null, [createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_dashboard_title')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_report_name')), 1), DashboardListvue_type_template_id_84756ffc_hoisted_2, createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_public_link')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_view')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_edit')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_copy')), 1), createBaseVNode("th", null, toDisplayString($props.module.tt('dashboard_list_delete')), 1)])]), createBaseVNode("tbody", null, [(openBlock(true), createElementBlock(Fragment, null, renderList($data.localDashboards, (dashboard, index) => {
     return openBlock(), createElementBlock("tr", {
       key: dashboard.dash_id
-    }, [createBaseVNode("td", null, toDisplayString(dashboard.title), 1), createBaseVNode("td", null, toDisplayString($data.reportNames[dashboard.report_id]), 1), DashboardListvue_type_template_id_3ccf7c8e_hoisted_3, createBaseVNode("td", null, [dashboard.is_public ? (openBlock(), createElementBlock("a", {
+    }, [createBaseVNode("td", null, toDisplayString(dashboard.title), 1), createBaseVNode("td", null, toDisplayString($data.reportNames[dashboard.report_id]), 1), DashboardListvue_type_template_id_84756ffc_hoisted_3, createBaseVNode("td", null, [dashboard.is_public ? (openBlock(), createElementBlock("a", {
       key: 0,
       href: $options.getPublicLink(dashboard),
       target: "_blank"
-    }, toDisplayString($props.module.tt('dashboard_list_public_link_href')), 9, DashboardListvue_type_template_id_3ccf7c8e_hoisted_4)) : createCommentVNode("", true)]), createBaseVNode("td", null, [createBaseVNode("button", {
+    }, toDisplayString($props.module.tt('dashboard_list_public_link_href')), 9, DashboardListvue_type_template_id_84756ffc_hoisted_4)) : createCommentVNode("", true)]), createBaseVNode("td", null, [createBaseVNode("button", {
       class: "btn btn-primary",
       onClick: $event => $options.viewDashboard(dashboard)
-    }, toDisplayString($props.module.tt('dashboard_list_view_button')), 9, DashboardListvue_type_template_id_3ccf7c8e_hoisted_5)]), createBaseVNode("td", null, [createBaseVNode("button", {
+    }, toDisplayString($props.module.tt('dashboard_list_view_button')), 9, DashboardListvue_type_template_id_84756ffc_hoisted_5)]), createBaseVNode("td", null, [createBaseVNode("button", {
       class: "btn btn-warning",
       onClick: $event => $options.editDashboard(dashboard)
-    }, toDisplayString($props.module.tt('dashboard_list_edit_button')), 9, DashboardListvue_type_template_id_3ccf7c8e_hoisted_6)]), createBaseVNode("td", null, [createBaseVNode("button", {
+    }, toDisplayString($props.module.tt('dashboard_list_edit_button')), 9, DashboardListvue_type_template_id_84756ffc_hoisted_6)]), createBaseVNode("td", null, [createBaseVNode("button", {
+      class: "btn btn-secondary",
+      disabled: $data.copying,
+      onClick: $event => $options.copyDashboard(index)
+    }, toDisplayString($props.module.tt('dashboard_list_copy_button')), 9, DashboardListvue_type_template_id_84756ffc_hoisted_7)]), createBaseVNode("td", null, [createBaseVNode("button", {
       class: "btn btn-danger",
       onClick: $event => $options.deleteDashboard(index)
-    }, toDisplayString($props.module.tt('dashboard_list_delete_button')), 9, DashboardListvue_type_template_id_3ccf7c8e_hoisted_7)])]);
+    }, toDisplayString($props.module.tt('dashboard_list_delete_button')), 9, DashboardListvue_type_template_id_84756ffc_hoisted_8)])]);
   }), 128))])]);
 }
-;// ./src/DashboardList.vue?vue&type=template&id=3ccf7c8e
+;// ./src/DashboardList.vue?vue&type=template&id=84756ffc
 
 ;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardList.vue?vue&type=script&lang=js
 /* harmony default export */ var DashboardListvue_type_script_lang_js = ({
@@ -74402,7 +74407,8 @@ function DashboardListvue_type_template_id_3ccf7c8e_render(_ctx, _cache, $props,
   data() {
     return {
       localDashboards: this.dashboards,
-      reportNames: {}
+      reportNames: {},
+      copying: false
     };
   },
   async created() {
@@ -74453,11 +74459,35 @@ function DashboardListvue_type_template_id_3ccf7c8e_render(_ctx, _cache, $props,
       // Open the dashboard in a new tab
       window.open(url, '_blank');
     },
+    async copyDashboard(index) {
+      const dashboard = this.localDashboards[index];
+      this.copying = true;
+      try {
+        const result = await this.module.ajax('copyDashboard', {
+          dash_id: dashboard.dash_id
+        });
+        const newDashboard = typeof result === 'string' ? JSON.parse(result) : result;
+        if (newDashboard && newDashboard.dash_id) {
+          // The copy is ordered directly after the original
+          this.localDashboards.splice(index + 1, 0, newDashboard);
+        } else {
+          alert(this.module.tt('dashboard_list_copy_error'));
+        }
+      } catch (error) {
+        console.log(error);
+        alert(this.module.tt('dashboard_list_copy_error'));
+      } finally {
+        this.copying = false;
+      }
+    },
     async deleteDashboard(index) {
       const dashboard = this.localDashboards[index];
       try {
-        const result = await this.module.ajax('deleteDashboard', dashboard);
-        if (result) {
+        const response = await this.module.ajax('deleteDashboard', {
+          dash_id: dashboard.dash_id
+        });
+        const result = typeof response === 'string' ? JSON.parse(response) : response;
+        if (result === true) {
           this.localDashboards.splice(index, 1);
         } else {
           alert(this.module.tt('dashboard_list_delete_error'));
@@ -74477,7 +74507,7 @@ function DashboardListvue_type_template_id_3ccf7c8e_render(_ctx, _cache, $props,
 
 
 ;
-const DashboardList_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(DashboardListvue_type_script_lang_js, [['render',DashboardListvue_type_template_id_3ccf7c8e_render]])
+const DashboardList_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(DashboardListvue_type_script_lang_js, [['render',DashboardListvue_type_template_id_84756ffc_render]])
 
 /* harmony default export */ var DashboardList = (DashboardList_exports_);
 ;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/DashboardViewer.vue?vue&type=template&id=0dd2a7f6&scoped=true
