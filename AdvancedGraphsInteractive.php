@@ -213,6 +213,11 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 			if ($dash_id === false || $dash_id === null) return json_encode(false);
 			return json_encode($this->copyDash($project_id, $dash_id));
 		}
+		else if ($action === 'saveDashboardLayout') {
+			$dash_id = filter_var($payload["dash_id"] ?? null, FILTER_VALIDATE_INT);
+			if ($dash_id === false || $dash_id === null) return json_encode(false);
+			return json_encode($this->saveDashLayout($project_id, $dash_id, $payload["layout"] ?? null));
+		}
 		else if ($action === 'getReportName') {
 			return $this->getReportName($payload["project_id"], $payload["report_id"]);
 		}
@@ -630,6 +635,49 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 
 		// Return the new dashboard
 		return $this->getDashboards($dashboard['project_id'], $dash_id);
+	}
+
+	// Saves chart positions from the layout page. $layout is a list of
+	// {row, col, x, y, w, h}; each position is stored on its cell as cell['layout'].
+	// Only the positions are taken from the client; the charts themselves come from the database.
+	public function saveDashLayout($pid, $dash_id, $layout)
+	{
+		$dashboard_table_name = $this->dashboard_table_name;
+		if (!is_array($layout)) return false;
+
+		$q = $this->query("select body from $dashboard_table_name where project_id = ? and dash_id = ?", [$pid, $dash_id]);
+		$dash = $q->fetch_assoc();
+		if (!$dash) return false;
+
+		// Decode as objects (not arrays) so empty {} values survive the round trip unchanged
+		$body = json_decode($dash['body']);
+		if (!is_array($body)) return false;
+
+		$grid_columns = 12;
+		foreach ($layout as $item) {
+			if (!is_array($item)) return false;
+			$values = [];
+			foreach (['row', 'col', 'x', 'y', 'w', 'h'] as $key) {
+				$value = filter_var($item[$key] ?? null, FILTER_VALIDATE_INT);
+				if ($value === false || $value === null) return false;
+				$values[$key] = $value;
+			}
+			$row = $values['row'];
+			$col = $values['col'];
+			if (!isset($body[$row]) || !is_array($body[$row]) || !isset($body[$row][$col]) || !is_object($body[$row][$col])) return false;
+
+			$w = max(1, min($grid_columns, $values['w']));
+			$body[$row][$col]->layout = (object)[
+				'x' => max(0, min($grid_columns - $w, $values['x'])),
+				'y' => max(0, min(10000, $values['y'])),
+				'w' => $w,
+				'h' => max(1, min(1000, $values['h'])),
+			];
+		}
+
+		$query = $this->query("update $dashboard_table_name set body = ? where project_id = ? and dash_id = ?",
+			[json_encode($body), $pid, $dash_id]);
+		return $query ? true : false;
 	}
 
 	// Return all dashboards (unless one is specified explicitly) as an array of their attributes

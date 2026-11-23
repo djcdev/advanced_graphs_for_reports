@@ -33,6 +33,7 @@
 		"saveDashboard",
 		"deleteDashboard",
 		"copyDashboard",
+		"saveDashboardLayout",
 		"getReportName"
 	 ],
 	"links": {

@@ -110,7 +110,7 @@ $module->loadCSS('advanced-graphs/dist/AdvancedGraphs.css');
         var report = <?php echo json_encode($module::escape($report)); ?>;
         var report_fields_by_reapeat_instrument = <?php echo json_encode($module::escape($report_fields_by_reapeat_instrument)); ?>;
 
-        var app = AdvancedGraphs.createDashboardViewerApp(module, dashboard, report, data_dictionary, report_fields_by_reapeat_instrument);
+        var app = AdvancedGraphs.createDashboardViewerApp(module, dashboard, report, data_dictionary, report_fields_by_reapeat_instrument, <?php echo $dash_id > 0 ? 'true' : 'false'; ?>);
         app.mount('#advanced_graphs');
     });
 </script>

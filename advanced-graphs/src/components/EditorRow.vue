@@ -32,6 +32,7 @@
   
   <script>
   import EditorCell from './EditorCell.vue';
+  import { getUuid } from '@/utils';
   
   export default {
     name: 'EditorRow',
@@ -51,7 +52,7 @@
     },
     methods: {
       addCell() {
-        this.$emit('updateRow', [{}, ...this.rowCells]);
+        this.$emit('updateRow', [{ id: getUuid() }, ...this.rowCells]);
       },
         updateCell(index, cell) {
             this.$emit('updateRow', [
@@ -91,7 +92,7 @@
         addCellRight(index) {
             this.$emit('updateRow', [
             ...this.rowCells.slice(0, index + 1),
-            {},
+            { id: getUuid() },
             ...this.rowCells.slice(index + 1),
             ]);
         },

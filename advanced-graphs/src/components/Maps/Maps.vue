@@ -70,6 +70,9 @@ export default {
             console.error(e);
         }
     },
+    beforeUnmount() {
+        if (this.resizeObserver) this.resizeObserver.disconnect();
+    },
     methods: {
         updateParameters(parameters) {
             this.$emit('updateParameters', parameters);
@@ -117,6 +120,14 @@ export default {
  
             this.graph = L.map(mapDiv, {
             }).setView([latitude_center, longitude_center], zoom_in);
+
+            // Leaflet only measures its container once; redraw tiles when a dashboard grid box is resized
+            if (!this.resizeObserver && typeof ResizeObserver !== 'undefined') {
+                this.resizeObserver = new ResizeObserver(() => {
+                    if (this.graph) this.graph.invalidateSize();
+                });
+                this.resizeObserver.observe(mapDiv);
+            }
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(this.graph);

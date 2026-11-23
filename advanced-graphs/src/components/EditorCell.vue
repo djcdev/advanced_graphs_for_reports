@@ -80,6 +80,8 @@
         currentGraph: this.cell && this.cell.type && GraphTypes[this.cell.type] ? markRaw(GraphTypes[this.cell.type].graph) : null,
         cellData: this.cell ? this.cell.parameters : {},
         cellID: this.cell ? this.cell.id : null,
+        // Saved grid position (set on the layout page); carried through edits so it is not lost
+        cellLayout: this.cell ? this.cell.layout : undefined,
         graphId: 0,
         showGraph: false,
         formReady: false,
@@ -120,7 +122,7 @@
 
         this.showGraph = false;
 
-        this.$emit('updateCell', {type: graphType, parameters: this.cellData, id: this.cellID});
+        this.$emit('updateCell', {type: graphType, parameters: this.cellData, id: this.cellID, layout: this.cellLayout});
       },
       updateFormStatus(status) {
         this.formReady = status;
@@ -130,7 +132,7 @@
       },
       updateCellData(data) {
         this.cellData = data;
-        this.$emit('updateCell', {type: this.currentGraphType, parameters: this.cellData, id: this.cellID});
+        this.$emit('updateCell', {type: this.currentGraphType, parameters: this.cellData, id: this.cellID, layout: this.cellLayout});
       },
       previewGraph() {
         this.showGraph = true;

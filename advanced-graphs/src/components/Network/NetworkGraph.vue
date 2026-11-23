@@ -384,7 +384,9 @@ export default {
       var svg = d3.select("body")
         .append("svg")
         .attr("width", width)
-        .attr("height", height);
+        .attr("height", height)
+        // viewBox lets the SVG scale down to fit a resized dashboard container
+        .attr("viewBox", [0, 0, width, height]);
 
       var simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id(function(d) { return d.id; }))
