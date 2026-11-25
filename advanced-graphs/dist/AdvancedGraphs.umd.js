@@ -68581,24 +68581,27 @@ function LikertGraphFormvue_type_template_id_aa231426_scoped_true_render(_ctx, _
 }
 ;// ./src/components/Likert/LikertGraphForm.vue?vue&type=template&id=aa231426&scoped=true
 
-;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=template&id=f03bfc2a
+;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=template&id=0c355baf&scoped=true
+/* unused harmony import specifier */ var LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_pushScopeId;
+/* unused harmony import specifier */ var LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_popScopeId;
 
-const LikertChoicesSelectorvue_type_template_id_f03bfc2a_hoisted_1 = {
+const LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_withScopeId = n => (LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_pushScopeId("data-v-0c355baf"), n = n(), LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_popScopeId(), n);
+const LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_hoisted_1 = {
   value: "",
   disabled: ""
 };
-const LikertChoicesSelectorvue_type_template_id_f03bfc2a_hoisted_2 = ["value"];
-function LikertChoicesSelectorvue_type_template_id_f03bfc2a_render(_ctx, _cache, $props, $setup, $data, $options) {
+const LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_hoisted_2 = ["value"];
+function LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_render(_ctx, _cache, $props, $setup, $data, $options) {
   return openBlock(), createElementBlock("div", null, [withDirectives(createBaseVNode("select", {
     "onUpdate:modelValue": _cache[0] || (_cache[0] = $event => $data.selectedChoices = $event)
-  }, [createBaseVNode("option", LikertChoicesSelectorvue_type_template_id_f03bfc2a_hoisted_1, toDisplayString($options.module.tt('likert_select_choices')), 1), (openBlock(true), createElementBlock(Fragment, null, renderList($props.options, (option, index) => {
+  }, [createBaseVNode("option", LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_hoisted_1, toDisplayString($options.module.tt('likert_select_choices')), 1), (openBlock(true), createElementBlock(Fragment, null, renderList($props.options, (option, index) => {
     return openBlock(), createElementBlock("option", {
       key: index,
       value: option
-    }, toDisplayString(option), 9, LikertChoicesSelectorvue_type_template_id_f03bfc2a_hoisted_2);
+    }, toDisplayString(option), 9, LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_hoisted_2);
   }), 128))], 512), [[vModelSelect, $data.selectedChoices]])]);
 }
-;// ./src/components/Likert/LikertChoicesSelector.vue?vue&type=template&id=f03bfc2a
+;// ./src/components/Likert/LikertChoicesSelector.vue?vue&type=template&id=0c355baf&scoped=true
 
 ;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=script&lang=js
 /* harmony default export */ var LikertChoicesSelectorvue_type_script_lang_js = ({
@@ -68627,10 +68630,10 @@ function LikertChoicesSelectorvue_type_template_id_f03bfc2a_render(_ctx, _cache,
 });
 ;// ./src/components/Likert/LikertChoicesSelector.vue?vue&type=script&lang=js
  
-;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=style&index=0&id=f03bfc2a&lang=css
+;// ./node_modules/mini-css-extract-plugin/dist/loader.js??clonedRuleSet-54.use[0]!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-54.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-54.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertChoicesSelector.vue?vue&type=style&index=0&id=0c355baf&scoped=true&lang=css
 // extracted by mini-css-extract-plugin
 
-;// ./src/components/Likert/LikertChoicesSelector.vue?vue&type=style&index=0&id=f03bfc2a&lang=css
+;// ./src/components/Likert/LikertChoicesSelector.vue?vue&type=style&index=0&id=0c355baf&scoped=true&lang=css
 
 ;// ./src/components/Likert/LikertChoicesSelector.vue
 
@@ -68640,7 +68643,7 @@ function LikertChoicesSelectorvue_type_template_id_f03bfc2a_render(_ctx, _cache,
 ;
 
 
-const LikertChoicesSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(LikertChoicesSelectorvue_type_script_lang_js, [['render',LikertChoicesSelectorvue_type_template_id_f03bfc2a_render]])
+const LikertChoicesSelector_exports_ = /*#__PURE__*/(0,exportHelper/* default */.A)(LikertChoicesSelectorvue_type_script_lang_js, [['render',LikertChoicesSelectorvue_type_template_id_0c355baf_scoped_true_render],['__scopeId',"data-v-0c355baf"]])
 
 /* harmony default export */ var LikertChoicesSelector = (LikertChoicesSelector_exports_);
 ;// ./node_modules/thread-loader/dist/cjs.js!./node_modules/babel-loader/lib/index.js??clonedRuleSet-82.use[1]!./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[3]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./src/components/Likert/LikertCategoryCheckbox.vue?vue&type=template&id=6222f952
@@ -84345,7 +84348,8 @@ var FontAwesomeLayersText = defineComponent({
 
 
 
-
+// Bootstrap CSS is not bundled: REDCap already loads its own Bootstrap 5, and a second copy
+// loaded after it overrides REDCap's page styles (left menu font size, top navbar).
 
 function createDashboardEditorApp(module, dashboard, report, data_dictionary, report_fields_by_repeat_instrument) {
   const app = createApp(DashboardEditor, {

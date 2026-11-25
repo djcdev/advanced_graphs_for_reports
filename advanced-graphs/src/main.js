@@ -4,7 +4,8 @@ import DashboardEditor from './DashboardEditor.vue';
 import DashboardList from './DashboardList.vue';
 import DashboardViewer from './DashboardViewer.vue';
 import DashboardLayoutEditor from './DashboardLayoutEditor.vue';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// Bootstrap CSS is not bundled: REDCap already loads its own Bootstrap 5, and a second copy
+// loaded after it overrides REDCap's page styles (left menu font size, top navbar).
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 

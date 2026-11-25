@@ -5,13 +5,6 @@ namespace VIHA\AdvancedGraphsInteractive;
 
 include APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 
-?>
-<style>
-	.rcproject-navbar {
-		display: none !important;
-	}
-</style>
-<?php
 $project_id = filter_input(INPUT_GET, 'pid', FILTER_VALIDATE_INT);
 $dash_id = filter_input(INPUT_GET, 'dash_id', FILTER_VALIDATE_INT);
 if ($project_id === null || $project_id === false || $dash_id === null || $dash_id === false || $dash_id <= 0) {

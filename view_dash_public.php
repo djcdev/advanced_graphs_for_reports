@@ -66,8 +66,15 @@ $module->loadCSS('advanced-graphs/dist/AdvancedGraphs.css');
 
 ?>
 
+<style>
+    /* The public page has no REDCap project header above it, so give the dashboard title some room */
+    #advanced_graphs {
+        padding-top: 2rem;
+    }
+</style>
+
 <div id="advanced_graphs">
-    
+
 </div>
 
 <script>

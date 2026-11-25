@@ -6,13 +6,6 @@ namespace VIHA\AdvancedGraphsInteractive;
 
 	include APP_PATH_DOCROOT . 'ProjectGeneral/header.php';
 
-?>
-<style>
-	.rcproject-navbar {
-		display: none !important;
-	}
-</style>
-<?php
 	// Get the project ID
 	$project_id = filter_input(INPUT_GET, 'pid', FILTER_VALIDATE_INT);
 	if ($project_id === null || $project_id === false) {
