@@ -1,7 +1,7 @@
 <!-- DashboardEditor.vue -->
   <template>
-    <div>
-      <h1>Dashboard Editor</h1>
+    <div class="AG-dashboard-editor">
+      <h1 class="AG-editor-heading">Dashboard Editor</h1>
       <DashboardOptions 
       :title="title" 
       :isPublic="isPublic" 
@@ -16,10 +16,11 @@
         @addRow="addDashboardRow"
       ></editor-table>
       <div class="AG-editor-final-buttons">
-        <button @click="saveDashboard" class="btn btn-primary">
-          {{ dashboard ? module.tt('dbe_save') : module.tt('dbe_create') }}
+        <button type="button" @click="cancel()" class="btn btn-outline-secondary">{{ module.tt('dbe_cancel') }}</button>
+        <button type="button" @click="saveDashboard" class="btn btn-primary">
+          <i class="fa fa-save" aria-hidden="true"></i>
+          {{ localDashboard && localDashboard.dash_id ? module.tt('dbe_save') : module.tt('dbe_create') }}
         </button>
-        <button @click="cancel()" class="btn btn-secondary">{{ module.tt('dbe_cancel') }}</button>
       </div>
     </div>
     <saved-modal
@@ -38,7 +39,7 @@
   import SavedModal from './components/SavedModal.vue';
   import ConfirmationModal from './components/ConfirmationModal.vue';
   import { reactive } from 'vue';
-  import { getUuid } from './utils.js';
+  import { getUuid, isFlagSet } from './utils.js';
 
   export default {
     name: "DashboardEditor",
@@ -74,7 +75,7 @@
     data() {
         return {
             title: this.dashboard.title || this.module.tt('dbe_new_dashboard'),
-            isPublic: this.dashboard.is_public || false,
+            isPublic: isFlagSet(this.dashboard.is_public),
             body: reactive( 
               this.dashboard.body ? 
               JSON.parse(JSON.stringify(this.dashboard.body)).map(row => row.map(cell => ({ ...cell, id: getUuid() }))): 
@@ -217,3 +218,60 @@
     }
  };
   </script>
+
+  <!-- Not scoped: these rules style the inputs inside every chart form without editing each form -->
+  <style>
+  .AG-dashboard-editor {
+    max-width: 1400px;
+  }
+
+  .AG-dashboard-editor .AG-editor-heading {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .AG-dashboard-editor .AG-editor-final-buttons {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid #dee2e6;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .AG-dashboard-editor .AG-editor-chart-body input[type="text"],
+  .AG-dashboard-editor .AG-editor-chart-body input[type="number"],
+  .AG-dashboard-editor .AG-editor-chart-body textarea,
+  .AG-dashboard-editor .AG-editor-chart-body select {
+    display: block;
+    width: 100%;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    text-align-last: auto;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+
+  .AG-dashboard-editor .AG-editor-chart-body input[type="text"]:focus,
+  .AG-dashboard-editor .AG-editor-chart-body input[type="number"]:focus,
+  .AG-dashboard-editor .AG-editor-chart-body textarea:focus,
+  .AG-dashboard-editor .AG-editor-chart-body select:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+  }
+
+  .AG-dashboard-editor .AG-editor-chart-body input[type="range"] {
+    width: 100%;
+    accent-color: #0d6efd;
+  }
+  </style>

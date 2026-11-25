@@ -242,6 +242,12 @@ export function truncateString(str, maxWidth) {
 }
 
 let uuid = 0;
+// The database returns flags such as is_public as the strings "1" / "0".
+// "0" is truthy in JavaScript, so compare explicitly.
+export function isFlagSet(value) {
+    return value === true || value === 1 || value === '1' || value === 'true';
+}
+
 export function getUuid() {
     return uuid++;
 }

@@ -620,7 +620,8 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		$title = decode_filter_tags($dashboard['title']);
 		$body = json_encode($dashboard['body']);
 
-		$is_public =  $dashboard['is_public'];
+		// Store exactly 1 or 0 whatever form the flag arrives in (true, "1", false, "0", ...)
+		$is_public = filter_var($dashboard['is_public'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
 
 		// Update dashboard
 		$sql = "update $dashboard_table_name set 

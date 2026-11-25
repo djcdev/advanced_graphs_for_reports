@@ -1,11 +1,14 @@
 <!-- GraphTypeSelector.vue -->
 <template>
-    <div>
-        <select v-model="selectedGraphType">
+    <div class="AG-graph-type-selector">
+        <select
+            v-model="selectedGraphType"
+            class="form-select form-select-sm"
+            :aria-label="module.tt('gts_select_a_graph_type')">
             <option :value="null" :selected="true"> -- {{ module.tt('gts_select_a_graph_type') }} --</option>
-            <option v-for="(graphType, index) in availableGraphTypes" 
-            :key="index" 
-            :value="graphType" 
+            <option v-for="(graphType, index) in availableGraphTypes"
+            :key="index"
+            :value="graphType"
             :selected="currentGraphType==graphType">
                 {{ module.tt(graphType) }}
             </option>
@@ -36,25 +39,18 @@ export default {
         selectedGraphType(newVal) {
             if (newVal)
                 this.$emit('graphTypeChange', newVal);
-            // console.log(newVal);
         },
     },
-    methods: {
-        onGraphTypeChange() {
-            console.log(this.selectedGraphType);
-            if (this.selectedGraphType)
-                this.$emit('graphTypeChange', this.selectedGraphType);
-        },
-    }
 };
 </script>
 
 <style scoped>
-    select {
-        min-width: 100px;
-        width: 100%;
-        height: 100%;
-        font-size: 1.2em;
-        color: #000;
+    .AG-graph-type-selector {
+        min-width: 180px;
+        flex: 1 1 auto;
+    }
+
+    .AG-graph-type-selector select {
+        font-weight: 600;
     }
 </style>

@@ -1,25 +1,50 @@
 <!-- EditorCell.vue -->
 <template>
-  <div class="AG-editor-cell-container">
-    <div class="AG-editor-cell">
-      <div class="AG-editor-cell-buttons">
-        <button class="btn btn-primary" @click="$emit('moveCellLeft')">
+  <div class="card AG-editor-cell-container">
+    <div class="card-header AG-editor-cell-buttons">
+      <GraphTypeSelector 
+      :currentGraphType="currentGraphType"
+      :availableGraphTypes="availableGraphTypes"
+      @graphTypeChange="graphTypeChange" />
+      <div class="btn-group btn-group-sm" role="group">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          :disabled="index === 0"
+          :title="module.tt('editor_cell_move_left')"
+          :aria-label="module.tt('editor_cell_move_left')"
+          @click="$emit('moveCellLeft')">
           <i class="fa fa-arrow-left" aria-hidden="true"></i>
         </button>
-        <GraphTypeSelector 
-        :currentGraphType="currentGraphType"
-        :availableGraphTypes="availableGraphTypes"
-        @graphTypeChange="graphTypeChange" />
-        <button class="btn btn-primary" @click="$emit('moveCellRight')">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          :disabled="index === cellCount - 1"
+          :title="module.tt('editor_cell_move_right')"
+          :aria-label="module.tt('editor_cell_move_right')"
+          @click="$emit('moveCellRight')">
           <i class="fa fa-arrow-right" aria-hidden="true"></i>
         </button>
-        <button class="btn btn-danger" @click="confirmDelete">
-          <i class="fa fa-trash" aria-hidden="true"></i>
-        </button>
-        <button class="btn btn-success AG-editor-cell-button-add-right" @click="$emit('addCellRight')">
+        <button
+          type="button"
+          class="btn btn-outline-secondary AG-editor-cell-button-add-right"
+          :title="module.tt('editor_cell_add_right')"
+          :aria-label="module.tt('editor_cell_add_right')"
+          @click="$emit('addCellRight')">
           <i class="fa fa-plus" aria-hidden="true"></i>
         </button>
       </div>
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-danger"
+        :title="module.tt('editor_cell_delete_cell')"
+        :aria-label="module.tt('editor_cell_delete_cell')"
+        @click="confirmDelete">
+        <i class="fa fa-trash" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="card-body AG-editor-cell AG-editor-chart-body">
+      <p v-if="!currentGraphForm" class="AG-editor-cell-empty">{{ module.tt('editor_cell_choose_type') }}</p>
       <div class="AG-editor-graph-form-container">
         <component 
           :is="currentGraphForm" 
@@ -27,23 +52,24 @@
           @updateCellData="updateCellData"
           @isReady="updateFormStatus"/>
       </div>
-      <div class="AG-editor-graph-container">
+      <div v-if="showGraph" class="AG-editor-graph-container">
         <component 
-          v-if="showGraph"
           :editorMode="true"
           :key="graphId"
           :is="currentGraph" 
           :parameters="cellData"
           @updateParameters="updateCellData" />
       </div>
-      <div class="AG-editor-graph-buttons">
-        <button 
-          class="btn btn-primary"
-          :disabled="!formReady"
-          @click="previewGraph">
-          {{module.tt('editor_cell_preview')}}
-        </button>
-      </div>
+    </div>
+    <div v-if="currentGraphForm" class="card-footer AG-editor-graph-buttons">
+      <button 
+        type="button"
+        class="btn btn-sm btn-primary"
+        :disabled="!formReady"
+        @click="previewGraph">
+        <i class="fa fa-eye" aria-hidden="true"></i>
+        {{module.tt('editor_cell_preview')}}
+      </button>
     </div>
   </div>
   <confirmation-modal
@@ -70,6 +96,14 @@
       cell: {
         type: Object,
         default: null,
+      },
+      index: {
+        type: Number,
+        default: 0,
+      },
+      cellCount: {
+        type: Number,
+        default: 1,
       },
     },
     emits: ['updateCell', 'deleteCell', 'moveCellLeft', 'moveCellRight', 'addCellRight'],
@@ -155,59 +189,45 @@
 
   <style scoped>
 .AG-editor-cell-container {
-  display: flex;
-  flex-direction: column;
-  margin-right: 30px;
-  border: 1px solid #ccc;
-}
-
-.AG-editor-cell {
-  /* Add these lines */
-  display: flex;
-  flex-direction: column;
-  /* align-items: center; */
+  flex: 1 1 560px;
+  min-width: 0;
+  max-width: 100%;
+  border-color: #d5dbe1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .AG-editor-cell-buttons {
-  /* Set a fixed height or min-height, so the button container doesn't get affected by the content */
-  min-height: 40px;
   display: flex;
-  flex-direction: row;
-  /* Remove these lines */
-  /* align-items: flex-start; */
-  /* justify-content: flex-start; */
-  /* Add these lines */
   align-items: center;
-  justify-content: center;
-  /* Add a margin-bottom to create some space between the buttons and the content */
-  margin-bottom: 10px;
+  gap: 0.5rem;
+  background: #fff;
 }
 
-.AG-editor-graph-form-container {
-  grid-area: graph-form-container;
+.AG-editor-cell {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-start;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.AG-editor-cell-empty {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.AG-editor-graph-form-container:empty {
+  display: none;
 }
 
 .AG-editor-graph-container {
-  grid-area: graph-container;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-start;
+  overflow-x: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
 }
 
 .AG-editor-graph-buttons {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: flex-end;
+  background: #fff;
 }
-
-.AG-add-cell-button {
-  float: left;
-  margin-right: 10px;
-}
-  </style>
+</style>

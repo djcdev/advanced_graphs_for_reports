@@ -1,29 +1,37 @@
 <!-- HelpfulParameter.vue -->
 <template>
-    <div class="helpful-container">
-      <label>
-        {{ labelText }}
-        <button type="button" @click="showModal = true">
+    <div class="AG-param">
+      <div class="AG-param-label">
+        <span>{{ labelText }}</span>
+        <button
+          type="button"
+          class="AG-param-help"
+          :title="helpLabel"
+          :aria-label="helpLabel"
+          @click="showModal = true">
           <i class="fa fa-question-circle" aria-hidden="true"></i>
         </button>
-      </label>
-      <div class="parameter-container">
+      </div>
+      <div class="AG-param-control">
         <slot></slot>
       </div>
-      <help-modal v-if="showModal" @close="showModal = false">
-        <h3>{{ labelText }}</h3>
-        <p>{{ helpText }}</p>
+      <help-modal v-if="showModal" :title="labelText" @close="showModal = false">
+        <p class="mb-0">{{ helpText }}</p>
       </help-modal>
     </div>
   </template>
-  
+
   <script>
   import HelpModal from './HelpModal.vue';
-  
+
   export default {
     name: 'HelpfulParameter',
     components: {
       HelpModal
+    },
+    // module is optional so this component still works outside the dashboard editor
+    inject: {
+      module: { default: null },
     },
     props: {
       labelText: {
@@ -39,43 +47,51 @@
       return {
         showModal: false
       };
-    }
+    },
+    computed: {
+      helpLabel() {
+        const help = this.module ? this.module.tt('editor_help') : 'Help';
+        return `${help}: ${this.labelText}`;
+      },
+    },
   };
   </script>
 
   <style scoped>
-  button {
+  .AG-param {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.9rem;
+  }
+
+  .AG-param-label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #343a40;
+  }
+
+  .AG-param-help {
     background: none;
     border: none;
     padding: 0;
     margin: 0;
     font: inherit;
+    line-height: 1;
+    color: #6c757d;
     cursor: pointer;
-    outline: inherit;
   }
 
-  label {
-    font-weight: bold;
+  .AG-param-help:hover,
+  .AG-param-help:focus-visible {
+    color: #0d6efd;
   }
 
-  .helpful-container {
+  .AG-param-control {
     display: flex;
     flex-direction: column;
-    margin-bottom: 10px;
-    border: 2px solid #ccc;
-  }
-
-  .helpful-container label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 5px;
-  }
-
-  .helpful-container .parameter-container {
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    border: 1px solid #ccc;
   }
   </style>

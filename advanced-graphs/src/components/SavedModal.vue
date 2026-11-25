@@ -1,26 +1,31 @@
+<!-- SavedModal.vue -->
 <template>
-    <div class="modal-mask">
-      <div class="modal-wrapper">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h3>{{ module.tt('saved_modal_dashboard_saved') }}</h3>
-            </div>
-            <div class="modal-body">
-                <p> {{module.tt('saved_modal_dashboard_named_saved', this.name)}} </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" @click="$emit('close')">{{module.tt('saved_modal_continue_editing')}}</button>
-                <button type="button" @click="viewList()">{{module.tt('saved_modal_return_to_list')}}</button>
-                <button type="button" @click="viewDash()">{{module.tt('saved_modal_view_dashboard')}}</button>
-            </div>
-        </div>
-      </div>
-    </div>
+    <base-modal
+        :title="module.tt('saved_modal_dashboard_saved')"
+        icon="fa-check"
+        variant="success"
+        @close="$emit('close')">
+        <p class="AG-saved-message">{{ module.tt('saved_modal_dashboard_named_saved', name) }}</p>
+        <template #footer>
+            <button type="button" class="btn btn-outline-secondary" @click="$emit('close')">
+                {{ module.tt('saved_modal_continue_editing') }}
+            </button>
+            <button type="button" class="btn btn-outline-primary" @click="viewList()">
+                {{ module.tt('saved_modal_return_to_list') }}
+            </button>
+            <button type="button" class="btn btn-primary" data-autofocus @click="viewDash()">
+                {{ module.tt('saved_modal_view_dashboard') }}
+            </button>
+        </template>
+    </base-modal>
 </template>
 
 <script>
+import BaseModal from './BaseModal.vue';
+
 export default {
     name: 'SavedModal',
+    components: { BaseModal },
     inject: ['module'],
     props: {
         name: {
@@ -36,6 +41,7 @@ export default {
             default: "#",
         },
     },
+    emits: ['close'],
     methods: {
         viewList() {
             window.location.href = this.list_link;
@@ -49,63 +55,7 @@ export default {
 </script>
 
 <style scoped>
-.modal-mask {
-  position: fixed;
-  z-index: 9998;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, .5);
-  display: table;
-  transition: opacity .3s ease;
+.AG-saved-message {
+    margin: 0;
 }
-
-.modal-wrapper {
-  display: table-cell;
-  vertical-align: middle;
-}
-
-.modal-container {
-  width: 600px;
-  margin: 0px auto;
-  padding: 20px 30px;
-  background-color: #fff;
-  border-radius: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
-  transition: all .3s ease;
-  font-family: Helvetica, Arial, sans-serif;
-}
-
-.modal-header h3 {
-  margin-top: 0;
-  color: #42b983;
-}
-
-.modal-body {
-  margin: 20px 0;
-}
-
-.modal-footer {
-    text-align: left;
-    border-width: 1px 0 0 0;
-    background-image: none;
-    margin-top: 0.5em;
-    padding: 0.3em 1em 0.5em 0.4em;
-}
-
-.modal-footer button {
-    padding: 0.3em 1em 0.4em;
-    float: right;
-    border: 1px solid #ccc;
-    background: #e6e6e6;
-    margin: 0.5em 0.4em 0.5em 0;
-    cursor: pointer;
-    border-bottom-right-radius: 3px;
-    border-bottom-left-radius: 3px;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    
-}
-
 </style>

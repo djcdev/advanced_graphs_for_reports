@@ -18,7 +18,7 @@
         <td>{{ reportNames[dashboard.report_id] }}</td>
         <td></td>
         <td>
-          <a v-if="dashboard.is_public" :href="getPublicLink(dashboard)" target="_blank">{{ module.tt('dashboard_list_public_link_href') }}</a>
+          <a v-if="isPublic(dashboard)" :href="getPublicLink(dashboard)" target="_blank">{{ module.tt('dashboard_list_public_link_href') }}</a>
         </td>
         <td>
           <button class="btn btn-primary" @click="viewDashboard(dashboard)">
@@ -43,11 +43,24 @@
       </tr>
     </tbody>
   </table>
+  <confirmation-modal ref="confirmationModal"></confirmation-modal>
 </template>
 
 <script>
+import ConfirmationModal from './components/ConfirmationModal.vue';
+import { isFlagSet } from './utils.js';
+
 export default {
   name: "DashboardList",
+  components: {
+    ConfirmationModal,
+  },
+  // ConfirmationModal injects module; this page receives it as a prop
+  provide() {
+    return {
+      module: this.module,
+    };
+  },
   props: {
     module: {
       type: Object,
@@ -94,9 +107,12 @@ export default {
     //     return "failed to retrieve report name";
     //   }
     // },
+    isPublic(dashboard) {
+      return isFlagSet(dashboard.is_public);
+    },
     getPublicLink(dashboard) {
       // If the dashboard is public, then return the public link
-      if (dashboard.is_public) {
+      if (this.isPublic(dashboard)) {
         return this.module.getUrl('view_dash_public.php')
         + '&NOAUTH'
         + '&report_id=' + dashboard.report_id 
@@ -146,6 +162,13 @@ export default {
     },
     async deleteDashboard(index) {
       const dashboard = this.localDashboards[index];
+      const confirmed = await this.$refs.confirmationModal.show({
+        title: this.module.tt('dashboard_list_confirm_delete_title'),
+        message: this.module.tt('dashboard_list_confirm_delete_message', dashboard.title),
+      });
+      if (!confirmed) {
+        return;
+      }
       try {
         const response = await this.module.ajax('deleteDashboard', { dash_id: dashboard.dash_id });
         const result = typeof response === 'string' ? JSON.parse(response) : response;
