@@ -193,7 +193,8 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 				"dash_list_url" => "#" //$this->getUrl("advanced_graphs.php", true, true)
 			);
 
-			$newDash = $this->saveDash($payload);
+			// Use the project ID REDCap verified for this request, never one supplied by the client
+			$newDash = $this->saveDash($project_id, $payload);
 			if ($newDash) {
 				return json_encode($newDash);
 			}
@@ -219,7 +220,10 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 			return json_encode($this->saveDashLayout($project_id, $dash_id, $payload["layout"] ?? null));
 		}
 		else if ($action === 'getReportName') {
-			return $this->getReportName($payload["project_id"], $payload["report_id"]);
+			// Use the project ID REDCap verified for this request, never one supplied by the client
+			$report_id = filter_var($payload["report_id"] ?? null, FILTER_VALIDATE_INT);
+			if ($report_id === false || $report_id === null) return json_encode(false);
+			return $this->getReportName($project_id, $report_id);
 		}
 		else {
 			return false;
@@ -601,20 +605,19 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 	}
 
 	// A function that takes a dashboard and saves it to the database
-	public function saveDash($dashboard) {
+	// $pid must be the trusted project ID from the request context, not a value from $dashboard.
+	public function saveDash($pid, $dashboard) {
 		$dashboard_table_name = $this->dashboard_table_name;
-		// extract($GLOBALS);
-		// echo json_encode($dashboard);
-		// return;
 		// Count errors
 		$errors = 0;
 
 		// Get dashboard id
-		$dash_id = $dashboard['dash_id'];
+		$dash_id = filter_var($dashboard['dash_id'] ?? null, FILTER_VALIDATE_INT);
+		if ($dash_id === false || $dash_id === null) return false;
 
-		// Get dashboard
-		$dash = $this->getDashboards($dashboard['project_id'], $dash_id);
-		if (empty($dash)) exit('0');
+		// Make sure the dashboard belongs to this project
+		$dash = $this->getDashboards($pid, $dash_id);
+		if (empty($dash)) return false;
 
 		// Report title
 		$title = decode_filter_tags($dashboard['title']);
@@ -628,14 +631,14 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 				title = ?, 
 				body = ?, 
 				is_public = ?
-				where dash_id = ?";
-		$params = [$title, $body, $is_public, $dash_id];
+				where project_id = ? and dash_id = ?";
+		$params = [$title, $body, $is_public, $pid, $dash_id];
 
 		$query = $this->query($sql, $params);
 		if (!$query) $errors += 1;
 
 		// Return the new dashboard
-		return $this->getDashboards($dashboard['project_id'], $dash_id);
+		return $this->getDashboards($pid, $dash_id);
 	}
 
 	// Saves chart positions from the layout page. $layout is a list of
