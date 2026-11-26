@@ -12,14 +12,11 @@ if ($project_id === null || $project_id === false || $dash_id === null || $dash_
     exit(0);
 }
 
-$dash_title = $module->getDashboardName($project_id, $dash_id);
-
 // Page header
 $objHtmlPage = new HtmlPage();
 $objHtmlPage->setPageTitle(remBr(br2nl($app_title))." | REDCap");
 $objHtmlPage->PrintHeader(false);
 $dashboard = $module->getDashboards($project_id, $dash_id)[0];
-
 
 if ($dashboard['is_public'] != "1") {
     echo "<h1>Advanced Graphs</h1><h2 style='color: red;'>This is not a publicly available dashboard</h2>";
@@ -40,21 +37,9 @@ if ($report_id == null) {
 
 define('SUPER_USER', true);
 
-// Get the report name
-$report_name = $module->getReportName($project_id, $report_id);
-
-// // Get the report
-// // $report = $module->getReport($project_id, $report_id);
-// // $report = $module->get_report($project_id, $report_id, array(), null, "array");
+// Get the report, data dictionary and report fields grouped by repeating instrument
 $report = $module->getReport($report_id);
-
-// // Get the report fields
-$report_fields = $module->getReportFields($project_id, $report_id);
-
-// // Get the data dictionary
 $data_dictionary = $module->getDataDictionary($project_id);
-
-// // Get the report fields by the repeating instruments
 $report_fields_by_reapeat_instrument = $module->getReportFieldsByRepeatInstrument($project_id, $report_id);
 
 $js_module = $module->initializeJavascriptModuleObject();

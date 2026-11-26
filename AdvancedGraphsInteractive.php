@@ -7,38 +7,10 @@ use ExternalModules\ExternalModules;
 
 class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 {
-	private $enabled_projects;
-
 	public $dashboard_table_name = "advanced_graphs_dashboards_v2";
-
-	public $data_dictionary;
-	public $report_fields;
-	public $instruments;
-	public $instruments_dictionary;
-	public $repeat_instruments;
-	public $repeats_dictionary;
-
-	public $query_result;
 
 	public $module_js_path;
 	public $module_css_path;
-
-	private function getEnabledProjects()
-	{
-		if($this->enabled_projects == null)
-		{
-			$arr_projects_api_tokens = $this->getSystemSetting("projects-api-tokens");
-			$arr_projects_pids = $this->getSystemSetting("project-pid");
-			$arr_projects_tokens = $this->getSystemSetting("project-token");
-			
-			$this->enabled_projects = Array();
-			foreach($arr_projects_api_tokens as $i => $valid) {
-				if ($valid=="true") {
-					$this->enabled_projects[$arr_projects_pids[$i]] = $arr_projects_tokens[$i];
-				}
-			}
-		}
-	}
 
 	function redcap_module_system_enable($version) {
 		// Do stuff, e.g. create DB table
@@ -59,63 +31,13 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		} catch (\Throwable $e) {
 			$this->log("Failed $this->PREFIX to create table $dashboard_table_name with error:\n".$e->getMessage());
 		}
-		
-		$default_graphs = array("likert" => "likert", 
-								"scatter" => "scatter", 
-								"barplot" => "barplot", 
-								"map" => "map", 
-								"network" => "network");
-
-		$current_graphs = $this->getSystemSetting("graph_types");
-
-		foreach ($current_graphs as $key => $graph_type) {
-			$default_graphs[$key] = $graph_type;
-		}
-
-		$this->setSystemSetting("graph_types", array_values($default_graphs));
-		// $this->setSystemSetting("graph_folder", array_keys($default_graphs));
-		// $this->setSystemSetting("graph_function", array_values($default_graphs));
-
-		// $this->log(json_encode($this->getSystemSetting("graph_types")));
 	}
 
-	// function redcap_module_system_disable($version) {
-	// 	// Do stuff, e.g. create DB table.
-	// 	$this->delete_advanced_graphs_table();
-	// }
-
-	function delete_advanced_graphs_table() {
-		$dashboard_table_name = $this->dashboard_table_name;
-		try {
-			$this->query("DROP TABLE IF EXISTS $dashboard_table_name", []);
-			$this->log("Deleted $dashboard_table_name table");
-		} catch (\Throwable $e) {
-			$this->log("Failed to delete table $dashboard_table_name with error:\n".$e->getMessage());
-			// throw new PoppingException("Failed to delete table advanced_graphs_dashboards with error:\n".$e->getMessage());
-		}
-	}
-	
-	function redcap_module_save_configuration($project_id) {
-
-		$error = "";
-
-		if($error!="") {
-			$this->log("Error configuring settings: $error");
-			$this->disable($this->PREFIX, false);
-		}
-	}
-	
-	//redcap_module_link_check_display($project_id, $link): Triggered when each link defined in config.json 
-	//is rendered. Override this method and return null if you don't want to 
-	//display the link, or modify and return the $link parameter as desired. This method also controls 
-	//whether pages will load if users access their URLs directly.
-	// $link = Array ( [name] => Advanced Graphs [icon] => gear [url] => http://localhost/redcap_8-4/redcap_v8.5.8/ExternalModules/?prefix=advanced_graphs&page=advanced_graphs [prefix] => advanced_graphs )
-	
-	//show link only in enabled project (with pid and token at config) AND if page is DataExport 
-	//and report_id is in QUERY_STRING
+	// Called when each link in config.json is rendered (and when its page is loaded directly).
+	// Return null to hide the link, or return the (possibly modified) $link.
+	// The "New dashboard" link is only shown on a report page, with that report's ID added.
     function redcap_module_link_check_display($project_id, $link)
-    {		
-		$current_page_is_this_module = strpos($_SERVER["QUERY_STRING"],"prefix=" . $this->PREFIX) > -1;
+    {
 		$current_page_is_this_page = strpos($_SERVER["QUERY_STRING"],"page=edit_dash") > -1;
 		$current_page_is_export_report = strpos($_SERVER["PHP_SELF"],"/DataExport/") > -1 && strpos($_SERVER["QUERY_STRING"],"&report_id=") > -1 && strpos($_SERVER["QUERY_STRING"],"&addedit") <= -1;
 
@@ -134,65 +56,14 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 				return(null);
 		}
 
-		// if ($link['id'] == "advanced_graphs_config") {
-		// 	if (!$this->getUser()->isSuperUser())
-		// 		return(null);
-		// }
-
 		return($link);
-
-
-		// if ($link['id'] == "edit_dash" && $current_page_is_this_module) {
-		// 	$link['url'] = "#";
-		// 	// echo json_encode($link);
-		// 	return(null);
-		// }
-
-		
-		if ($link['id'] == "edit_dash") {
-			if (!$current_page_is_export_report)
-				return(null);
-			$link['url'] .= "&dash_id=0";
-		} 
-		return $link;
-// 		if($link["prefix"]==$this->PREFIX) {			
-// 			$link["target"] = "_blank";
-// //			if (!($current_page_is_this_module || ($current_page_is_export_report && $this->isEnabledProject($project_id)))) {
-// 			if (!($current_page_is_this_module || $current_page_is_export_report )) {
-// 				$link=null;
-// 			} 
-// 		}
-		
     }
-/*	
-	function redcap_module_project_enable($version, $project_id) {
-		echo "version: " . $version;
-		echo "project_id: " . $project_id;
-		$version_n_pid = $version . " " . $project_id;
-		if($version_n_pid!="") {
-			throw new Exception("This is a test");
-			//die($version_n_pid);
-		}
-	}
-*/
-	function redcap_every_page_top ( int $project_id ) {
-		$current_page_is_export_report = strpos($_SERVER["PHP_SELF"],"/DataExport/") > -1 && strpos($_SERVER["QUERY_STRING"],"&report_id=") > -1;
-		if($current_page_is_export_report) {
-		
-		}
-		
-	}
 
 	function redcap_module_ajax($action, $payload, $project_id, $record, $instrument, $event_id, $repeat_instance, $survey_hash, $response_id, $survey_queue_hash, $page, $page_full, $user_id, $group_id){
         if($action === 'newDashboard'){
             return json_encode($this->newDash($project_id, $payload));
         }
 		else if($action === 'saveDashboard'){
-			$result = array(
-				"view_url" => "#", //$this->getUrl("view_dash.php", true, true) . "&dash_id=" . $payload["dash_id"] . "&report_id=" . $payload["report_id"],
-				"dash_list_url" => "#" //$this->getUrl("advanced_graphs.php", true, true)
-			);
-
 			// Use the project ID REDCap verified for this request, never one supplied by the client
 			$newDash = $this->saveDash($project_id, $payload);
 			if ($newDash) {
@@ -200,9 +71,6 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 			}
 
 			return "error man";
-		}
-		else if ($action === 'getDashboards') {
-			return json_encode($this->getDashboards($project_id));
 		}
 		else if ($action === 'deleteDashboard') {
 			$dash_id = filter_var($payload["dash_id"] ?? null, FILTER_VALIDATE_INT);
@@ -230,96 +98,6 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		}
     }
 	
-	function isEnabledProject($project_id) {
-		if($this->enabled_projects == null)
-			$this->getEnabledProjects();
-
-		return array_key_exists($project_id,$this->enabled_projects);
-	}
-	
-	function getServerAPIurl() {
-		return $GLOBALS["redcap_base_url"] . "api/";
-	}
-	
-	function getProjectToken($project_id) {
-		if($this->enabled_projects == null)
-			$this->getEnabledProjects();
-
-		$token = null;
-		if($this->isEnabledProject($project_id)) {
-			$token = $this->enabled_projects[$project_id];
-		} 
-		return $token;
-	}
-	
-	function getParameter($parameter_name,$default_value="", $method="post") {
-		global $_POST,$_GET,$_FILES;
-		$result=null;
-		if ($method=="post") {
-		  if(isset($_POST[$parameter_name])){
-			if ($_POST[$parameter_name]!="") {
-			  $result= $_POST[$parameter_name];
-			} else {
-			  $result= $default_value;
-			}
-		  } else  {
-			if(isset($_GET[$parameter_name])){
-			  if ($_GET[$parameter_name]!="") {
-				$result= $_GET[$parameter_name];
-			  } else {
-				$result= $default_value;
-			  }
-			} else {
-				if(isset($_FILES[$parameter_name])){
-				  if ($_FILES[$parameter_name]["name"]!="") {
-					$result= $_FILES[$parameter_name];
-				  } else {
-					$result= $default_value;
-				  }
-				} else {
-				  $result= $default_value;
-				}
-			 }
-		   }
-		} else if ($method=="GET") {
-		  if(isset($_GET[$parameter_name])){
-			if ($_GET[$parameter_name]!="") {
-			  $result= $_GET[$parameter_name];
-			} else {
-			  $result= $default_value;
-			}
-		  } else  {
-			if(isset($_POST[$parameter_name])){
-			  if ($_POST[$parameter_name]!="") {
-				$result= $_POST[$parameter_name];
-			  } else {
-				$result= $default_value;
-			  }
-			} else {
-				if(isset($_FILES[$parameter_name])){
-				  if ($_FILES[$parameter_name]!="") {
-					$result= $_FILES[$parameter_name];
-				  } else {
-					$result= $default_value;
-				  }
-				} else {
-				  $result= $default_value;
-				}
-			 }
-		   }
-		}
-
-		
-		$result=str_replace("\\\"","\"",$result) ;
-		$result=str_replace("\\'","'",$result) ;
-		$result=str_replace("\\\\'","\\'",$result) ;
-		$result=str_replace("\\\\\"","\\\"",$result) ;
-		if (is_string($result)) {
-			$result = htmlspecialchars($result, ENT_QUOTES);
-		}
-	return $result;
-	}
-
 	function loadJS($js_file, $folder = "js", $outputToPage=true) {
 		if($this->module_js_path == null)
 		{
@@ -350,63 +128,6 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		}
 	}
 	
-
-	function renderDashEditor() {
-		// Return an error if PID is not set
-		$pid = filter_input(INPUT_GET, 'pid', FILTER_VALIDATE_INT);
-		$dash_id = filter_input(INPUT_GET, 'dash_id', FILTER_VALIDATE_INT);
-		if ($pid === null || $pid === false) {
-			echo "<h1 style='color: red;'>Unable to obtain project ID</h1>";
-			return;
-		}
-		if ($dash_id === null || $dash_id === false) {
-			$dash_id = 0;
-		}
-
-		// Parse live filters from referer
-		// $live_filters = $this->getLiveFiltersFromReferer();
-		parse_str(parse_url($_SERVER["HTTP_REFERER"], PHP_URL_QUERY), $live_filters);
-
-		// Get the active dashboard if there dash id is not null or 0
-		if ($dash_id !== 0) {
-			$dashboard = $this->getDashboards($pid, $dash_id)[0];
-			$report_id = $dashboard['report_id'];
-			$live_filters = $dashboard['live_filters'];
-		}
-
-		// If the report_id is not set get it from the url
-		if (!isset($report_id))
-			$report_id = filter_input(INPUT_GET, 'report_id', FILTER_VALIDATE_INT);
-			
-		// If the report_id is still not set return an error
-		if (!isset($report_id)) {
-			echo "<h1 style='color: red;'>New Dashboards must be created from the context of a report</h1>";
-			return;
-		}
-
-		// If the report_id is 0 change it to all
-		if ($report_id == 0)
-			$report_id = "ALL";
-
-		// Load the code needed to build forms
-		$this->loadJS("dash-builder.js");
-		$this->loadCSS("advanced-graphs.css");
-
-		// Load the js and css needed to display maps
-		$this->loadAllJS('mapdependencies/js');
-		$this->loadAllCSS('mapdependencies/css');
-
-		echo "<script>var AdvancedGraphsInteractive = {};
-		AdvancedGraphsInteractive.graph_types = {};</script>";
-
-		$graph_types = $this->getSystemSetting("graph_types");
-
-		foreach($graph_types as $graph_type) {
-			$this->loadJS("interactions.js", "graph_forms/$graph_type");
-		}
-
-
-	}
 
 	// returns the data dictionary for a project
 	public function getDataDictionary($project_id) {
@@ -556,13 +277,6 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 	}
 
 
-	// Translate backend limiter operator (LT, GTE, E) into mathematical operator (<, >=, =)
-	public static function translateLimiterOperator($backend_value)
-	{
-		$all_options = array('E'=>'=', 'NE'=>'!=', 'LT'=>'<', 'LTE'=>'<=', 'GT'=>'>', 'GTE'=>'>=');
-		return (isset($all_options[$backend_value]) ? $all_options[$backend_value] : 'E');
-	}
-
 	// A function that creates a new dashboard and returns the corresponding dashboard object
 	public function newDash($pid, $report_id) {
 		$dashboard_table_name = $this->dashboard_table_name;
@@ -710,69 +424,10 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		return $dashboards;
 	}
 	
-	// Obtain a dashboard's title/name
-	public function getDashboardName($pid, $dash_id)
-	{
-		$dashboard_table_name = $this->dashboard_table_name;
-		// Delete report
-		$sql = "select title from $dashboard_table_name where project_id = ? and dash_id = ?";
-		$q = $this->query($sql, [$pid, $dash_id]);
-		$title = strip_tags(label_decode(db_result($q, 0)));
-		return $title;
-	}
-
-	// getDashReportId
-	public function getDashReportId($pid, $dash_id)
-	{
-		$dashboard_table_name = $this->dashboard_table_name;
-		// Delete report
-		$sql = "select report_id from $dashboard_table_name where project_id = ".$pid." and dash_id = $dash_id";
-		$q = $this->query($sql, []);
-		$report_id = $q->fetch_assoc()['report_id'];
-		return $report_id;
-	}
-
-	// Render the setup page
-	public function renderSetupPage()
-	{
-		// die(json_encode($this->query("select * from advanced_graphs_dashboards")->fetch_all()));
-		print "<div id='dashboard_list_parent_div' class='mt-3'>".$this->renderDashboardList()."</div>";
-	}
-
-	// Ensure all project dashboards have a hash
-	public function checkDashHash($dash_id=null)
-	{
-		$params = [PROJECT_ID];
-		$sql = "select dash_id from $this->dashboard_table_name
-				where project_id = ? and hash is null";
-		if (isinteger($dash_id) && $dash_id > 0) {
-			$sql .= " and dash_id = ?";
-			$params[] = $dash_id;
-		}
-		$q = $this->query($sql, $params);
-		$dash_ids = [];
-		while ($row = $q->fetch_assoc()) {
-			$dash_ids[] = $row['dash_id'];
-		}
-		// Loop through each dashboard
-		foreach ($dash_ids as $dash_id) {
-			// Attempt to save it to dashboards table
-			$success = false;
-			while (!$success) {
-				// Generate new unique name (start with 3 digit number followed by 7 alphanumeric chars) - do not allow zeros
-				$unique_name = generateRandomHash(11, false, true);
-				// Update the table
-				$sql = "update $this->dashboard_table_name set hash = ? where dash_id = ?";
-				$success = $this->query($sql, [$unique_name, $dash_id]);
-			}
-		}
-	}
-
 	// Delete a report
 	public function deleteDash($pid, $dash_id)
 	{
 		$dashboard_table_name = $this->dashboard_table_name;
-		// $title = $this->getDashboardName($pid, $dash_id);
 		// Delete report
 		$sql = "delete from $dashboard_table_name where project_id = ? and dash_id = ?";
 		$params = array($pid, $dash_id);
@@ -889,20 +544,6 @@ class AdvancedGraphsInteractive extends \ExternalModules\AbstractExternalModule
 		}
 		// Return boolean on success
 		return true;
-	}
-
-	// Obtain array of column names and their default value from specified database table.
-	// Column name will be array key and default value will be corresponding array value.
-	function getTableColumns($table)
-	{
-		$sql = "describe `$table`";
-		$q = $this->query($sql, []);
-		if (!$q) return false;
-		$cols = array();
-		while ($row = $q->fetch_assoc()) {
-			$cols[$row['Field']] = $row['Default'];
-		}
-		return $cols;
 	}
 
 	public static function escape($value){

@@ -23,15 +23,10 @@ if ($dash_id == 0) {
     $dashboard = array();
 } else {
     $dashboard = $module->getDashboards($project_id, $dash_id)[0];
-    $dash_name = $module->getDashboardName($project_id, $dash_id);
 }
-
-// echo json_encode($dashboard);
-// echo "<br>proof: ".$dashboard['report_id'];
 
 // Get the associated report ID from the dashboard
 if (isset($dashboard['report_id'])) {
-    // echo "<br>isset";
     $report_id = $dashboard['report_id'];
 } else {
     // Get the reffering URL
@@ -63,17 +58,8 @@ if ($report_id == null) {
     exit;
 }
 
-
-
-
-// Get the report name
-$report_name = $module->getReportName($project_id, $report_id);
-
 // Get the report
 $report = $module->getReport($report_id);
-
-// Get the report fields
-$report_fields = $module->getReportFields($project_id, $report_id);
 
 // Get the data dictionary
 $data_dictionary = $module->getDataDictionary($project_id);
@@ -107,13 +93,6 @@ $module->loadCSS('advanced-graphs/dist/AdvancedGraphs.css');
         app.mount('#advanced_graphs');
     });
 </script>
-
-
-
-
-
-
-
 
 <?php
 // Footer
